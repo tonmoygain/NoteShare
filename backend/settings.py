@@ -9,15 +9,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env")
 
-SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-development-key"
-)
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+
+if not SECRET_KEY:
+    raise RuntimeError(
+        "DJANGO_SECRET_KEY is not set."
+    )
 
 DEBUG = os.getenv(
     "DJANGO_DEBUG",
-    "True"
+    "False"
 ).lower() == "true"
+
+FRONTEND_URL = os.getenv(
+    "FRONTEND_URL",
+    "http://localhost:5173"
+).rstrip("/")
+
+BACKEND_URL = os.getenv(
+    "BACKEND_URL",
+    "http://127.0.0.1:8000"
+).rstrip("/")
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -27,6 +39,24 @@ ALLOWED_HOSTS = [
     ).split(",")
     if host.strip()
 ]
+
+
+# Production security settings
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    SECURE_PROXY_SSL_HEADER = (
+        "HTTP_X_FORWARDED_PROTO",
+        "https",
+    )
 
 
 # Application definition
@@ -223,16 +253,16 @@ HEADLESS_JWT_REFRESH_TOKEN_EXPIRES_IN = 604800
 
 HEADLESS_FRONTEND_URLS = {
     "account_confirm_email":
-        "http://localhost:5173/register",
+        f"{FRONTEND_URL}/register",
 
     "account_reset_password":
-        "http://localhost:5173/login",
+        f"{FRONTEND_URL}/login",
 
     "account_reset_password_from_key":
-        "http://localhost:5173/login",
+        f"{FRONTEND_URL}/login",
 
     "socialaccount_login_error":
-        "http://localhost:5173/login",
+        f"{FRONTEND_URL}/login",
 }
 
 
@@ -275,9 +305,9 @@ CSRF_TRUSTED_ORIGINS = [
 SOCIALACCOUNT_LOGIN_ON_GET = True 
 
 LOGIN_REDIRECT_URL = (
-    "http://127.0.0.1:8000/api/social-login/complete/"
+    f"{BACKEND_URL}/api/social-login/complete/"
 )
 
 LOGOUT_REDIRECT_URL = (
-    "http://localhost:5173/"
+    f"{FRONTEND_URL}/"
 )
