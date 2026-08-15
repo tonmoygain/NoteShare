@@ -1,5 +1,11 @@
+import requests
+import re
+from difflib import SequenceMatcher
+
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
+
+import fitz
 
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -286,6 +292,88 @@ def note_detail(request, id):
     serializer = NoteSerializer(note)
 
     return Response(serializer.data)
+
+
+@api_view(["GET"])
+def extract_note_text(request, id):
+
+    try:
+        note = Note.objects.get(id=id)
+
+    except Note.DoesNotExist:
+        return Response(
+            {
+                "error": "Note not found"
+            },
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    if not note.file:
+        return Response(
+            {
+                "error": "This note does not have a file."
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    file_name = note.file.name.lower()
+
+    if not file_name.endswith(".pdf"):
+        return Response(
+            {
+                "error": "AI processing currently supports PDF files only."
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+
+        with note.file.open("rb") as file:
+
+            pdf_document = fitz.open(
+                stream=file.read(),
+                filetype="pdf"
+            )
+
+            extracted_text = ""
+
+            for page in pdf_document:
+                extracted_text += page.get_text()
+
+            pdf_document.close()
+
+    except Exception as e:
+
+        return Response(
+            {
+                "error": "Could not extract text from this PDF.",
+                "details": str(e)
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+    extracted_text = extracted_text.strip()
+
+    if not extracted_text:
+
+        return Response(
+            {
+                "error": "No readable text was found in this PDF."
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    return Response({
+
+        "note_id": note.id,
+
+        "title": note.title,
+
+        "text_length": len(extracted_text),
+
+        "text": extracted_text,
+
+    })
 
 @api_view(["GET"])
 def download_note(request, id):
@@ -1116,3 +1204,527 @@ def change_password(request):
         "message":
             "Password changed successfully."
     })
+
+
+def get_note_text(note):
+    """
+    Extract readable text from a Note file.
+
+    PDF  -> PyMuPDF
+    PNG/JPG/JPEG -> Tesseract OCR
+
+    Returns empty string if the file cannot be processed.
+    """
+
+    if not note.file:
+        return ""
+
+    file_name = note.file.name.lower()
+
+    try:
+
+        # ==========================================
+        # PDF TEXT EXTRACTION
+        # ==========================================
+
+        if file_name.endswith(".pdf"):
+
+            with note.file.open("rb") as file:
+
+                pdf_document = fitz.open(
+                    stream=file.read(),
+                    filetype="pdf"
+                )
+
+                extracted_text = ""
+
+                for page in pdf_document:
+                    extracted_text += page.get_text()
+
+                pdf_document.close()
+
+            return extracted_text.strip()
+
+
+        # ==========================================
+        # IMAGE OCR
+        # ==========================================
+
+        if file_name.endswith(
+            (".png", ".jpg", ".jpeg")
+        ):
+
+            from PIL import Image
+            import pytesseract
+
+            # Tesseract executable path
+            pytesseract.pytesseract.tesseract_cmd = (
+                r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+            )
+
+            with note.file.open("rb") as file:
+
+                image = Image.open(file)
+
+                extracted_text = pytesseract.image_to_string(
+                    image
+                )
+
+            return extracted_text.strip()
+
+
+        # ==========================================
+        # UNSUPPORTED FILE TYPE
+        # ==========================================
+
+        return ""
+
+
+    except Exception as error:
+
+        print(
+            "Note Text Extraction Error:",
+            error
+        )
+
+        return ""
+    
+
+
+def find_relevant_notes(query, max_notes=3):
+    """
+    Find relevant notes using:
+    - title
+    - department
+    - description
+    - extracted PDF/OCR content
+
+    If a specific person's name is found in a note,
+    prioritize that person's note to avoid mixing
+    information from unrelated documents.
+    """
+
+    notes = Note.objects.all()
+
+    query_lower = query.lower().strip()
+
+    query_words = set(
+        re.findall(
+            r"\b[a-zA-Z0-9]+\b",
+            query_lower
+        )
+    )
+
+    scored_notes = []
+
+    for note in notes:
+
+        # ==========================================
+        # NOTE METADATA
+        # ==========================================
+
+        metadata_text = " ".join([
+            note.title or "",
+            note.department or "",
+            note.description or "",
+        ]).lower()
+
+        # ==========================================
+        # NOTE CONTENT
+        # ==========================================
+
+        note_text = get_note_text(note)
+
+        combined_text = (
+            metadata_text +
+            " " +
+            note_text.lower()
+        )
+
+        content_words = set(
+            re.findall(
+                r"\b[a-zA-Z0-9]+\b",
+                combined_text
+            )
+        )
+
+        # ==========================================
+        # WORD MATCHING
+        # ==========================================
+
+        matches = query_words.intersection(
+            content_words
+        )
+
+        score = len(matches)
+
+        # Metadata gets extra weight
+        metadata_words = set(
+            re.findall(
+                r"\b[a-zA-Z0-9]+\b",
+                metadata_text
+            )
+        )
+
+        metadata_matches = query_words.intersection(
+            metadata_words
+        )
+
+        score += len(metadata_matches) * 3
+
+        # ==========================================
+        # PERSON NAME MATCH
+        # ==========================================
+
+        # Look for possible two-word person names
+        query_name_candidates = []
+
+        words = list(query_words)
+
+        for i in range(len(words)):
+            for j in range(i + 1, len(words)):
+
+                word1 = words[i]
+                word2 = words[j]
+
+                if (
+                    len(word1) >= 3
+                    and len(word2) >= 3
+                    and word1 not in {
+                        "what",
+                        "where",
+                        "when",
+                        "which",
+                        "who",
+                        "does",
+                        "did",
+                        "the",
+                        "is",
+                        "are",
+                        "was",
+                        "were",
+                        "has",
+                        "have",
+                        "his",
+                        "her",
+                        "their",
+                        "this",
+                        "that",
+                        "from",
+                        "about",
+                    }
+                ):
+                    query_name_candidates.append(
+                        (word1, word2)
+                    )
+
+        # Strongly prioritize a note containing
+        # both words of a possible person's name
+        for word1, word2 in query_name_candidates:
+
+            if (
+                word1 in combined_text
+                and word2 in combined_text
+            ):
+
+                score += 20
+
+            elif (
+                word1 in combined_text
+                or word2 in combined_text
+            ):
+
+                score += 5
+
+        # ==========================================
+        # SAVE RELEVANT NOTES
+        # ==========================================
+
+        if score > 0:
+
+            scored_notes.append(
+                (
+                    score,
+                    note
+                )
+            )
+
+    # ==========================================
+    # PERSON-SPECIFIC FILTER
+    # ==========================================
+
+    if scored_notes:
+
+        query_name_words = []
+
+        for word in query_words:
+
+            if (
+                len(word) >= 3
+                and word not in {
+                    "what",
+                    "where",
+                    "when",
+                    "which",
+                    "who",
+                    "does",
+                    "did",
+                    "the",
+                    "is",
+                    "are",
+                    "was",
+                    "were",
+                    "has",
+                    "have",
+                    "his",
+                    "her",
+                    "their",
+                    "this",
+                    "that",
+                    "from",
+                    "about",
+                }
+            ):
+                query_name_words.append(word)
+
+        name_matched_notes = []
+
+        for score, note in scored_notes:
+
+            note_text = get_note_text(note).lower()
+
+            matched_name_words = [
+                word
+                for word in query_name_words
+                if word in note_text
+            ]
+
+            if len(matched_name_words) >= 2:
+                name_matched_notes.append(
+                    (
+                        score,
+                        note
+                    )
+                )
+
+        if name_matched_notes:
+
+            scored_notes = name_matched_notes
+
+
+    # ==========================================
+    # SORT BY RELEVANCE
+    # ==========================================
+
+    scored_notes.sort(
+        key=lambda item: item[0],
+        reverse=True
+    )
+
+    # ==========================================
+    # RETURN RELEVANT NOTES
+    # ==========================================
+
+    if not scored_notes:
+        return []
+
+    # Best matching score
+    best_score = scored_notes[0][0]
+
+    # Only keep notes that are reasonably close
+    # to the best matching note.
+    relevant_notes = [
+        note
+        for score, note in scored_notes
+        if score >= best_score * 0.6
+    ]
+
+    return relevant_notes[:max_notes]
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def ai_chat(request):
+
+    message = request.data.get("message", "").strip()
+
+    if not message:
+        return Response(
+            {
+                "error": "Message is required."
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # ==========================================
+    # FIND RELEVANT NOTES
+    # ==========================================
+
+    relevant_notes = find_relevant_notes(
+        message,
+        max_notes=3
+    )
+
+    # ==========================================
+    # BUILD NOTE CONTEXT
+    # ==========================================
+
+    note_context = ""
+
+    sources = []
+
+    for note in relevant_notes:
+
+        text = get_note_text(note)
+
+        if not text:
+            continue
+
+        # Limit each note to avoid huge prompts
+        text = text[:8000]
+
+        note_context += (
+            f"\n\n--- NOTE: {note.title} ---\n"
+            f"{text}\n"
+        )
+
+        sources.append({
+            "id": note.id,
+            "title": note.title,
+        })
+
+    # ==========================================
+    # SYSTEM PROMPT
+    # ==========================================
+
+    system_prompt = """
+You are NoteShare AI Assistant.
+
+Your primary job is to answer questions using
+the uploaded notes provided in the context.
+
+Rules:
+
+1. Use the provided note context whenever it contains
+   information relevant to the user's question.
+
+2. Do not invent information that is not present
+   in the provided notes.
+
+3. If the answer cannot be found in the uploaded notes,
+   clearly say that the information was not found
+   in the uploaded notes.
+
+4. You may give a short general explanation only after
+   stating that the uploaded notes do not contain
+   the requested information.
+
+5. Keep answers clear, useful, and student-friendly.
+"""
+
+    # ==========================================
+    # USER PROMPT WITH NOTE CONTEXT
+    # ==========================================
+
+    if note_context:
+
+        user_prompt = f"""
+Uploaded Note Context:
+
+{note_context}
+
+User Question:
+
+{message}
+
+Answer the user's question based primarily on
+the uploaded note context above.
+"""
+
+    else:
+
+        user_prompt = f"""
+No relevant uploaded note content was found.
+
+User Question:
+
+{message}
+
+Explain that the information was not found
+in the uploaded notes.
+"""
+
+    try:
+
+        # ==========================================
+        # SEND TO OLLAMA
+        # ==========================================
+
+        ollama_response = requests.post(
+
+            "http://127.0.0.1:11434/api/chat",
+
+            json={
+
+                "model": "llama3.2:3b",
+
+                "messages": [
+
+                    {
+                        "role": "system",
+                        "content": system_prompt,
+                    },
+
+                    {
+                        "role": "user",
+                        "content": user_prompt,
+                    },
+
+                ],
+
+                "stream": False,
+
+            },
+
+            timeout=120,
+
+        )
+
+        ollama_response.raise_for_status()
+
+        data = ollama_response.json()
+
+        reply = data.get(
+            "message",
+            {}
+        ).get(
+            "content",
+            "No response received from AI."
+        )
+
+        return Response({
+
+            "reply": reply,
+
+            "sources": sources,
+
+        })
+
+    except requests.exceptions.RequestException as error:
+
+        print(
+            "Ollama Error:",
+            error
+        )
+
+        return Response(
+
+            {
+                "error":
+                    "Ollama is not available. "
+                    "Please make sure Ollama is running."
+            },
+
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+
+        )

@@ -18,6 +18,12 @@ path("api/notes/update/<int:id>/", views.update_note),
 path("api/notes/<int:id>/", views.note_detail),
 path("api/notes/download/<int:id>/", views.download_note),
 
+path(
+    "api/notes/<int:id>/extract-text/",
+    views.extract_note_text,
+    name="extract-note-text"
+),
+
 # Dashboard
 path("api/dashboard/", views.dashboard_stats),
 
@@ -119,6 +125,22 @@ path(
     views.create_discussion_message,
     name="create-discussion-message"
 ),
+
+
+# ==========================
+# AI Assistant API
+# ==========================
+
+path(
+    "api/ai/chat/",
+    views.ai_chat,
+    name="ai-chat"
+),
+
+
+# ==========================
+# Social Login
+# ==========================
 
 
 path(

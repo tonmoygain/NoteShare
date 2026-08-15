@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import MainLayout from "./layouts/MainLayout";
+import AIAssistant from "./components/AIAssistant";
 
 import Home from "./pages/Home";
 import Notes from "./pages/Notes";
@@ -108,6 +109,8 @@ function App() {
                 />
 
             </Routes>
+
+            <AIAssistant />
 
         </BrowserRouter>
 

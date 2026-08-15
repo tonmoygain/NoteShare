@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import timedelta
 
 from dotenv import load_dotenv
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -52,10 +53,11 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-
     "corsheaders.middleware.CorsMiddleware",
 
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -64,7 +66,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 
     "allauth.account.middleware.AccountMiddleware",
-
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -100,13 +101,15 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 DATABASES = {
 
-    "default": {
+    "default": dj_database_url.config(
 
-        "ENGINE": "django.db.backends.sqlite3",
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
 
-        "NAME": BASE_DIR / "db.sqlite3",
+        conn_max_age=600,
 
-    }
+        conn_health_checks=True,
+
+    )
 
 }
 
@@ -147,11 +150,22 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 STATICFILES_DIRS = [
 
     BASE_DIR / "static",
-
 ]
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 MEDIA_URL = "/media/"
 
