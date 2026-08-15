@@ -33,3 +33,11 @@ staticfiles/
 
 # Local uploaded media
 media/
+
+# Keep existing profile image for deployment
+!media/
+!media/profiles/
+!media/profiles/IMG-20230615-WA0006.jpg
+
+# Database backups
+data_backup*.json

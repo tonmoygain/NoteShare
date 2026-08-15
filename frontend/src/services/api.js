@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-    baseURL: "http://127.0.0.1:8000/api/",
+    baseURL: "https://noteshare-uy4z.onrender.com/api/",
 });
 
 
@@ -147,7 +147,7 @@ API.interceptors.response.use(
 
             const response =
                 await axios.post(
-                    "http://127.0.0.1:8000/api/token/refresh/",
+                    "https://noteshare-uy4z.onrender.com/api/token/refresh/",
                     {
                         refresh,
                     }
