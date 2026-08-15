@@ -12,6 +12,8 @@ import {
 
 import { Link, useNavigate } from "react-router-dom";
 
+import API from "../services/api";
+
 
 function Header({ search, setSearch }) {
 
@@ -101,31 +103,23 @@ function Header({ search, setSearch }) {
 
             try {
 
-                const response = await fetch(
-                    "http://127.0.0.1:8000/api/profile/",
-                    {
-                        headers: {
-                            Authorization:
-                                `Bearer ${localStorage.getItem("access")}`,
-                        },
-                    }
-                );
+                const response = await API.get("profile/");
 
-                if (!response.ok) return;
+                const data = response.data;
 
-                const data = await response.json();
+                console.log("Header Profile Data:", data);
 
-                setProfilePhoto(
-                    data.photo || ""
-                );
+                setProfilePhoto(data.photo || "");
 
                 if (data.username) {
                     setUsername(data.username);
+
                     localStorage.setItem(
                         "username",
                         data.username
                     );
                 }
+
             } catch (error) {
 
                 console.error(
@@ -367,13 +361,10 @@ function Header({ search, setSearch }) {
                                         {profilePhoto ? (
 
                                             <img
-                                                src={
-                                                    profilePhoto.startsWith("http")
-                                                        ? profilePhoto
-                                                        : `http://127.0.0.1:8000${profilePhoto}`
-                                                }
+                                                src={profilePhoto}
                                                 alt={username || "Profile"}
                                                 className="w-full h-full object-cover"
+                                                    
                                             />
 
                                         ) : (
