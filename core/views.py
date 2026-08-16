@@ -1,5 +1,6 @@
 import requests
 import re
+from django.http import HttpResponseRedirect
 from difflib import SequenceMatcher
 
 from django.shortcuts import render, get_object_or_404
@@ -396,11 +397,12 @@ def download_note(request, id):
     note.downloads += 1
     note.save(update_fields=["downloads"])
 
-    return FileResponse(
-        note.file.open("rb"),
-        as_attachment=True,
-        filename=note.file.name.split("/")[-1]
-    )
+    # Cloudinary file URL
+    file_url = note.file.url
+
+    return HttpResponseRedirect(file_url)
+
+
 
 @api_view(["GET"])
 def dashboard_stats(request):
