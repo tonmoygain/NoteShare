@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -8,14 +9,13 @@ import {
     BookOpen,
     User,
     Sparkles,
-    CalendarDays,
     FileText,
+    SlidersHorizontal,
 } from "lucide-react";
 
 import API from "../services/api";
 
 function Blogs() {
-
     const navigate = useNavigate();
     const isLoggedIn = !!localStorage.getItem("access");
 
@@ -24,425 +24,612 @@ function Blogs() {
     const [search, setSearch] = useState("");
 
     useEffect(() => {
-
         API.get("blogs/")
             .then((res) => {
-
                 setBlogs(res.data || []);
-
                 setLoading(false);
-
             })
             .catch((err) => {
-
                 console.log("Blogs API Error:", err);
-
                 setBlogs([]);
-
                 setLoading(false);
-
             });
-
     }, []);
 
     const filteredBlogs = blogs.filter((blog) => {
+        const keyword = search.toLowerCase().trim();
 
-        const keyword = search.toLowerCase();
+        if (!keyword) return true;
 
         return (
-            (blog.title || "").toLowerCase().includes(keyword) ||
-            (blog.content || "").toLowerCase().includes(keyword) ||
-            (blog.author_name || "").toLowerCase().includes(keyword)
+            (blog.title || "")
+                .toLowerCase()
+                .includes(keyword) ||
+            (blog.content || "")
+                .toLowerCase()
+                .includes(keyword) ||
+            (blog.author_name || "")
+                .toLowerCase()
+                .includes(keyword)
         );
-
     });
 
+    const handleCreateBlog = () => {
+        if (isLoggedIn) {
+            navigate("/create-blog");
+        } else {
+            navigate("/login");
+        }
+    };
+
     if (loading) {
-
         return (
-
-            <section className="max-w-7xl mx-auto px-8 py-12">
-
+            <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
                 <div className="animate-pulse">
 
-                    <div className="h-5 w-32 bg-slate-200 rounded-full"></div>
+                    {/* Hero skeleton */}
+                    <div className="overflow-hidden rounded-[34px] border border-slate-200/60 bg-gradient-to-br from-slate-300 via-slate-200 to-slate-300 p-8 sm:p-10">
+                        <div className="h-8 w-44 rounded-full bg-white/60" />
 
-                    <div className="h-12 w-72 bg-slate-200 rounded-xl mt-5"></div>
+                        <div className="mt-6 h-12 w-72 max-w-full rounded-2xl bg-white/60" />
 
-                    <div className="h-5 w-96 max-w-full bg-slate-200 rounded mt-4"></div>
+                        <div className="mt-4 h-5 w-full max-w-2xl rounded bg-white/50" />
+                        <div className="mt-3 h-5 w-3/4 max-w-xl rounded bg-white/50" />
 
-                    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 mt-12">
-
-                        {[1, 2, 3, 4, 5, 6].map((item) => (
-
-                            <div
-                                key={item}
-                                className="bg-white rounded-[28px] border border-slate-100 p-6"
-                            >
-
-                                <div className="h-2 bg-slate-200 rounded-full"></div>
-
-                                <div className="w-14 h-14 bg-slate-200 rounded-2xl mt-6"></div>
-
-                                <div className="h-7 bg-slate-200 rounded mt-6"></div>
-
-                                <div className="h-4 bg-slate-200 rounded mt-4"></div>
-
-                                <div className="h-4 bg-slate-200 rounded mt-3 w-4/5"></div>
-
-                                <div className="h-12 bg-slate-200 rounded-xl mt-7"></div>
-
-                            </div>
-
-                        ))}
-
+                        <div className="mt-7 h-12 w-40 rounded-2xl bg-white/60" />
                     </div>
 
+                    {/* Search skeleton */}
+                    <div className="mt-8 rounded-[26px] border border-slate-200 bg-white p-5">
+                        <div className="h-14 rounded-2xl bg-slate-100" />
+                    </div>
+
+                    {/* Cards skeleton */}
+                    <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                        {[1, 2, 3, 4, 5, 6].map((item) => (
+                            <div
+                                key={item}
+                                className="overflow-hidden rounded-[28px] border border-slate-200/70 bg-white p-6"
+                            >
+                                <div className="h-1.5 rounded-full bg-slate-200" />
+
+                                <div className="mt-6 flex items-center justify-between">
+                                    <div className="h-14 w-14 rounded-2xl bg-slate-200" />
+                                    <div className="h-7 w-20 rounded-full bg-slate-200" />
+                                </div>
+
+                                <div className="mt-6 h-7 rounded bg-slate-200" />
+                                <div className="mt-4 h-4 rounded bg-slate-200" />
+                                <div className="mt-3 h-4 w-4/5 rounded bg-slate-200" />
+
+                                <div className="mt-7 flex items-center gap-3 border-t border-slate-100 pt-5">
+                                    <div className="h-10 w-10 rounded-full bg-slate-200" />
+                                    <div className="flex-1">
+                                        <div className="h-3 w-20 rounded bg-slate-200" />
+                                        <div className="mt-2 h-4 w-28 rounded bg-slate-200" />
+                                    </div>
+                                </div>
+
+                                <div className="mt-6 h-12 rounded-xl bg-slate-200" />
+                            </div>
+                        ))}
+                    </div>
                 </div>
-
             </section>
-
         );
-
     }
 
     return (
+        <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
 
-        <section className="max-w-7xl mx-auto px-8 py-10">
+            {/* =====================================================
+                HERO
+            ====================================================== */}
 
-            {/* Hero Header */}
+            <motion.div
+                initial={{
+                    opacity: 0,
+                    y: 18,
+                }}
+                animate={{
+                    opacity: 1,
+                    y: 0,
+                }}
+                transition={{
+                    duration: 0.55,
+                    ease: "easeOut",
+                }}
+                className="
+                    relative
+                    mb-9
+                    overflow-hidden
+                    rounded-[34px]
+                    border
+                    border-slate-200/50
+                    bg-gradient-to-br
+                    from-slate-950
+                    via-blue-950
+                    to-cyan-900
+                    p-7
+                    text-white
+                    shadow-[0_25px_70px_rgba(15,23,42,0.13)]
+                    sm:p-9
+                    lg:p-12
+                "
+            >
+                <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-cyan-400/15 blur-3xl" />
 
-            <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-slate-900 via-blue-950 to-cyan-900 p-8 md:p-12 mb-10 shadow-2xl">
+                <div className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-blue-500/15 blur-3xl" />
 
-                {/* Decorative Glow */}
+                <div className="pointer-events-none absolute right-1/3 top-1/3 h-48 w-48 rounded-full bg-indigo-400/10 blur-3xl" />
 
-                <div className="absolute -right-20 -top-20 w-72 h-72 bg-cyan-400/20 rounded-full blur-3xl"></div>
+                <div className="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
 
-                <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl"></div>
+                    <div className="max-w-3xl">
 
-                <div className="relative flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-
-                    <div>
-
-                        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/10 text-cyan-200 px-4 py-2 rounded-full text-sm font-bold backdrop-blur">
-
-                            <Sparkles size={15} />
-
+                        <motion.div
+                            initial={{
+                                opacity: 0,
+                                y: 8,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            transition={{
+                                duration: 0.4,
+                                delay: 0.08,
+                            }}
+                            className="
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-full
+                                border
+                                border-white/10
+                                bg-white/10
+                                px-4
+                                py-2
+                                text-xs
+                                font-bold
+                                text-cyan-200
+                                backdrop-blur-sm
+                            "
+                        >
+                            <Sparkles size={14} />
                             NoteShare Knowledge Hub
+                        </motion.div>
 
-                        </div>
-
-                        <h1 className="text-4xl md:text-5xl font-black text-white mt-6 tracking-tight">
-
+                        <h1 className="mt-6 text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
                             Student Blogs
-
                         </h1>
 
-                        <p className="text-slate-300 mt-4 text-lg leading-8 max-w-2xl">
-
-                            Explore tutorials, experiences, study tips and academic
-                            ideas shared by the NoteShare community.
-
+                        <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
+                            Explore tutorials, experiences, study tips and academic ideas shared by the NoteShare community.
                         </p>
 
-                        <div className="flex flex-wrap gap-4 mt-7">
-
-                            <div className="flex items-center gap-2 text-sm text-slate-300">
-
-                                <FileText size={17} />
-
+                        <div className="mt-7 flex flex-wrap gap-3">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-300 backdrop-blur-sm">
+                                <FileText size={16} />
                                 {blogs.length} Articles
-
                             </div>
 
-                            <div className="flex items-center gap-2 text-sm text-slate-300">
-
-                                <BookOpen size={17} />
-
+                            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-300 backdrop-blur-sm">
+                                <BookOpen size={16} />
                                 Academic Resources
-
                             </div>
-
                         </div>
-
                     </div>
 
-                    <button
-                        onClick={() => {
-                            if (isLoggedIn) {
-                                navigate("/create-blog");
-                            } else {
-                                navigate("/login");
-                            }
+                    <motion.button
+                        whileHover={{
+                            y: -2,
                         }}
-                        className="group inline-flex items-center justify-center gap-3 bg-white text-slate-900 px-7 py-4 rounded-2xl font-bold shadow-xl hover:bg-cyan-400 hover:text-white transition-all duration-300 whitespace-nowrap"
+                        whileTap={{
+                            scale: 0.98,
+                        }}
+                        onClick={handleCreateBlog}
+                        className="
+                            group
+                            inline-flex
+                            w-full
+                            items-center
+                            justify-center
+                            gap-3
+                            rounded-2xl
+                            bg-white
+                            px-7
+                            py-4
+                            font-bold
+                            text-slate-900
+                            shadow-xl
+                            transition
+                            hover:bg-cyan-400
+                            hover:text-white
+                            sm:w-auto
+                        "
                     >
-
                         <PenLine size={19} />
 
                         Create Blog
 
                         <ArrowRight
                             size={18}
-                            className="group-hover:translate-x-1 transition-transform"
+                            className="transition-transform duration-300 group-hover:translate-x-1"
                         />
-
-                    </button>
-
+                    </motion.button>
                 </div>
+            </motion.div>
 
-            </div>
+            {/* =====================================================
+                SEARCH
+            ====================================================== */}
 
-
-            {/* Search */}
-
-            <div className="bg-white border border-slate-100 rounded-[26px] p-5 shadow-lg mb-10">
-
+            <motion.div
+                initial={{
+                    opacity: 0,
+                    y: 12,
+                }}
+                animate={{
+                    opacity: 1,
+                    y: 0,
+                }}
+                transition={{
+                    duration: 0.45,
+                    delay: 0.1,
+                }}
+                className="
+                    mb-10
+                    rounded-[26px]
+                    border
+                    border-slate-200/80
+                    bg-white/85
+                    p-4
+                    shadow-[0_10px_30px_rgba(15,23,42,0.045)]
+                    backdrop-blur-sm
+                    sm:p-5
+                "
+            >
                 <div className="relative">
 
                     <Search
                         size={21}
-                        className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="
+                            absolute
+                            left-5
+                            top-1/2
+                            -translate-y-1/2
+                            text-slate-400
+                        "
                     />
 
                     <input
                         type="text"
                         placeholder="Search blogs by title, content or author..."
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-14 pr-5 py-4 text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        onChange={(e) =>
+                            setSearch(e.target.value)
+                        }
+                        className="
+                            h-14
+                            w-full
+                            rounded-2xl
+                            border
+                            border-slate-200
+                            bg-slate-50/80
+                            pl-14
+                            pr-5
+                            text-slate-700
+                            outline-none
+                            transition
+                            placeholder:text-slate-400
+                            focus:border-blue-500
+                            focus:bg-white
+                            focus:ring-4
+                            focus:ring-blue-100
+                        "
                     />
 
+                    <div className="pointer-events-none absolute right-4 top-1/2 hidden -translate-y-1/2 items-center gap-2 text-xs font-semibold text-slate-400 sm:flex">
+                        <SlidersHorizontal size={14} />
+                        Search
+                    </div>
                 </div>
+            </motion.div>
 
-            </div>
+            {/* =====================================================
+                SECTION HEADING
+            ====================================================== */}
 
-
-            {/* Section Heading */}
-
-            <div className="flex items-end justify-between mb-7">
+            <div className="mb-7 flex items-end justify-between gap-4">
 
                 <div>
-
-                    <p className="text-sm font-bold uppercase tracking-wider text-blue-600">
-
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-blue-600">
                         Latest Articles
-
                     </p>
 
-                    <h2 className="text-3xl font-black text-slate-800 mt-2">
-
+                    <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-800 sm:text-4xl">
                         Explore Community Blogs
-
                     </h2>
-
                 </div>
 
-                <p className="hidden md:block text-sm text-slate-400">
-
+                <div className="hidden rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-400 shadow-sm md:block">
                     {filteredBlogs.length} result
                     {filteredBlogs.length !== 1 ? "s" : ""}
-
-                </p>
-
+                </div>
             </div>
 
-
-            {/* Empty State */}
+            {/* =====================================================
+                EMPTY STATE
+            ====================================================== */}
 
             {filteredBlogs.length === 0 ? (
-
-                <div className="bg-white border border-slate-100 rounded-[30px] shadow-lg p-14 text-center">
-
-                    <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-blue-50 to-cyan-50 flex items-center justify-center">
-
-                        <BookOpen
-                            size={36}
-                            className="text-blue-600"
-                        />
-
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 14,
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0,
+                    }}
+                    className="
+                        rounded-[30px]
+                        border
+                        border-slate-200/80
+                        bg-white
+                        p-10
+                        text-center
+                        shadow-[0_15px_40px_rgba(15,23,42,0.05)]
+                        sm:p-14
+                    "
+                >
+                    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-50 to-cyan-50 text-blue-600">
+                        <BookOpen size={36} />
                     </div>
 
-                    <h2 className="text-2xl font-black text-slate-800 mt-6">
-
-                        {search ? "No Blogs Found" : "No Blogs Yet"}
-
+                    <h2 className="mt-6 text-2xl font-black text-slate-800">
+                        {search
+                            ? "No Blogs Found"
+                            : "No Blogs Yet"}
                     </h2>
 
-                    <p className="text-slate-500 mt-3 max-w-md mx-auto">
-
+                    <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-slate-500 sm:text-base">
                         {search
                             ? "Try another keyword or search for a different author."
-                            : "Be the first student to share an article with the NoteShare community."
-                        }
-
+                            : "Be the first student to share an article with the NoteShare community."}
                     </p>
 
                     {!search && (
-
-                        <button
-                            onClick={() => {
-                                if (isLoggedIn) {
-                                    navigate("/create-blog");
-                                } else {
-                                    navigate("/login");
-                                }
+                        <motion.button
+                            whileHover={{
+                                y: -2,
                             }}
-                            className="mt-7 inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-1 transition"
+                            whileTap={{
+                                scale: 0.98,
+                            }}
+                            onClick={handleCreateBlog}
+                            className="
+                                mt-7
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-xl
+                                bg-gradient-to-r
+                                from-blue-600
+                                to-cyan-500
+                                px-6
+                                py-3
+                                font-bold
+                                text-white
+                                shadow-lg
+                                shadow-blue-500/15
+                                transition
+                                hover:shadow-xl
+                            "
                         >
-
                             <PenLine size={18} />
-
                             Create First Blog
-
-                        </button>
-
+                        </motion.button>
                     )}
-
-                </div>
-
+                </motion.div>
             ) : (
+                <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
 
-                /* Blog Cards */
-
-                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-
-                    {filteredBlogs.map((blog) => (
-
-                        <article
+                    {filteredBlogs.map((blog, index) => (
+                        <motion.article
                             key={blog.id}
-                            className="group relative bg-white rounded-[28px] border border-slate-100 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden"
+                            initial={{
+                                opacity: 0,
+                                y: 20,
+                            }}
+                            whileInView={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            viewport={{
+                                once: true,
+                                amount: 0.12,
+                            }}
+                            transition={{
+                                duration: 0.45,
+                                delay:
+                                    index % 3 * 0.06,
+                                ease: "easeOut",
+                            }}
+                            whileHover={{
+                                y: -7,
+                            }}
+                            className="
+                                group
+                                relative
+                                overflow-hidden
+                                rounded-[28px]
+                                border
+                                border-slate-200/80
+                                bg-white
+                                shadow-[0_10px_30px_rgba(15,23,42,0.045)]
+                                transition-shadow
+                                duration-300
+                                hover:shadow-[0_25px_55px_rgba(15,23,42,0.10)]
+                            "
                         >
+                            {/* Top accent */}
+                            <div className="h-1.5 bg-gradient-to-r from-blue-600 via-cyan-500 to-emerald-400" />
 
-                            {/* Top Gradient */}
-
-                            <div className="h-1.5 bg-gradient-to-r from-blue-600 via-cyan-500 to-emerald-400"></div>
-
-                            {/* Blog Image */}
-
+                            {/* Image */}
                             {blog.image && (
-                                <div className="w-full h-52 overflow-hidden bg-slate-100">
+                                <div className="relative h-52 overflow-hidden bg-slate-100">
                                     <img
                                         src={blog.image}
                                         alt={blog.title}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        className="
+                                            h-full
+                                            w-full
+                                            object-cover
+                                            transition-transform
+                                            duration-700
+                                            group-hover:scale-105
+                                        "
                                         loading="lazy"
                                     />
 
+                                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/15 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                                 </div>
-
                             )}
 
-                            <div className="p-7">
+                            <div className="p-6 sm:p-7">
 
                                 {/* Card Top */}
 
                                 <div className="flex items-start justify-between gap-4">
 
-                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 flex items-center justify-center">
+                                    <motion.div
+                                        whileHover={{
+                                            rotate: -3,
+                                            scale: 1.04,
+                                        }}
+                                        className="
+                                            flex
+                                            h-14
+                                            w-14
+                                            shrink-0
+                                            items-center
+                                            justify-center
+                                            rounded-2xl
+                                            border
+                                            border-blue-100
+                                            bg-gradient-to-br
+                                            from-blue-50
+                                            to-cyan-50
+                                            text-blue-600
+                                        "
+                                    >
+                                        <BookOpen size={25} />
+                                    </motion.div>
 
-                                        <BookOpen
-                                            size={25}
-                                            className="text-blue-600"
-                                        />
-
-                                    </div>
-
-                                    <span className="text-xs font-bold bg-slate-100 text-slate-600 px-3 py-1.5 rounded-full">
-
+                                    <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">
                                         Article
-
                                     </span>
-
                                 </div>
-
 
                                 {/* Title */}
 
-                                <h2 className="text-2xl font-black text-slate-800 mt-6 line-clamp-2 group-hover:text-blue-600 transition-colors">
-
+                                <h2 className="mt-6 line-clamp-2 text-2xl font-black leading-tight tracking-tight text-slate-800 transition-colors duration-300 group-hover:text-blue-600">
                                     {blog.title}
-
                                 </h2>
-
 
                                 {/* Content */}
 
-                                <p className="text-slate-500 mt-4 leading-7 line-clamp-4">
-
+                                <p className="mt-4 line-clamp-4 text-sm leading-7 text-slate-500">
                                     {blog.content ||
-                                        "Explore this educational article shared by the NoteShare community."
-                                    }
-
+                                        "Explore this educational article shared by the NoteShare community."}
                                 </p>
-
 
                                 {/* Author */}
 
-                                <div className="flex items-center gap-3 mt-7 pt-5 border-t border-slate-100">
+                                <div className="mt-7 flex items-center gap-3 border-t border-slate-100 pt-5">
 
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white flex items-center justify-center font-bold">
-
+                                    <div className="
+                                        flex
+                                        h-10
+                                        w-10
+                                        shrink-0
+                                        items-center
+                                        justify-center
+                                        rounded-full
+                                        bg-gradient-to-r
+                                        from-blue-600
+                                        to-cyan-500
+                                        font-bold
+                                        text-white
+                                        shadow-sm
+                                    ">
                                         {(blog.author_name || "S")
                                             .charAt(0)
                                             .toUpperCase()}
-
                                     </div>
 
-                                    <div className="flex-1 min-w-0">
-
-                                        <p className="text-xs text-slate-400">
-
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                                             Written by
-
                                         </p>
 
-                                        <p className="font-bold text-slate-700 text-sm truncate">
-
-                                            {blog.author_name || "Student"}
-
+                                        <p className="truncate text-sm font-bold text-slate-700">
+                                            {blog.author_name ||
+                                                "Student"}
                                         </p>
-
                                     </div>
 
                                     <User
                                         size={17}
-                                        className="text-slate-300"
+                                        className="shrink-0 text-slate-300 transition-colors group-hover:text-blue-400"
                                     />
-
                                 </div>
-
 
                                 {/* Read Button */}
 
                                 <button
-                                    onClick={() => navigate(`/blog/${blog.id}`)}
-                                    className="w-full mt-6 flex items-center justify-center gap-2 bg-slate-900 text-white py-3.5 rounded-xl font-bold group-hover:bg-blue-600 transition-all"
+                                    onClick={() =>
+                                        navigate(
+                                            `/blog/${blog.id}`
+                                        )
+                                    }
+                                    className="
+                                        group/read
+                                        mt-6
+                                        flex
+                                        w-full
+                                        items-center
+                                        justify-center
+                                        gap-2
+                                        rounded-xl
+                                        bg-slate-900
+                                        py-3.5
+                                        font-bold
+                                        text-white
+                                        transition
+                                        duration-300
+                                        hover:bg-blue-600
+                                        hover:shadow-lg
+                                        hover:shadow-blue-500/15
+                                    "
                                 >
-
                                     Read Article
 
                                     <ArrowRight
                                         size={18}
-                                        className="group-hover:translate-x-1 transition-transform"
+                                        className="transition-transform duration-300 group-hover/read:translate-x-1"
                                     />
-
                                 </button>
-
                             </div>
-
-                        </article>
-
+                        </motion.article>
                     ))}
-
                 </div>
-
             )}
 
         </section>
-
     );
-
 }
 
 export default Blogs;

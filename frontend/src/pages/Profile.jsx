@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "motion/react";
 import API from "../services/api";
 
 import {
@@ -8,7 +9,6 @@ import {
     BookOpen,
     Eye,
     Download,
-    CalendarDays,
     Pencil,
     Trash2,
     ExternalLink,
@@ -23,10 +23,12 @@ import {
     FileText,
     MessageSquare,
     PenLine,
+    Sparkles,
+    CalendarDays,
+    ArrowUpRight,
 } from "lucide-react";
 
 function Profile() {
-
     const navigate = useNavigate();
 
     const [profile, setProfile] = useState(null);
@@ -61,36 +63,26 @@ function Profile() {
         confirm_password: "",
     });
 
-
     const getImageUrl = (photo) => {
-
         if (!photo) return "";
 
         if (photo.startsWith("http")) {
             return photo;
         }
 
-        return `http://127.0.0.1:8000${photo}`;
-
+        return `${API.defaults.baseURL.replace(/\/api\/?$/, "")}${photo}`;
     };
 
-
     const loadProfile = async () => {
-
         try {
-
             setLoading(true);
             setError("");
 
-            const token =
-                localStorage.getItem("access");
+            const token = localStorage.getItem("access");
 
             if (!token) {
-
                 navigate("/login");
-
                 return;
-
             }
 
             const res = await API.get("profile/");
@@ -110,60 +102,33 @@ function Profile() {
                 photo: null,
                 remove_photo: false,
             });
-
         } catch (err) {
+            console.error("Profile API Error:", err);
 
-            console.error(
-                "Profile API Error:",
-                err
-            );
-
-            if (
-                err.response?.status === 401
-            ) {
-
-                localStorage.removeItem(
-                    "access"
-                );
-
-                localStorage.removeItem(
-                    "refresh"
-                );
-
-                localStorage.removeItem(
-                    "username"
-                );
+            if (err.response?.status === 401) {
+                localStorage.removeItem("access");
+                localStorage.removeItem("refresh");
+                localStorage.removeItem("username");
 
                 navigate("/login");
-
                 return;
-
             }
 
             setError(
                 err.response?.data?.detail ||
-                err.response?.data?.error ||
-                "Failed to load profile."
+                    err.response?.data?.error ||
+                    "Failed to load profile."
             );
-
         } finally {
-
             setLoading(false);
-
         }
-
     };
 
-
     useEffect(() => {
-
         loadProfile();
-
     }, [navigate]);
 
-
     const handleDelete = async (id) => {
-
         const ok = window.confirm(
             "Are you sure you want to delete this note?"
         );
@@ -171,130 +136,83 @@ function Profile() {
         if (!ok) return;
 
         try {
-
-            await API.delete(
-                `notes/delete/${id}/`
-            );
+            await API.delete(`notes/delete/${id}/`);
 
             setProfile((prev) => {
-
                 if (!prev) return prev;
 
-                const updatedNotes =
-                    (prev.user_notes || []).filter(
-                        (note) => note.id !== id
-                    );
+                const updatedNotes = (
+                    prev.user_notes || []
+                ).filter((note) => note.id !== id);
 
                 return {
                     ...prev,
                     user_notes: updatedNotes,
-                    total_notes:
-                        Math.max(
-                            (prev.total_notes || 1) - 1,
-                            0
-                        ),
+                    total_notes: Math.max(
+                        (prev.total_notes || 1) - 1,
+                        0
+                    ),
                 };
-
             });
-
         } catch (err) {
-
-            console.error(
-                "Delete Note Error:",
-                err
-            );
+            console.error("Delete Note Error:", err);
 
             alert(
                 err.response?.data?.error ||
-                "Delete failed."
+                    "Delete failed."
             );
-
         }
-
     };
 
-
     const handleDeleteAccount = async () => {
-
-    const firstConfirm = window.confirm(
-        "This will permanently delete your account, uploaded notes and blogs. Continue?"
-    );
-
-    if (!firstConfirm) return;
-
-
-    const secondConfirm = window.confirm(
-        "This action cannot be undone. Are you absolutely sure?"
-    );
-
-    if (!secondConfirm) return;
-
-
-    try {
-
-        await API.delete(
-            "profile/delete-account/"
+        const firstConfirm = window.confirm(
+            "This will permanently delete your account, uploaded notes and blogs. Continue?"
         );
 
+        if (!firstConfirm) return;
 
-        localStorage.removeItem(
-            "access"
+        const secondConfirm = window.confirm(
+            "This action cannot be undone. Are you absolutely sure?"
         );
 
-        localStorage.removeItem(
-            "refresh"
-        );
+        if (!secondConfirm) return;
 
-        localStorage.removeItem(
-            "username"
-        );
+        try {
+            await API.delete("profile/delete-account/");
 
-
-        alert(
-            "Your account has been deleted successfully."
-        );
-
-
-        navigate("/");
-
-        window.location.reload();
-
-    } catch (err) {
-
-        console.error(
-            "Delete Account Error:",
-            err
-        );
-
-
-        if (
-            err.response?.status === 401
-        ) {
+            localStorage.removeItem("access");
+            localStorage.removeItem("refresh");
+            localStorage.removeItem("username");
 
             alert(
-                "Your session has expired. Please login again."
+                "Your account has been deleted successfully."
             );
 
-            localStorage.clear();
+            navigate("/");
+            window.location.reload();
+        } catch (err) {
+            console.error("Delete Account Error:", err);
 
-            navigate("/login");
+            if (err.response?.status === 401) {
+                alert(
+                    "Your session has expired. Please login again."
+                );
 
-            return;
+                localStorage.clear();
 
+                navigate("/login");
+                return;
+            }
+
+            alert(
+                err.response?.data?.error ||
+                    err.response?.data?.detail ||
+                    "Failed to delete your account."
+            );
         }
-
-
-        alert(
-            err.response?.data?.error ||
-            err.response?.data?.detail ||
-            "Failed to delete your account."
-        );
-
-    }};
-
+    };
 
     const handleEditChange = (e) => {
-
         const {
             name,
             value,
@@ -308,18 +226,14 @@ function Profile() {
                     ? files?.[0] || null
                     : value,
         }));
-
     };
 
-
     const handleSaveProfile = async (e) => {
-
         e.preventDefault();
 
         if (savingProfile) return;
 
         try {
-
             setSavingProfile(true);
 
             const formData = new FormData();
@@ -334,67 +248,55 @@ function Profile() {
                 editForm.email.trim()
             );
 
-            formData.append(
-                "bio",
-                editForm.bio
-            );
-
+            formData.append("bio", editForm.bio);
             formData.append(
                 "department",
                 editForm.department
             );
-
             formData.append(
                 "location",
                 editForm.location
             );
-
             formData.append(
                 "website",
                 editForm.website
             );
-
             formData.append(
                 "linkedin",
                 editForm.linkedin
             );
-
             formData.append(
                 "github",
                 editForm.github
             );
-
             formData.append(
                 "facebook",
                 editForm.facebook
             );
-
             formData.append(
                 "remove_photo",
-                editForm.remove_photo ? "true" : "false"
+                editForm.remove_photo
+                    ? "true"
+                    : "false"
             );
 
             if (editForm.photo) {
-
                 formData.append(
                     "photo",
                     editForm.photo
                 );
-
             }
 
-            const response =
-                await API.put(
-                    "profile/update/",
-                    formData,
-                    {
-                        headers: {
-                            "Content-Type":
-                                "multipart/form-data",
-                        },
-                    }
-                );
-
+            const response = await API.put(
+                "profile/update/",
+                formData,
+                {
+                    headers: {
+                        "Content-Type":
+                            "multipart/form-data",
+                    },
+                }
+            );
 
             const updatedUsername =
                 response.data.username ||
@@ -405,7 +307,6 @@ function Profile() {
                 updatedUsername
             );
 
-
             alert(
                 "Profile updated successfully."
             );
@@ -414,16 +315,8 @@ function Profile() {
 
             await loadProfile();
 
-            /*
-             * Header uses localStorage on mount.
-             * Reload to immediately reflect updated
-             * username/avatar state everywhere.
-             */
-
             window.location.reload();
-
         } catch (err) {
-
             console.error(
                 "Update Profile Error:",
                 err
@@ -431,36 +324,22 @@ function Profile() {
 
             alert(
                 err.response?.data?.error ||
-                err.response?.data?.detail ||
-                "Failed to update profile."
+                    err.response?.data?.detail ||
+                    "Failed to update profile."
             );
-
         } finally {
-
             setSavingProfile(false);
-
         }
-
     };
 
-
-    const handlePasswordChange = (
-        e
-    ) => {
-
+    const handlePasswordChange = (e) => {
         setPasswordForm((prev) => ({
             ...prev,
-            [e.target.name]:
-                e.target.value,
+            [e.target.name]: e.target.value,
         }));
-
     };
 
-
-    const handleChangePassword = async (
-        e
-    ) => {
-
+    const handleChangePassword = async (e) => {
         e.preventDefault();
 
         if (changingPassword) return;
@@ -468,30 +347,25 @@ function Profile() {
         if (
             passwordForm.new_password.length < 6
         ) {
-
             alert(
                 "New password must be at least 6 characters."
             );
 
             return;
-
         }
 
         if (
             passwordForm.new_password !==
             passwordForm.confirm_password
         ) {
-
             alert(
                 "New passwords do not match."
             );
 
             return;
-
         }
 
         try {
-
             setChangingPassword(true);
 
             await API.post(
@@ -511,23 +385,11 @@ function Profile() {
 
             setShowPasswordModal(false);
 
-            /*
-             * Existing JWT may still be valid, but forcing
-             * login again is cleaner after password change.
-             */
-
-            localStorage.removeItem(
-                "access"
-            );
-
-            localStorage.removeItem(
-                "refresh"
-            );
+            localStorage.removeItem("access");
+            localStorage.removeItem("refresh");
 
             navigate("/login");
-
         } catch (err) {
-
             console.error(
                 "Change Password Error:",
                 err
@@ -535,66 +397,70 @@ function Profile() {
 
             alert(
                 err.response?.data?.error ||
-                err.response?.data?.detail ||
-                "Failed to change password."
+                    err.response?.data?.detail ||
+                    "Failed to change password."
             );
-
         } finally {
-
             setChangingPassword(false);
-
         }
-
     };
 
-
     if (loading) {
-
         return (
-
             <div className="min-h-[70vh] flex items-center justify-center px-6">
-
-                <div className="text-center">
-
-                    <div className="w-16 h-16 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
-
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 12,
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0,
+                    }}
+                    className="text-center"
+                >
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-blue-100 bg-white shadow-lg shadow-slate-200/50">
                         <Loader2
-                            size={30}
-                            className="animate-spin"
+                            size={28}
+                            className="animate-spin text-blue-600"
                         />
-
                     </div>
 
-                    <h2 className="text-lg font-black text-slate-700 mt-5">
+                    <h2 className="mt-5 text-lg font-black text-slate-700">
                         Loading Profile
                     </h2>
 
-                    <p className="text-sm text-slate-400 mt-2">
+                    <p className="mt-2 text-sm text-slate-400">
                         Please wait while we load your profile.
                     </p>
-
-                </div>
-
+                </motion.div>
             </div>
-
         );
-
     }
 
-
     if (error) {
-
         return (
-
             <div className="min-h-[70vh] flex items-center justify-center px-6">
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 15,
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0,
+                    }}
+                    className="w-full max-w-lg rounded-[30px] border border-slate-200 bg-white p-10 text-center shadow-xl"
+                >
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+                        <ShieldCheck size={28} />
+                    </div>
 
-                <div className="bg-white rounded-[30px] shadow-xl p-10 text-center max-w-lg w-full">
-
-                    <h2 className="text-3xl font-black text-slate-800">
+                    <h2 className="mt-5 text-3xl font-black text-slate-800">
                         Profile Error
                     </h2>
 
-                    <p className="text-slate-500 mt-4">
+                    <p className="mt-4 text-slate-500">
                         {error}
                     </p>
 
@@ -602,553 +468,510 @@ function Profile() {
                         onClick={() =>
                             window.location.reload()
                         }
-                        className="mt-7 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold"
+                        className="mt-7 rounded-xl bg-blue-600 px-6 py-3 font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/20"
                     >
                         Try Again
                     </button>
-
-                </div>
-
+                </motion.div>
             </div>
-
         );
-
     }
-
 
     if (!profile) {
         return null;
     }
 
+    const notes = profile.user_notes || [];
+    const blogs = profile.user_blogs || [];
 
-    const notes =
-        profile.user_notes || [];
+    const firstLetter = (
+        profile.username || "U"
+    )
+        .charAt(0)
+        .toUpperCase();
 
-    const blogs =
-        profile.user_blogs || [];
-
-    const firstLetter =
-        (
-            profile.username ||
-            "U"
-        )
-            .charAt(0)
-            .toUpperCase();
-
+    const stats = [
+        {
+            label: "Uploaded Notes",
+            value: profile.total_notes || 0,
+            icon: BookOpen,
+            iconClass:
+                "bg-blue-50 text-blue-600",
+            glow:
+                "from-blue-500/10 to-transparent",
+        },
+        {
+            label: "Note Views",
+            value: profile.total_views || 0,
+            icon: Eye,
+            iconClass:
+                "bg-violet-50 text-violet-600",
+            glow:
+                "from-violet-500/10 to-transparent",
+        },
+        {
+            label: "Downloads",
+            value: profile.total_downloads || 0,
+            icon: Download,
+            iconClass:
+                "bg-emerald-50 text-emerald-600",
+            glow:
+                "from-emerald-500/10 to-transparent",
+        },
+        {
+            label: "Blogs",
+            value: blogs.length,
+            icon: PenLine,
+            iconClass:
+                "bg-orange-50 text-orange-600",
+            glow:
+                "from-orange-500/10 to-transparent",
+        },
+    ];
 
     return (
-
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
 
             {/* =====================================================
-                PROFILE HEADER
+                PROFILE HERO
             ====================================================== */}
 
-            <div className="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-slate-950 via-blue-950 to-cyan-800 text-white shadow-2xl">
+            <motion.div
+                initial={{
+                    opacity: 0,
+                    y: 18,
+                }}
+                animate={{
+                    opacity: 1,
+                    y: 0,
+                }}
+                transition={{
+                    duration: 0.55,
+                    ease: "easeOut",
+                }}
+                className="relative overflow-hidden rounded-[36px] border border-slate-200/70 bg-gradient-to-br from-slate-950 via-blue-950 to-cyan-800 text-white shadow-[0_25px_70px_rgba(15,23,42,0.16)]"
+            >
+                <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-cyan-400/15 blur-3xl" />
 
-                <div className="absolute -top-28 -right-20 w-96 h-96 rounded-full bg-cyan-400/15 blur-3xl"></div>
+                <div className="pointer-events-none absolute -bottom-40 -left-24 h-[420px] w-[420px] rounded-full bg-blue-500/15 blur-3xl" />
 
-                <div className="absolute -bottom-32 -left-20 w-96 h-96 rounded-full bg-blue-500/15 blur-3xl"></div>
+                <div className="pointer-events-none absolute right-1/3 top-1/2 h-44 w-44 -translate-y-1/2 rounded-full bg-indigo-400/10 blur-3xl" />
 
+                <div className="relative p-7 sm:p-9 lg:p-10">
 
-                <div className="relative p-8 md:p-10">
-
-                    <div className="flex flex-col lg:flex-row gap-8 lg:items-center">
+                    <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
 
                         {/* Avatar */}
 
-                        <div className="relative shrink-0">
-
-                            <div className="w-32 h-32 rounded-full bg-white/10 border-4 border-white/20 overflow-hidden flex items-center justify-center shadow-2xl">
-
+                        <div className="relative shrink-0 self-start">
+                            <motion.div
+                                whileHover={{
+                                    scale: 1.03,
+                                }}
+                                className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-white/20 bg-white/10 shadow-2xl backdrop-blur-sm sm:h-36 sm:w-36"
+                            >
                                 {profile.photo ? (
-
                                     <img
                                         src={getImageUrl(
                                             profile.photo
                                         )}
-                                        alt={
-                                            profile.username
-                                        }
-                                        className="w-full h-full object-cover"
+                                        alt={profile.username}
+                                        className="h-full w-full object-cover"
                                     />
-
                                 ) : (
-
                                     <span className="text-5xl font-black">
                                         {firstLetter}
                                     </span>
-
                                 )}
-
-                            </div>
+                            </motion.div>
 
                             <button
                                 onClick={() =>
-                                    setShowEditModal(
-                                        true
-                                    )
+                                    setShowEditModal(true)
                                 }
-                                className="absolute bottom-1 right-1 w-10 h-10 rounded-full bg-white text-blue-700 shadow-lg flex items-center justify-center hover:scale-105 transition"
+                                className="absolute bottom-1 right-1 flex h-11 w-11 items-center justify-center rounded-full border-4 border-slate-900/20 bg-white text-blue-700 shadow-lg transition hover:scale-105 hover:bg-blue-50"
                                 title="Edit profile"
                             >
                                 <Camera size={18} />
                             </button>
-
                         </div>
 
+                        {/* Identity */}
 
-                        {/* Profile Identity */}
-
-                        <div className="flex-1 min-w-0">
+                        <div className="min-w-0 flex-1">
 
                             <div className="flex flex-wrap gap-2">
-
-                                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 text-sm font-bold">
-
-                                    <ShieldCheck
-                                        size={15}
-                                    />
-
+                                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-bold backdrop-blur-sm">
+                                    <ShieldCheck size={14} />
                                     Student Profile
-
                                 </span>
 
-
-                                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-400/10 border border-emerald-300/10 text-emerald-200 text-sm font-bold">
-
-                                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-
+                                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/10 bg-emerald-400/10 px-4 py-2 text-xs font-bold text-emerald-200">
+                                    <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
                                     Active
-
                                 </span>
-
                             </div>
 
-
-                            <h1 className="text-4xl md:text-5xl font-black mt-5 break-words">
-
+                            <h1 className="mt-5 break-words text-4xl font-black tracking-tight sm:text-5xl">
                                 {profile.username}
-
                             </h1>
 
-
                             {profile.bio ? (
-
-                                <p className="text-blue-100 mt-4 text-base md:text-lg leading-7 max-w-3xl">
-
+                                <p className="mt-4 max-w-3xl text-base leading-7 text-blue-100 sm:text-lg">
                                     {profile.bio}
-
                                 </p>
-
                             ) : (
-
-                                <p className="text-blue-200/70 mt-4">
-
+                                <p className="mt-4 text-blue-200/70">
                                     Add a short bio to tell other students about yourself.
-
                                 </p>
-
                             )}
 
-
-                            <div className="flex flex-wrap gap-4 mt-5 text-sm text-blue-100">
-
+                            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-blue-100">
                                 {profile.email && (
-
-                                    <span className="inline-flex items-start gap-2 text-blue-100 text-sm break-all">
-
-                                        <Mail size={16} />
-
+                                    <span className="inline-flex items-start gap-2 break-all">
+                                        <Mail
+                                            size={16}
+                                            className="mt-0.5 shrink-0"
+                                        />
                                         {profile.email}
-
                                     </span>
-
                                 )}
-
 
                                 {profile.department && (
-
                                     <span className="inline-flex items-center gap-2">
-
                                         <BookOpen size={16} />
-
                                         {profile.department}
-
                                     </span>
-
                                 )}
-
 
                                 {profile.location && (
-
                                     <span className="inline-flex items-center gap-2">
-
                                         <MapPin size={16} />
-
                                         {profile.location}
-
                                     </span>
-
                                 )}
-
                             </div>
-
                         </div>
-
 
                         {/* Actions */}
 
-                        <div className="w-full lg:w-auto flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
-
-                            <button
+                        <div className="flex w-full shrink-0 flex-col gap-3 sm:flex-row lg:w-auto lg:flex-col">
+                            <motion.button
+                                whileHover={{
+                                    y: -2,
+                                }}
+                                whileTap={{
+                                    scale: 0.98,
+                                }}
                                 onClick={() =>
-                                    setShowEditModal(
-                                        true
-                                    )
+                                    setShowEditModal(true)
                                 }
-                                className="inline-flex items-center justify-center gap-2 bg-white text-blue-700 hover:bg-blue-50 px-6 py-3 rounded-xl font-black transition shadow-lg"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 font-black text-blue-700 shadow-lg transition hover:bg-blue-50"
                             >
-
                                 <Pencil size={18} />
-
                                 Edit Profile
-
-                            </button>
+                            </motion.button>
 
                             {profile.has_usable_password ? (
-
-                                <button
+                                <motion.button
+                                    whileHover={{
+                                        y: -2,
+                                    }}
+                                    whileTap={{
+                                        scale: 0.98,
+                                    }}
                                     onClick={() =>
-                                        setShowPasswordModal(true)
+                                        setShowPasswordModal(
+                                            true
+                                        )
                                     }
-                                    className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 border border-white/20 text-white px-6 py-3 rounded-xl font-bold transition"
+                                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-6 py-3 font-bold text-white backdrop-blur-sm transition hover:bg-white/15"
                                 >
                                     <Lock size={18} />
-
                                     Change Password
-
-                                </button>
+                                </motion.button>
                             ) : (
-                                <div className="inline-flex items-center justify-center gap-2 bg-white/10 border border-white/20 text-blue-100 px-6 py-3 rounded-xl font-bold">
-
+                                <div className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-6 py-3 font-bold text-blue-100 backdrop-blur-sm">
                                     <ShieldCheck size={18} />
-
                                     Signed in with Google
                                 </div>
-
                             )}
-
                         </div>
-
                     </div>
 
-
-                    {/* Social Links */}
+                    {/* Social links */}
 
                     {(profile.website ||
                         profile.linkedin ||
                         profile.github ||
                         profile.facebook) && (
-
-                        <div className="flex flex-wrap gap-2.5 mt-8 pt-6 border-t border-white/10">
-
+                        <div className="mt-8 flex flex-wrap gap-2.5 border-t border-white/10 pt-6">
                             {profile.website && (
-
                                 <a
                                     href={profile.website}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 px-4 py-2.5 rounded-xl text-sm font-bold transition"
+                                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-bold transition hover:-translate-y-0.5 hover:bg-white/15"
                                 >
-
                                     <Globe size={16} />
-
                                     Website
-
                                     <ExternalLink size={13} />
-
                                 </a>
-
                             )}
 
-
                             {profile.linkedin && (
-
                                 <a
                                     href={profile.linkedin}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 px-4 py-2.5 rounded-xl text-sm font-bold transition"
+                                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-bold transition hover:-translate-y-0.5 hover:bg-white/15"
                                 >
-
-                                    <span className="font-black text-sm">
-
-                                    LI
-
+                                    <span className="text-sm font-black">
+                                        LI
                                     </span>
-
                                     LinkedIn
-
                                     <ExternalLink size={13} />
-
                                 </a>
-
                             )}
 
-
                             {profile.github && (
-
                                 <a
                                     href={profile.github}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 px-4 py-2.5 rounded-xl text-sm font-bold transition"
+                                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-bold transition hover:-translate-y-0.5 hover:bg-white/15"
                                 >
-
-                                    <span className="font-black text-sm">
-
-                                    GH
-
+                                    <span className="text-sm font-black">
+                                        GH
                                     </span>
-
                                     Github
-
                                     <ExternalLink size={13} />
-
                                 </a>
-
                             )}
 
-
                             {profile.facebook && (
-
                                 <a
                                     href={profile.facebook}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 px-4 py-2.5 rounded-xl text-sm font-bold transition"
+                                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2.5 text-sm font-bold transition hover:-translate-y-0.5 hover:bg-white/15"
                                 >
-
-                                    <span className="font-black text-sm">
-
-                                    f
-
+                                    <span className="text-sm font-black">
+                                        f
                                     </span>
-
                                     Facebook
-
                                     <ExternalLink size={13} />
-
                                 </a>
-
                             )}
-
                         </div>
-
                     )}
-
                 </div>
-
-            </div>
-
+            </motion.div>
 
             {/* =====================================================
                 STATS
             ====================================================== */}
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-7">
+            <motion.div
+                initial={{
+                    opacity: 0,
+                    y: 18,
+                }}
+                animate={{
+                    opacity: 1,
+                    y: 0,
+                }}
+                transition={{
+                    duration: 0.5,
+                    delay: 0.08,
+                }}
+                className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
+            >
+                {stats.map((stat, index) => {
+                    const Icon = stat.icon;
 
-                <div className="bg-white border border-slate-100 rounded-[26px] p-6 shadow-sm">
+                    return (
+                        <motion.div
+                            key={stat.label}
+                            initial={{
+                                opacity: 0,
+                                y: 16,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            transition={{
+                                duration: 0.4,
+                                delay:
+                                    0.08 +
+                                    index * 0.06,
+                            }}
+                            whileHover={{
+                                y: -4,
+                            }}
+                            className="group relative overflow-hidden rounded-[26px] border border-slate-200/80 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.045)] transition-shadow duration-300 hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)]"
+                        >
+                            <div
+                                className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br ${stat.glow} blur-2xl`}
+                            />
 
-                    <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                            <div className="relative">
+                                <div
+                                    className={`flex h-12 w-12 items-center justify-center rounded-2xl ${stat.iconClass}`}
+                                >
+                                    <Icon size={21} />
+                                </div>
 
-                        <BookOpen size={21} />
+                                <p className="mt-5 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
+                                    {stat.label}
+                                </p>
 
-                    </div>
-
-                    <p className="text-xs uppercase font-black tracking-wider text-slate-400 mt-5">
-                        Uploaded Notes
-                    </p>
-
-                    <p className="text-4xl font-black text-slate-800 mt-1">
-                        {profile.total_notes || 0}
-                    </p>
-
-                </div>
-
-
-                <div className="bg-white border border-slate-100 rounded-[26px] p-6 shadow-sm">
-
-                    <div className="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-
-                        <Eye size={21} />
-
-                    </div>
-
-                    <p className="text-xs uppercase font-black tracking-wider text-slate-400 mt-5">
-                        Note Views
-                    </p>
-
-                    <p className="text-4xl font-black text-slate-800 mt-1">
-                        {profile.total_views || 0}
-                    </p>
-
-                </div>
-
-
-                <div className="bg-white border border-slate-100 rounded-[26px] p-6 shadow-sm">
-
-                    <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-
-                        <Download size={21} />
-
-                    </div>
-
-                    <p className="text-xs uppercase font-black tracking-wider text-slate-400 mt-5">
-                        Downloads
-                    </p>
-
-                    <p className="text-4xl font-black text-slate-800 mt-1">
-                        {profile.total_downloads || 0}
-                    </p>
-
-                </div>
-
-
-                <div className="bg-white border border-slate-100 rounded-[26px] p-6 shadow-sm">
-
-                    <div className="w-11 h-11 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
-
-                        <PenLine size={21} />
-
-                    </div>
-
-                    <p className="text-xs uppercase font-black tracking-wider text-slate-400 mt-5">
-                        Blogs
-                    </p>
-
-                    <p className="text-4xl font-black text-slate-800 mt-1">
-                        {blogs.length}
-                    </p>
-
-                </div>
-
-            </div>
-
+                                <p className="mt-1 text-4xl font-black tracking-tight text-slate-800">
+                                    {stat.value}
+                                </p>
+                            </div>
+                        </motion.div>
+                    );
+                })}
+            </motion.div>
 
             {/* =====================================================
                 ABOUT + ACCOUNT
             ====================================================== */}
 
-            <div className="grid lg:grid-cols-[1fr_340px] gap-7 mt-8">
+            <div className="mt-8 grid gap-7 lg:grid-cols-[1fr_340px]">
 
-                <div className="bg-white border border-slate-100 rounded-[30px] shadow-sm p-7">
-
-                    <div className="flex items-center justify-between">
-
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 18,
+                    }}
+                    whileInView={{
+                        opacity: 1,
+                        y: 0,
+                    }}
+                    viewport={{
+                        once: true,
+                        amount: 0.15,
+                    }}
+                    transition={{
+                        duration: 0.5,
+                    }}
+                    className="rounded-[30px] border border-slate-200/80 bg-white p-7 shadow-[0_10px_30px_rgba(15,23,42,0.045)]"
+                >
+                    <div className="flex items-start justify-between gap-4">
                         <div>
+                            <div className="flex items-center gap-2">
+                                <Sparkles
+                                    size={17}
+                                    className="text-blue-600"
+                                />
 
-                            <h2 className="text-2xl font-black text-slate-800">
-                                About
-                            </h2>
+                                <h2 className="text-2xl font-black text-slate-800">
+                                    About
+                                </h2>
+                            </div>
 
-                            <p className="text-sm text-slate-400 mt-1">
+                            <p className="mt-1 text-sm text-slate-400">
                                 Your public academic profile information.
                             </p>
-
                         </div>
 
                         <button
                             onClick={() =>
-                                setShowEditModal(
-                                    true
-                                )
+                                setShowEditModal(true)
                             }
-                            className="inline-flex items-center gap-2 text-blue-600 font-bold text-sm"
+                            className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 transition hover:text-blue-700"
                         >
                             <Pencil size={15} />
                             Edit
                         </button>
-
                     </div>
 
-
-                    <div className="mt-6">
-
-                        <p className="text-slate-600 leading-8">
-
+                    <div className="mt-6 rounded-2xl bg-slate-50/80 p-5">
+                        <p className="leading-8 text-slate-600">
                             {profile.bio ||
                                 "No bio added yet. Tell other students about your academic interests, department and what you like to study."}
-
                         </p>
+                    </div>
+                </motion.div>
 
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 18,
+                    }}
+                    whileInView={{
+                        opacity: 1,
+                        y: 0,
+                    }}
+                    viewport={{
+                        once: true,
+                        amount: 0.15,
+                    }}
+                    transition={{
+                        duration: 0.5,
+                        delay: 0.05,
+                    }}
+                    className="rounded-[30px] border border-slate-200/80 bg-white p-7 shadow-[0_10px_30px_rgba(15,23,42,0.045)]"
+                >
+                    <div className="flex items-center gap-2">
+                        <ShieldCheck
+                            size={18}
+                            className="text-blue-600"
+                        />
+
+                        <h2 className="text-xl font-black text-slate-800">
+                            Account Information
+                        </h2>
                     </div>
 
-                </div>
-
-
-                <div className="bg-white border border-slate-100 rounded-[30px] shadow-sm p-7">
-
-                    <h2 className="text-xl font-black text-slate-800">
-                        Account Information
-                    </h2>
-
-                    <div className="space-y-5 mt-6">
-
+                    <div className="mt-6 space-y-5">
                         <div>
-
-                            <p className="text-xs uppercase font-black tracking-wider text-slate-400">
+                            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">
                                 Username
                             </p>
 
-                            <p className="font-bold text-slate-700 mt-1 break-all">
+                            <p className="mt-1 break-all font-bold text-slate-700">
                                 {profile.username}
                             </p>
-
                         </div>
 
-
                         <div>
-
-                            <p className="text-xs uppercase font-black tracking-wider text-slate-400">
+                            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">
                                 Email
                             </p>
 
-                            <p className="font-bold text-slate-700 mt-1 break-all">
+                            <p className="mt-1 break-all font-bold text-slate-700">
                                 {profile.email ||
                                     "Not available"}
                             </p>
-
                         </div>
 
-
                         {profile.department && (
-
                             <div>
-
-                                <p className="text-xs uppercase font-black tracking-wider text-slate-400">
+                                <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">
                                     Department
                                 </p>
 
-                                <p className="font-bold text-slate-700 mt-1">
+                                <p className="mt-1 font-bold text-slate-700">
                                     {profile.department}
                                 </p>
-
                             </div>
-
                         )}
 
-
                         {profile.date_joined && (
-
                             <div>
-
-                                <p className="text-xs uppercase font-black tracking-wider text-slate-400">
+                                <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">
                                     Joined
                                 </p>
 
-                                <p className="font-bold text-slate-700 mt-1">
+                                <div className="mt-1 flex items-center gap-2 font-bold text-slate-700">
+                                    <CalendarDays
+                                        size={15}
+                                        className="text-blue-500"
+                                    />
 
                                     {new Date(
                                         profile.date_joined
@@ -1160,140 +983,116 @@ function Profile() {
                                             day: "numeric",
                                         }
                                     )}
-
-                                </p>
-
+                                </div>
                             </div>
-
                         )}
-
                     </div>
-
-                </div>
-
+                </motion.div>
             </div>
 
-
             {/* =====================================================
-                MY UPLOADED NOTES
+                NOTES
             ====================================================== */}
 
             <div className="mt-12">
-
-                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-
                         <div className="flex items-center gap-3">
-
-                            <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-
+                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
                                 <BookOpen size={21} />
-
                             </div>
 
                             <div>
-
                                 <h2 className="text-2xl font-black text-slate-800">
                                     My Uploaded Notes
                                 </h2>
 
-                                <p className="text-sm text-slate-400 mt-1">
+                                <p className="mt-1 text-sm text-slate-400">
                                     Manage the study resources you have shared.
                                 </p>
-
                             </div>
-
                         </div>
-
                     </div>
 
                     <span className="text-sm font-bold text-slate-400">
                         {notes.length} resources
                     </span>
-
                 </div>
 
-
                 {notes.length ? (
-
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-7">
-
-                        {notes.map((note) => (
-
-                            <div
+                    <div className="mt-7 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {notes.map((note, index) => (
+                            <motion.div
                                 key={note.id}
-                                className="group bg-white border border-slate-100 rounded-[28px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                                initial={{
+                                    opacity: 0,
+                                    y: 18,
+                                }}
+                                whileInView={{
+                                    opacity: 1,
+                                    y: 0,
+                                }}
+                                viewport={{
+                                    once: true,
+                                    amount: 0.12,
+                                }}
+                                transition={{
+                                    duration: 0.45,
+                                    delay:
+                                        index * 0.04,
+                                }}
+                                whileHover={{
+                                    y: -5,
+                                }}
+                                className="group overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-sm transition-shadow duration-300 hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)]"
                             >
-
                                 <div className="p-6">
-
                                     <div className="flex items-start justify-between gap-4">
-
-                                        <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-
+                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
                                             <FileText size={22} />
-
                                         </div>
 
-                                        <span className="text-[10px] uppercase tracking-wider font-black text-slate-400 bg-slate-50 px-3 py-1.5 rounded-full">
+                                        <span className="rounded-full bg-slate-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400">
                                             {note.department ||
                                                 "Note"}
                                         </span>
-
                                     </div>
 
-
-                                    <h3 className="text-lg font-black text-slate-800 mt-5 line-clamp-2 group-hover:text-blue-600 transition">
+                                    <h3 className="mt-5 line-clamp-2 text-lg font-black text-slate-800 transition group-hover:text-blue-600">
                                         {note.title}
                                     </h3>
 
-
-                                    <p className="text-sm text-slate-500 leading-6 mt-2 line-clamp-3">
+                                    <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-500">
                                         {note.description ||
                                             "No description available for this note."}
                                     </p>
 
-
-                                    <div className="flex items-center gap-5 mt-5 pt-4 border-t border-slate-100">
-
+                                    <div className="mt-5 flex items-center gap-5 border-t border-slate-100 pt-4">
                                         <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-
                                             <Eye size={14} />
-
                                             {note.views || 0}
-
                                         </div>
-
 
                                         <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-
                                             <Download size={14} />
-
-                                            {note.downloads || 0}
-
+                                            {note.downloads ||
+                                                0}
                                         </div>
-
                                     </div>
-
                                 </div>
 
-
-                                <div className="px-6 py-4 bg-slate-50/70 border-t border-slate-100">
-
+                                <div className="border-t border-slate-100 bg-slate-50/75 px-6 py-4">
                                     <div className="grid grid-cols-3 gap-2">
-
                                         <button
                                             onClick={() =>
                                                 navigate(
                                                     `/note/${note.id}`
                                                 )
                                             }
-                                            className="h-10 rounded-xl bg-white border border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600 font-bold text-xs transition"
+                                            className="h-10 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-blue-300 hover:text-blue-600"
                                         >
                                             Open
                                         </button>
-
 
                                         <button
                                             onClick={() =>
@@ -1301,11 +1100,10 @@ function Profile() {
                                                     `/edit/${note.id}`
                                                 )
                                             }
-                                            className="h-10 rounded-xl bg-white border border-slate-200 text-slate-600 hover:border-amber-300 hover:text-amber-600 font-bold text-xs transition"
+                                            className="h-10 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-amber-300 hover:text-amber-600"
                                         >
                                             Edit
                                         </button>
-
 
                                         <button
                                             onClick={() =>
@@ -1313,36 +1111,39 @@ function Profile() {
                                                     note.id
                                                 )
                                             }
-                                            className="h-10 rounded-xl bg-white border border-slate-200 text-slate-600 hover:border-red-300 hover:text-red-600 font-bold text-xs transition"
+                                            className="h-10 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-red-300 hover:text-red-600"
                                         >
                                             Delete
                                         </button>
-
                                     </div>
-
                                 </div>
-
-                            </div>
-
+                            </motion.div>
                         ))}
-
                     </div>
-
                 ) : (
-
-                    <div className="mt-7 bg-white border border-dashed border-slate-200 rounded-[28px] p-12 text-center">
-
-                        <div className="w-16 h-16 mx-auto rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center">
-
+                    <motion.div
+                        initial={{
+                            opacity: 0,
+                            y: 10,
+                        }}
+                        whileInView={{
+                            opacity: 1,
+                            y: 0,
+                        }}
+                        viewport={{
+                            once: true,
+                        }}
+                        className="mt-7 rounded-[28px] border border-dashed border-slate-300 bg-white p-12 text-center shadow-sm"
+                    >
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
                             <BookOpen size={28} />
-
                         </div>
 
-                        <h3 className="font-black text-slate-700 text-lg mt-5">
+                        <h3 className="mt-5 text-lg font-black text-slate-700">
                             No notes uploaded yet
                         </h3>
 
-                        <p className="text-sm text-slate-400 mt-2 max-w-md mx-auto leading-6">
+                        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-400">
                             You haven't shared any study notes yet.
                         </p>
 
@@ -1350,160 +1151,186 @@ function Profile() {
                             onClick={() =>
                                 navigate("/upload")
                             }
-                            className="mt-6 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold transition"
+                            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/20"
                         >
                             <BookOpen size={17} />
                             Upload Your First Note
                         </button>
-
-                    </div>
-
+                    </motion.div>
                 )}
-
             </div>
 
-
             {/* =====================================================
-                MY BLOGS
+                BLOGS
             ====================================================== */}
 
             {blogs.length > 0 && (
-
                 <div className="mt-12">
-
                     <div className="flex items-center gap-3">
-
-                        <div className="w-11 h-11 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
-
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
                             <PenLine size={21} />
-
                         </div>
 
                         <div>
-
                             <h2 className="text-2xl font-black text-slate-800">
                                 My Blogs
                             </h2>
 
-                            <p className="text-sm text-slate-400 mt-1">
+                            <p className="mt-1 text-sm text-slate-400">
                                 Articles and ideas you have shared.
                             </p>
-
                         </div>
-
                     </div>
 
-
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-7">
-
-                        {blogs.map((blog) => (
-
-                            <button
+                    <div className="mt-7 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {blogs.map((blog, index) => (
+                            <motion.button
                                 key={blog.id}
+                                initial={{
+                                    opacity: 0,
+                                    y: 18,
+                                }}
+                                whileInView={{
+                                    opacity: 1,
+                                    y: 0,
+                                }}
+                                viewport={{
+                                    once: true,
+                                    amount: 0.12,
+                                }}
+                                transition={{
+                                    duration: 0.45,
+                                    delay:
+                                        index * 0.05,
+                                }}
+                                whileHover={{
+                                    y: -5,
+                                }}
                                 onClick={() =>
                                     navigate(
                                         `/blog/${blog.id}`
                                     )
                                 }
-                                className="text-left bg-white border border-slate-100 rounded-[28px] p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
+                                className="group rounded-[28px] border border-slate-200/80 bg-white p-6 text-left shadow-sm transition-shadow duration-300 hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)]"
                             >
+                                <div className="flex items-center justify-between">
+                                    <span className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1.5 text-xs font-bold text-orange-600">
+                                        Academic Blog
+                                    </span>
 
-                                <span className="inline-flex items-center gap-2 bg-orange-50 text-orange-600 px-3 py-1.5 rounded-full text-xs font-bold">
-                                    Academic Blog
-                                </span>
+                                    <ArrowUpRight
+                                        size={18}
+                                        className="text-slate-300 transition group-hover:text-orange-500"
+                                    />
+                                </div>
 
-                                <h3 className="text-xl font-black text-slate-800 mt-5 line-clamp-2">
+                                <h3 className="mt-5 line-clamp-2 text-xl font-black text-slate-800 transition group-hover:text-orange-600">
                                     {blog.title}
                                 </h3>
 
-                                <p className="text-sm text-slate-500 mt-3 line-clamp-3 leading-6">
+                                <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-500">
                                     {blog.content ||
                                         "No content available."}
                                 </p>
 
-                                <p className="text-xs text-slate-400 font-semibold mt-5">
+                                <p className="mt-5 text-xs font-semibold text-slate-400">
                                     {blog.views || 0} views
                                 </p>
-
-                            </button>
-
+                            </motion.button>
                         ))}
-
                     </div>
-
                 </div>
-
             )}
 
-
             {/* =====================================================
-                DISCUSSION ACTIVITY
+                DISCUSSION
             ====================================================== */}
 
-            <div className="mt-12 grid md:grid-cols-2 gap-6">
+            <div className="mt-12 grid gap-6 md:grid-cols-2">
+                <motion.div
+                    whileHover={{
+                        y: -4,
+                    }}
+                    className="relative overflow-hidden rounded-[30px] bg-gradient-to-br from-blue-600 to-cyan-500 p-7 text-white shadow-lg shadow-blue-500/15"
+                >
+                    <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
 
-                <div className="bg-gradient-to-br from-blue-600 to-cyan-500 rounded-[30px] p-7 text-white shadow-lg">
+                    <div className="relative">
+                        <MessageSquare size={25} />
 
-                    <MessageSquare size={25} />
+                        <h3 className="mt-5 text-2xl font-black">
+                            Discussion Rooms
+                        </h3>
 
-                    <h3 className="text-2xl font-black mt-5">
-                        Discussion Rooms
-                    </h3>
+                        <p className="mt-2 text-blue-100">
+                            Rooms you've joined or participated in.
+                        </p>
 
-                    <p className="text-blue-100 mt-2">
-                        Rooms you've joined or participated in.
-                    </p>
+                        <p className="mt-6 text-4xl font-black">
+                            {profile.discussion_rooms_count ||
+                                0}
+                        </p>
+                    </div>
+                </motion.div>
 
-                    <p className="text-4xl font-black mt-6">
-                        {profile.discussion_rooms_count || 0}
-                    </p>
+                <motion.div
+                    whileHover={{
+                        y: -4,
+                    }}
+                    className="relative overflow-hidden rounded-[30px] bg-gradient-to-br from-violet-600 to-purple-500 p-7 text-white shadow-lg shadow-violet-500/15"
+                >
+                    <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
 
-                </div>
+                    <div className="relative">
+                        <MessageSquare size={25} />
 
+                        <h3 className="mt-5 text-2xl font-black">
+                            Messages
+                        </h3>
 
-                <div className="bg-gradient-to-br from-violet-600 to-purple-500 rounded-[30px] p-7 text-white shadow-lg">
+                        <p className="mt-2 text-violet-100">
+                            Messages you've contributed to discussions.
+                        </p>
 
-                    <MessageSquare size={25} />
-
-                    <h3 className="text-2xl font-black mt-5">
-                        Messages
-                    </h3>
-
-                    <p className="text-violet-100 mt-2">
-                        Messages you've contributed to discussions.
-                    </p>
-
-                    <p className="text-4xl font-black mt-6">
-                        {profile.discussion_messages_count || 0}
-                    </p>
-
-                </div>
-
+                        <p className="mt-6 text-4xl font-black">
+                            {profile.discussion_messages_count ||
+                                0}
+                        </p>
+                    </div>
+                </motion.div>
             </div>
-
 
             {/* =====================================================
                 EDIT PROFILE MODAL
             ====================================================== */}
 
             {showEditModal && (
-
-                <div className="fixed inset-0 z-[100] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-
-                    <div className="w-full max-w-3xl max-h-[94vh] sm:max-h-[90vh] overflow-y-auto bg-white rounded-t-[30px] sm:rounded-[30px] shadow-2xl">
-
-                        <div className="sticky top-0 z-10 flex items-center justify-between px-7 py-5 bg-white border-b border-slate-100">
-
+                <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/45 p-0 backdrop-blur-md sm:items-center sm:p-4">
+                    <motion.div
+                        initial={{
+                            opacity: 0,
+                            y: 24,
+                            scale: 0.98,
+                        }}
+                        animate={{
+                            opacity: 1,
+                            y: 0,
+                            scale: 1,
+                        }}
+                        transition={{
+                            duration: 0.25,
+                        }}
+                        className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-[30px] border border-white/70 bg-white shadow-[0_25px_80px_rgba(15,23,42,0.18)] sm:max-h-[90vh] sm:rounded-[30px]"
+                    >
+                        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/95 px-7 py-5 backdrop-blur">
                             <div>
-
                                 <h2 className="text-2xl font-black text-slate-800">
                                     Edit Profile
                                 </h2>
 
-                                <p className="text-sm text-slate-400 mt-1">
+                                <p className="mt-1 text-sm text-slate-400">
                                     Update your personal and academic information.
                                 </p>
-
                             </div>
 
                             <button
@@ -1513,70 +1340,54 @@ function Profile() {
                                         false
                                     )
                                 }
-                                className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"
+                                className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition hover:bg-slate-200"
                             >
                                 <X size={19} />
                             </button>
-
                         </div>
 
-
                         <form
-                            onSubmit={
-                                handleSaveProfile
-                            }
-                            className="p-7 space-y-6"
+                            onSubmit={handleSaveProfile}
+                            className="space-y-6 p-7"
                         >
-
-                            {/* Photo */}
-
-                            <div className="flex flex-col sm:flex-row items-center gap-5 p-5 rounded-2xl bg-slate-50 border border-slate-100">
-
-                                <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-blue-600 to-cyan-500 text-white flex items-center justify-center text-3xl font-black shrink-0">
-
+                            <div className="flex flex-col items-center gap-5 rounded-2xl border border-slate-100 bg-slate-50 p-5 sm:flex-row">
+                                <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-3xl font-black text-white">
                                     {editForm.photo ? (
-
                                         <img
-                                            src={URL.createObjectURL(editForm.photo)}
+                                            src={URL.createObjectURL(
+                                                editForm.photo
+                                            )}
                                             alt="Preview"
-                                            className="w-full h-full object-cover"
+                                            className="h-full w-full object-cover"
                                         />
-
-                                    ) : profile.photo && !editForm.remove_photo ? (
-
+                                    ) : profile.photo &&
+                                      !editForm.remove_photo ? (
                                         <img
-                                            src={getImageUrl(profile.photo)}
-                                            alt={profile.username}
-                                            className="w-full h-full object-cover"
+                                            src={getImageUrl(
+                                                profile.photo
+                                            )}
+                                            alt={
+                                                profile.username
+                                            }
+                                            className="h-full w-full object-cover"
                                         />
-
                                     ) : (
-
                                         firstLetter
-
                                     )}
-
                                 </div>
 
-
                                 <div>
-
                                     <h3 className="font-black text-slate-800">
                                         Profile Photo
                                     </h3>
 
-                                    <p className="text-sm text-slate-400 mt-1">
+                                    <p className="mt-1 text-sm text-slate-400">
                                         JPG, PNG or JPEG recommended.
                                     </p>
 
                                     <div className="mt-3 flex flex-wrap items-center gap-2">
-
-                                        {/* Choose Photo */}
-
-                                        <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold cursor-pointer">
-
+                                        <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700">
                                             <Camera size={16} />
-
                                             Choose Photo
 
                                             <input
@@ -1584,61 +1395,52 @@ function Profile() {
                                                 name="photo"
                                                 accept="image/png,image/jpeg,image/jpg"
                                                 className="hidden"
-                                                onChange={handleEditChange}
+                                                onChange={
+                                                    handleEditChange
+                                                }
                                             />
-
                                         </label>
-
-                                        {/* Remove Photo */}
 
                                         <button
                                             type="button"
                                             onClick={() =>
-                                                setEditForm((prev) => ({
-                                                    ...prev,
-                                                    photo: null,
-                                                    remove_photo: true,
-                                                }))
+                                                setEditForm(
+                                                    (
+                                                        prev
+                                                    ) => ({
+                                                        ...prev,
+                                                        photo:
+                                                            null,
+                                                        remove_photo:
+                                                            true,
+                                                    })
+                                                )
                                             }
                                             disabled={
                                                 !profile.photo &&
                                                 !editForm.photo
                                             }
-                                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 font-bold text-sm transition disabled:opacity-40 disabled:cursor-not-allowed"
+                                            className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40"
                                         >
                                             <Trash2 size={16} />
-
                                             Remove Photo
-
                                         </button>
-
                                     </div>
 
-                                    {/* Selected new photo */}
-
                                     {editForm.photo && (
-
-                                        <p className="text-xs text-emerald-600 font-semibold mt-2">
-
+                                        <p className="mt-2 text-xs font-semibold text-emerald-600">
                                             New photo selected:{" "}
-
-                                            {editForm.photo.name}
-
+                                            {
+                                                editForm.photo
+                                                    .name
+                                            }
                                         </p>
-
                                     )}
-
                                 </div>
-
                             </div>
 
-
-                            {/* Username / Email */}
-
-                            <div className="grid md:grid-cols-2 gap-5">
-
+                            <div className="grid gap-5 md:grid-cols-2">
                                 <div>
-
                                     <label className="text-sm font-bold text-slate-700">
                                         Username
                                     </label>
@@ -1653,14 +1455,11 @@ function Profile() {
                                             handleEditChange
                                         }
                                         required
-                                        className="w-full mt-2 h-12 border border-slate-200 rounded-xl px-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     />
-
                                 </div>
 
-
                                 <div>
-
                                     <label className="text-sm font-bold text-slate-700">
                                         Email
                                     </label>
@@ -1675,18 +1474,12 @@ function Profile() {
                                             handleEditChange
                                         }
                                         required
-                                        className="w-full mt-2 h-12 border border-slate-200 rounded-xl px-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     />
-
                                 </div>
-
                             </div>
 
-
-                            {/* Bio */}
-
                             <div>
-
                                 <label className="text-sm font-bold text-slate-700">
                                     Bio
                                 </label>
@@ -1694,25 +1487,17 @@ function Profile() {
                                 <textarea
                                     name="bio"
                                     rows="4"
-                                    value={
-                                        editForm.bio
-                                    }
+                                    value={editForm.bio}
                                     onChange={
                                         handleEditChange
                                     }
                                     placeholder="Tell other students a little about yourself..."
-                                    className="w-full mt-2 border border-slate-200 rounded-xl px-4 py-3 outline-none resize-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                    className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                 />
-
                             </div>
 
-
-                            {/* Academic */}
-
-                            <div className="grid md:grid-cols-2 gap-5">
-
+                            <div className="grid gap-5 md:grid-cols-2">
                                 <div>
-
                                     <label className="text-sm font-bold text-slate-700">
                                         Department
                                     </label>
@@ -1725,40 +1510,30 @@ function Profile() {
                                         onChange={
                                             handleEditChange
                                         }
-                                        className="w-full mt-2 h-12 border border-slate-200 rounded-xl px-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     >
-
                                         <option value="">
                                             Select Department
                                         </option>
-
                                         <option value="CSE">
                                             CSE
                                         </option>
-
                                         <option value="EEE">
                                             EEE
                                         </option>
-
                                         <option value="BBA">
                                             BBA
                                         </option>
-
                                         <option value="English">
                                             English
                                         </option>
-
                                         <option value="Law">
                                             Law
                                         </option>
-
                                     </select>
-
                                 </div>
 
-
                                 <div>
-
                                     <label className="text-sm font-bold text-slate-700">
                                         Location
                                     </label>
@@ -1773,28 +1548,21 @@ function Profile() {
                                             handleEditChange
                                         }
                                         placeholder="Dhaka, Bangladesh"
-                                        className="w-full mt-2 h-12 border border-slate-200 rounded-xl px-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     />
-
                                 </div>
-
                             </div>
 
-
-                            {/* Social */}
-
                             <div>
-
                                 <h3 className="text-lg font-black text-slate-800">
                                     Social & Professional Links
                                 </h3>
 
-                                <p className="text-sm text-slate-400 mt-1">
+                                <p className="mt-1 text-sm text-slate-400">
                                     Add links you want other students to see.
                                 </p>
 
-                                <div className="grid md:grid-cols-2 gap-5 mt-4">
-
+                                <div className="mt-4 grid gap-5 md:grid-cols-2">
                                     <input
                                         type="url"
                                         name="website"
@@ -1805,7 +1573,7 @@ function Profile() {
                                             handleEditChange
                                         }
                                         placeholder="Website URL"
-                                        className="h-12 border border-slate-200 rounded-xl px-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="h-12 rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     />
 
                                     <input
@@ -1818,7 +1586,7 @@ function Profile() {
                                             handleEditChange
                                         }
                                         placeholder="LinkedIn URL"
-                                        className="h-12 border border-slate-200 rounded-xl px-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="h-12 rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     />
 
                                     <input
@@ -1831,7 +1599,7 @@ function Profile() {
                                             handleEditChange
                                         }
                                         placeholder="GitHub URL"
-                                        className="h-12 border border-slate-200 rounded-xl px-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="h-12 rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     />
 
                                     <input
@@ -1844,16 +1612,12 @@ function Profile() {
                                             handleEditChange
                                         }
                                         placeholder="Facebook URL"
-                                        className="h-12 border border-slate-200 rounded-xl px-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="h-12 rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     />
-
                                 </div>
-
                             </div>
 
-
-                            <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
-
+                            <div className="flex justify-end gap-3 border-t border-slate-100 pt-3">
                                 <button
                                     type="button"
                                     onClick={() =>
@@ -1861,80 +1625,68 @@ function Profile() {
                                             false
                                         )
                                     }
-                                    className="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
+                                    className="rounded-xl bg-slate-100 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-200"
                                 >
                                     Cancel
                                 </button>
 
-
                                 <button
                                     type="submit"
-                                    disabled={
-                                        savingProfile
-                                    }
-                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black disabled:opacity-50"
+                                    disabled={savingProfile}
+                                    className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-black text-white transition hover:bg-blue-700 disabled:opacity-50"
                                 >
-
                                     {savingProfile ? (
-
                                         <>
                                             <Loader2
                                                 size={17}
                                                 className="animate-spin"
                                             />
-
                                             Saving...
-
                                         </>
-
                                     ) : (
-
                                         <>
-                                            <Save
-                                                size={17}
-                                            />
-
+                                            <Save size={17} />
                                             Save Changes
-
                                         </>
-
                                     )}
-
                                 </button>
-
                             </div>
-
                         </form>
-
-                    </div>
-
+                    </motion.div>
                 </div>
-
             )}
 
-
             {/* =====================================================
-                CHANGE PASSWORD MODAL
+                PASSWORD MODAL
             ====================================================== */}
 
             {showPasswordModal && (
-
-                <div className="fixed inset-0 z-[100] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-
-                    <div className="w-full max-w-lg max-h-[94vh] overflow-y-auto bg-white rounded-t-[30px] sm:rounded-[30px] shadow-2xl">
-
-                        <div className="px-7 py-5 border-b border-slate-100 flex items-center justify-between">
-
+                <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/45 p-0 backdrop-blur-md sm:items-center sm:p-4">
+                    <motion.div
+                        initial={{
+                            opacity: 0,
+                            y: 24,
+                            scale: 0.98,
+                        }}
+                        animate={{
+                            opacity: 1,
+                            y: 0,
+                            scale: 1,
+                        }}
+                        transition={{
+                            duration: 0.25,
+                        }}
+                        className="max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-t-[30px] bg-white shadow-[0_25px_80px_rgba(15,23,42,0.18)] sm:rounded-[30px]"
+                    >
+                        <div className="flex items-center justify-between border-b border-slate-100 px-7 py-5">
                             <div>
-
                                 <h2 className="text-2xl font-black text-slate-800">
                                     Change Password
                                 </h2>
 
-                                <p className="text-sm text-slate-400 mt-1">
+                                <p className="mt-1 text-sm text-slate-400">
                                     Keep your NoteShare account secure.
                                 </p>
-
                             </div>
 
                             <button
@@ -1944,37 +1696,30 @@ function Profile() {
                                         false
                                     )
                                 }
-                                className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"
+                                className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition hover:bg-slate-200"
                             >
                                 <X size={19} />
                             </button>
-
                         </div>
-
 
                         <form
                             onSubmit={
                                 handleChangePassword
                             }
-                            className="p-7 space-y-5"
+                            className="space-y-5 p-7"
                         >
-
-                            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3">
-
+                            <div className="flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4">
                                 <ShieldCheck
                                     size={19}
-                                    className="text-blue-600 shrink-0 mt-0.5"
+                                    className="mt-0.5 shrink-0 text-blue-600"
                                 />
 
-                                <p className="text-sm text-blue-700 leading-6">
+                                <p className="text-sm leading-6 text-blue-700">
                                     After changing your password, you'll be asked to log in again.
                                 </p>
-
                             </div>
 
-
                             <div>
-
                                 <label className="text-sm font-bold text-slate-700">
                                     Current Password
                                 </label>
@@ -1989,14 +1734,11 @@ function Profile() {
                                         handlePasswordChange
                                     }
                                     required
-                                    className="w-full mt-2 h-12 border border-slate-200 rounded-xl px-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                    className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                 />
-
                             </div>
 
-
                             <div>
-
                                 <label className="text-sm font-bold text-slate-700">
                                     New Password
                                 </label>
@@ -2012,14 +1754,11 @@ function Profile() {
                                     }
                                     required
                                     minLength={6}
-                                    className="w-full mt-2 h-12 border border-slate-200 rounded-xl px-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                    className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                 />
-
                             </div>
 
-
                             <div>
-
                                 <label className="text-sm font-bold text-slate-700">
                                     Confirm New Password
                                 </label>
@@ -2035,14 +1774,11 @@ function Profile() {
                                     }
                                     required
                                     minLength={6}
-                                    className="w-full mt-2 h-12 border border-slate-200 rounded-xl px-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                    className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                 />
-
                             </div>
 
-
-                            <div className="flex justify-end gap-3 pt-3">
-
+                            <div className="flex justify-end gap-3 border-t border-slate-100 pt-3">
                                 <button
                                     type="button"
                                     onClick={() =>
@@ -2050,97 +1786,76 @@ function Profile() {
                                             false
                                         )
                                     }
-                                    className="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
+                                    className="rounded-xl bg-slate-100 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-200"
                                 >
                                     Cancel
                                 </button>
 
-
                                 <button
                                     type="submit"
-                                    disabled={
-                                        changingPassword
-                                    }
-                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-black text-white font-black disabled:opacity-50"
+                                    disabled={changingPassword}
+                                    className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3 font-black text-white transition hover:bg-slate-800 disabled:opacity-50"
                                 >
-
                                     {changingPassword ? (
-
                                         <>
                                             <Loader2
                                                 size={17}
                                                 className="animate-spin"
                                             />
-
                                             Updating...
-
                                         </>
-
                                     ) : (
-
                                         <>
                                             <Lock size={17} />
                                             Change Password
                                         </>
-
                                     )}
-
                                 </button>
-
                             </div>
-
                         </form>
-
-                    </div>
-
+                    </motion.div>
                 </div>
-
             )}
-
 
             {/* =====================================================
                 DANGER ZONE
             ====================================================== */}
 
-            <div className="mt-12 bg-red-50 border border-red-100 rounded-[30px] p-7">
-
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-
+            <motion.div
+                initial={{
+                    opacity: 0,
+                }}
+                whileInView={{
+                    opacity: 1,
+                }}
+                viewport={{
+                    once: true,
+                    amount: 0.15,
+                }}
+                className="mt-12 rounded-[30px] border border-red-100 bg-gradient-to-br from-red-50 to-white p-7 shadow-sm"
+            >
+                <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                     <div>
-
                         <h2 className="text-xl font-black text-red-700">
                             Danger Zone
                         </h2>
 
-                        <p className="text-sm text-red-600/80 mt-2 max-w-2xl leading-6">
-
-                            Permanently delete your NoteShare account and
-                            associated content. This action cannot be undone.
-
+                        <p className="mt-2 max-w-2xl text-sm leading-6 text-red-600/80">
+                            Permanently delete your NoteShare account and associated content. This action cannot be undone.
                         </p>
-
                     </div>
-
 
                     <button
                         onClick={handleDeleteAccount}
-                        className="shrink-0 inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-3 rounded-xl font-black transition"
+                        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 font-black text-white transition hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/20"
                     >
-
                         <Trash2 size={18} />
-
                         Permanently Delete Account
-
                     </button>
-
                 </div>
-
-            </div>
-
+            </motion.div>
         </section>
-
     );
-
 }
 
 export default Profile;

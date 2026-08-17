@@ -1,35 +1,33 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import API from "../services/api";
+import { motion } from "motion/react";
 
 import {
     Search,
-    X,
     SlidersHorizontal,
     BookOpen,
     Sparkles,
     ChevronLeft,
     ChevronRight,
-    Download,
-    Eye,
-    ArrowRight,
+    Upload,
+    X,
+    Layers3,
+    GraduationCap,
+    ArrowUpRight,
+    Filter,
 } from "lucide-react";
 
+import { Link } from "react-router-dom";
+
+import API from "../services/api";
 import NoteCard from "../components/NoteCard";
-import TopNotes from "../components/TopNotes";
 
 function Notes() {
-
-    const navigate = useNavigate();
-
     const [notes, setNotes] = useState([]);
-    const [mostDownloaded, setMostDownloaded] = useState([]);
-    const [mostViewed, setMostViewed] = useState([]);
-
     const [loading, setLoading] = useState(true);
-
     const [search, setSearch] = useState("");
     const [department, setDepartment] = useState("All");
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     const departmentOptions = [
         "All",
@@ -40,69 +38,85 @@ function Notes() {
         "Law",
     ];
 
-    const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    // =========================================================
+    // LOAD NOTES
+    // =========================================================
 
     useEffect(() => {
+        let mounted = true;
 
-        setLoading(true);
+        const loadNotes = async () => {
+            setLoading(true);
 
-        API.get(`notes/?page=${page}`)
-            .then((res) => {
-
-                setNotes(res.data.notes || []);
-                setTotalPages(res.data.total_pages || 1);
-
-            })
-            .catch((err) => {
-
-                console.log("Notes API Error:", err);
-
-            })
-            .finally(() => {
-
-                setLoading(false);
-
-            });
-
-        API.get("dashboard/")
-            .then((res) => {
-
-                setMostDownloaded(
-                    res.data.most_downloaded || []
+            try {
+                const response = await API.get(
+                    `notes/?page=${page}`
                 );
 
-                setMostViewed(
-                    res.data.most_viewed || []
+                if (!mounted) return;
+
+                const data = response?.data || {};
+
+                setNotes(
+                    Array.isArray(data.notes)
+                        ? data.notes
+                        : []
                 );
 
-            })
-            .catch((err) => {
+                setTotalPages(
+                    Number(data.total_pages) || 1
+                );
+            } catch (error) {
+                console.error(
+                    "Notes API Error:",
+                    error
+                );
 
-                console.log("Dashboard API Error:", err);
+                if (mounted) {
+                    setNotes([]);
+                    setTotalPages(1);
+                }
+            } finally {
+                if (mounted) {
+                    setLoading(false);
+                }
+            }
+        };
 
-            });
+        loadNotes();
 
+        return () => {
+            mounted = false;
+        };
     }, [page]);
 
+    // =========================================================
+    // FILTER
+    // =========================================================
 
     const filteredNotes = notes.filter((note) => {
+        const keyword = search
+            .toLowerCase()
+            .trim();
 
-        const keyword = search.toLowerCase().trim();
+        const title = (
+            note?.title || ""
+        ).toLowerCase();
 
-        const title =
-            (note.title || "").toLowerCase();
+        const description = (
+            note?.description || ""
+        ).toLowerCase();
 
-        const description =
-            (note.description || "").toLowerCase();
+        const dept = (
+            note?.department || ""
+        ).toLowerCase();
 
-        const dept =
-            (note.department || "").toLowerCase();
-
-        const uploader =
-            (note.uploader_name || "").toLowerCase();
+        const uploader = (
+            note?.uploader_name || ""
+        ).toLowerCase();
 
         const searchMatch =
+            !keyword ||
             title.includes(keyword) ||
             description.includes(keyword) ||
             dept.includes(keyword) ||
@@ -110,706 +124,1416 @@ function Notes() {
 
         const departmentMatch =
             department === "All" ||
-            note.department === department;
+            note?.department === department;
 
-        return searchMatch && departmentMatch;
-
+        return (
+            searchMatch &&
+            departmentMatch
+        );
     });
 
+    // =========================================================
+    // CLEAR FILTERS
+    // =========================================================
 
     const clearFilters = () => {
-
         setSearch("");
         setDepartment("All");
         setPage(1);
-
     };
 
+    // =========================================================
+    // PAGINATION
+    // =========================================================
 
-    if (loading) {
-
-        return (
-
-            <section className="max-w-7xl mx-auto px-8 py-12">
-
-                {/* Header Skeleton */}
-
-                <div className="rounded-[32px] bg-slate-200 animate-pulse p-10">
-
-                    <div className="h-6 w-40 bg-slate-300 rounded-full"></div>
-
-                    <div className="h-12 w-80 bg-slate-300 rounded-xl mt-6"></div>
-
-                    <div className="h-5 w-[520px] max-w-full bg-slate-300 rounded mt-5"></div>
-
-                    <div className="h-5 w-96 max-w-full bg-slate-300 rounded mt-3"></div>
-
-                </div>
-
-
-                {/* Search Skeleton */}
-
-                <div className="h-20 bg-slate-200 rounded-[28px] mt-10 animate-pulse"></div>
-
-
-                {/* Cards Skeleton */}
-
-                <div className="grid md:grid-cols-2 gap-7 mt-10">
-
-                    {[1, 2, 3, 4].map((item) => (
-
-                        <div
-                            key={item}
-                            className="bg-white rounded-[28px] p-6 border border-slate-100 shadow-sm animate-pulse"
-                        >
-
-                            <div className="h-7 bg-slate-200 rounded-lg w-3/4"></div>
-
-                            <div className="h-4 bg-slate-200 rounded mt-5"></div>
-
-                            <div className="h-4 bg-slate-200 rounded mt-3 w-5/6"></div>
-
-                            <div className="h-12 bg-slate-200 rounded-xl mt-8"></div>
-
-                        </div>
-
-                    ))}
-
-                </div>
-
-            </section>
-
+    const previousPage = () => {
+        setPage((current) =>
+            Math.max(current - 1, 1)
         );
 
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        });
+    };
+
+    const nextPage = () => {
+        setPage((current) =>
+            Math.min(
+                current + 1,
+                totalPages
+            )
+        );
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        });
+    };
+
+    // =========================================================
+    // LOADING UI
+    // =========================================================
+
+    if (loading) {
+        return (
+            <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:py-12">
+                <div className="animate-pulse">
+
+                    {/* Hero skeleton */}
+
+                    <div
+                        className="
+                            overflow-hidden
+                            rounded-[34px]
+                            border
+                            border-slate-200
+                            bg-slate-200
+                            p-7
+                            sm:p-10
+                            lg:p-14
+                        "
+                    >
+                        <div className="h-7 w-40 rounded-full bg-slate-300" />
+
+                        <div className="mt-7 h-14 w-3/4 max-w-2xl rounded-2xl bg-slate-300" />
+
+                        <div className="mt-5 h-5 w-full max-w-2xl rounded-lg bg-slate-300" />
+
+                        <div className="mt-3 h-5 w-2/3 max-w-xl rounded-lg bg-slate-300" />
+
+                        <div className="mt-8 flex gap-3">
+                            <div className="h-11 w-40 rounded-xl bg-slate-300" />
+                            <div className="h-11 w-40 rounded-xl bg-slate-300" />
+                        </div>
+                    </div>
+
+                    {/* Filter skeleton */}
+
+                    <div className="mt-8 rounded-[28px] border border-slate-200 bg-white p-5">
+                        <div className="h-14 rounded-2xl bg-slate-200" />
+                    </div>
+
+                    {/* Card skeletons */}
+
+                    <div className="mt-10 grid gap-6 md:grid-cols-2">
+                        {[1, 2, 3, 4].map(
+                            (item) => (
+                                <div
+                                    key={item}
+                                    className="
+                                        rounded-[28px]
+                                        border
+                                        border-slate-200
+                                        bg-white
+                                        p-6
+                                    "
+                                >
+                                    <div className="h-48 rounded-2xl bg-slate-200" />
+
+                                    <div className="mt-6 h-6 w-3/4 rounded-lg bg-slate-200" />
+
+                                    <div className="mt-4 h-4 rounded bg-slate-200" />
+
+                                    <div className="mt-3 h-4 w-2/3 rounded bg-slate-200" />
+                                </div>
+                            )
+                        )}
+                    </div>
+                </div>
+            </section>
+        );
     }
 
-
     return (
-
-        <section className="max-w-7xl mx-auto px-8 py-12">
+        <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:py-12">
 
             {/* =====================================================
-                PREMIUM HERO
+                HERO
             ====================================================== */}
 
-            <section className="relative overflow-hidden rounded-[36px] bg-slate-950 text-white shadow-[0_25px_70px_rgba(15,23,42,0.20)]">
+            <motion.div
+                initial={{
+                    opacity: 0,
+                    y: 20,
+                }}
+                animate={{
+                    opacity: 1,
+                    y: 0,
+                }}
+                transition={{
+                    duration: 0.6,
+                    ease: "easeOut",
+                }}
+                className="
+                    relative
+                    overflow-hidden
+                    rounded-[34px]
+                    border
+                    border-slate-800/30
+                    bg-slate-950
+                    text-white
+                    shadow-[0_30px_80px_rgba(15,23,42,0.16)]
+                "
+            >
+                {/* Ambient glows */}
 
-              
+                <motion.div
+                    animate={{
+                        x: [0, 25, 0],
+                        y: [0, -20, 0],
+                        scale: [1, 1.08, 1],
+                    }}
+                    transition={{
+                        duration: 10,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                    }}
+                    className="
+                        pointer-events-none
+                        absolute
+                        -right-24
+                        -top-24
+                        h-96
+                        w-96
+                        rounded-full
+                        bg-blue-500/20
+                        blur-3xl
+                    "
+                />
 
-                {/* Background gradients */}
+                <motion.div
+                    animate={{
+                        x: [0, -20, 0],
+                        y: [0, 20, 0],
+                        scale: [1, 1.08, 1],
+                    }}
+                    transition={{
+                        duration: 12,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                    }}
+                    className="
+                        pointer-events-none
+                        absolute
+                        -bottom-28
+                        -left-24
+                        h-96
+                        w-96
+                        rounded-full
+                        bg-cyan-400/15
+                        blur-3xl
+                    "
+                />
 
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-950 via-slate-950 to-cyan-950"></div>
+                {/* Grid texture */}
 
-                {/* Glow */}
+                <div
+                    className="
+                        pointer-events-none
+                        absolute
+                        inset-0
+                        opacity-20
+                        [background-image:linear-gradient(rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.07)_1px,transparent_1px)]
+                        [background-size:36px_36px]
+                        [mask-image:linear-gradient(to_bottom,black,transparent)]
+                    "
+                />
 
-                <div className="absolute -top-32 -right-20 w-96 h-96 rounded-full bg-blue-500/20 blur-3xl"></div>
+                <div
+                    className="
+                        relative
+                        z-10
+                        grid
+                        gap-10
+                        px-7
+                        py-10
+                        sm:px-10
+                        sm:py-12
+                        lg:grid-cols-[1.15fr_0.85fr]
+                        lg:px-14
+                        lg:py-14
+                    "
+                >
 
-                <div className="absolute -bottom-40 -left-20 w-96 h-96 rounded-full bg-cyan-500/10 blur-3xl"></div>
+                    {/* Left */}
 
-                {/* Content */}
+                    <div>
+                        <motion.div
+                            initial={{
+                                opacity: 0,
+                                y: 10,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            transition={{
+                                delay: 0.08,
+                                duration: 0.4,
+                            }}
+                            className="
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-full
+                                border
+                                border-white/10
+                                bg-white/10
+                                px-4
+                                py-2
+                                text-[11px]
+                                font-extrabold
+                                uppercase
+                                tracking-[0.18em]
+                                text-cyan-200
+                                backdrop-blur-xl
+                            "
+                        >
+                            <Sparkles size={14} />
+                            Study Resources
+                        </motion.div>
 
-                <div className="relative z-10 px-8 py-12 md:px-14 md:py-16">
+                        <motion.h1
+                            initial={{
+                                opacity: 0,
+                                y: 15,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            transition={{
+                                delay: 0.16,
+                                duration: 0.55,
+                            }}
+                            className="
+                                mt-6
+                                max-w-3xl
+                                text-4xl
+                                font-black
+                                leading-[1.02]
+                                tracking-[-0.04em]
+                                sm:text-5xl
+                                lg:text-6xl
+                            "
+                        >
+                            Explore knowledge.
+                            <br />
 
-                    <div className="max-w-3xl">
-
-                        {/* Badge */}
-
-                        <div className=" inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 backdrop-blur-md text-sm font-bold text-blue-100">
-                        
-                        <BookOpen size={16} />
-
-                        NoteShare Library
-
-                        </div>
-
-                        {/* Heading */}
-
-                        <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-[1.05] mt-6">
-                            Discover Notes.
-                            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-white">
-                                Learn Better.
+                            <span
+                                className="
+                                    bg-gradient-to-r
+                                    from-cyan-300
+                                    via-sky-300
+                                    to-blue-300
+                                    bg-clip-text
+                                    text-transparent
+                                "
+                            >
+                                One note at a time.
                             </span>
-                        </h1>
+                        </motion.h1>
 
-                        {/* Description */}
+                        <motion.p
+                            initial={{
+                                opacity: 0,
+                                y: 12,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            transition={{
+                                delay: 0.26,
+                                duration: 0.5,
+                            }}
+                            className="
+                                mt-6
+                                max-w-2xl
+                                text-base
+                                leading-7
+                                text-slate-300
+                                sm:text-lg
+                                sm:leading-8
+                            "
+                        >
+                            Discover lecture notes, study
+                            materials, academic resources,
+                            and shared knowledge from the
+                            NoteShare community.
+                        </motion.p>
 
-                        <p className="text-slate-300 text-base md:text-lg leading-8 mt-6 max-w-2xl">
-                            Explore organized lecture notes, study materials and academic resources shared by students across departments.
-                        </p>
-
-                        {/* Stats */}
-
-                        <div className="flex flex-wrap gap-4 mt-8">
-
-                            <div className="px-5 py-3 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-md">
-                            
-                                <p className="text-2xl font-black">
-                                    {filteredNotes.length}
-                                </p>
-
-                                <p className="text-xs text-slate-400 mt-1">
-                                    Notes on this page
-                                </p>
-
-                                <p className="text-xs text-slate-400 mt-1">
-                                    Total Notes
-                                </p>
+                        <motion.div
+                            initial={{
+                                opacity: 0,
+                                y: 12,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            transition={{
+                                delay: 0.36,
+                                duration: 0.5,
+                            }}
+                            className="mt-8 flex flex-wrap gap-3"
+                        >
+                            <div className="
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-xl
+                                border
+                                border-white/10
+                                bg-white/10
+                                px-4
+                                py-2.5
+                                text-sm
+                                font-semibold
+                                text-slate-200
+                                backdrop-blur-xl
+                            ">
+                                <BookOpen size={16} />
+                                Multiple subjects
                             </div>
 
-                            <div className="px-5 py-3 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-md">
-
-                                <p className="text-2xl font-black">
-                                    {departmentOptions.filter(
-                                        (item) => item !== "All"
-                                    ).length}
-                                </p>
-
-                                <p className="text-xs text-slate-400 mt-1">
-                                    Departments
-                                </p>
+                            <div className="
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-xl
+                                border
+                                border-white/10
+                                bg-white/10
+                                px-4
+                                py-2.5
+                                text-sm
+                                font-semibold
+                                text-slate-200
+                                backdrop-blur-xl
+                            ">
+                                <GraduationCap
+                                    size={16}
+                                />
+                                Student powered
                             </div>
-
-                        </div>
-
+                        </motion.div>
                     </div>
 
-                </div>
+                    {/* Right visual */}
 
-            </section>
+                    <div className="flex items-center justify-center lg:justify-end">
+                        <motion.div
+                            initial={{
+                                opacity: 0,
+                                scale: 0.92,
+                                y: 18,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                scale: 1,
+                                y: 0,
+                            }}
+                            transition={{
+                                delay: 0.25,
+                                duration: 0.65,
+                            }}
+                            className="relative w-full max-w-sm"
+                        >
+                            <motion.div
+                                animate={{
+                                    y: [0, -8, 0],
+                                }}
+                                transition={{
+                                    duration: 4,
+                                    repeat: Infinity,
+                                    ease: "easeInOut",
+                                }}
+                                className="
+                                    relative
+                                    overflow-hidden
+                                    rounded-[28px]
+                                    border
+                                    border-white/10
+                                    bg-white/[0.08]
+                                    p-5
+                                    shadow-2xl
+                                    backdrop-blur-2xl
+                                "
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="
+                                            flex
+                                            h-11
+                                            w-11
+                                            items-center
+                                            justify-center
+                                            rounded-xl
+                                            bg-gradient-to-br
+                                            from-blue-500
+                                            to-cyan-400
+                                        ">
+                                            <BookOpen size={21} />
+                                        </div>
 
+                                        <div>
+                                            <p className="text-sm font-bold text-white">
+                                                NoteShare Library
+                                            </p>
 
-            {/* =====================================================
-                PREMIUM SEARCH & FILTER
-            ====================================================== */}
+                                            <p className="text-xs text-slate-400">
+                                                Learn. Share. Grow.
+                                            </p>
+                                        </div>
+                                    </div>
 
-            <section className="mt-10">
-
-                <div className="bg-white rounded-[30px] border border-slate-100 shadow-[0_10px_40px_rgba(15,23,42,0.06)] p-6 md:p-7">
-
-                    {/* Header */}
-
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 mb-6">
-
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                                    <Search size={18} />
+                                    <div className="
+                                        h-2.5
+                                        w-2.5
+                                        rounded-full
+                                        bg-emerald-400
+                                        shadow-[0_0_15px_rgba(52,211,153,0.8)]
+                                    " />
                                 </div>
 
-                                <h2 className="text-xl font-black text-slate-800">
-                                    Find Study Resources
-                                </h2>
-                            </div>
+                                <div className="mt-6 space-y-3">
+                                    {[
+                                        {
+                                            title: "Lecture Notes",
+                                            label: "CSE",
+                                        },
+                                        {
+                                            title: "IDP Proposal",
+                                            label: "Project",
+                                        },
+                                        {
+                                            title: "Study Material",
+                                            label: "Academic",
+                                        },
+                                    ].map(
+                                        (
+                                            item,
+                                            index
+                                        ) => (
+                                            <motion.div
+                                                key={
+                                                    item.title
+                                                }
+                                                initial={{
+                                                    opacity: 0,
+                                                    x: 15,
+                                                }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    x: 0,
+                                                }}
+                                                transition={{
+                                                    delay:
+                                                        0.5 +
+                                                        index *
+                                                            0.12,
+                                                }}
+                                                className="
+                                                    flex
+                                                    items-center
+                                                    justify-between
+                                                    rounded-xl
+                                                    border
+                                                    border-white/10
+                                                    bg-white/5
+                                                    px-4
+                                                    py-3
+                                                "
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-2 w-2 rounded-full bg-cyan-300" />
 
-                            <p className="text-sm text-slate-400 mt-2">
-                                Search by note title, description, department or uploader.
+                                                    <span className="text-sm font-semibold text-slate-200">
+                                                        {
+                                                            item.title
+                                                        }
+                                                    </span>
+                                                </div>
+
+                                                <span className="
+                                                    rounded-full
+                                                    bg-white/10
+                                                    px-2.5
+                                                    py-1
+                                                    text-[10px]
+                                                    font-bold
+                                                    text-slate-300
+                                                ">
+                                                    {
+                                                        item.label
+                                                    }
+                                                </span>
+                                            </motion.div>
+                                        )
+                                    )}
+                                </div>
+
+                                <div className="
+                                    mt-5
+                                    flex
+                                    items-center
+                                    justify-between
+                                    rounded-xl
+                                    bg-gradient-to-r
+                                    from-blue-600/30
+                                    to-cyan-500/20
+                                    px-4
+                                    py-3
+                                ">
+                                    <span className="text-xs font-semibold text-slate-300">
+                                        Always growing
+                                    </span>
+
+                                    <Sparkles
+                                        size={16}
+                                        className="text-cyan-300"
+                                    />
+                                </div>
+                            </motion.div>
+
+                            <div className="
+                                pointer-events-none
+                                absolute
+                                -bottom-5
+                                -left-5
+                                h-20
+                                w-20
+                                rounded-2xl
+                                border
+                                border-white/10
+                                bg-white/5
+                                backdrop-blur-xl
+                            " />
+                        </motion.div>
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* =====================================================
+                SEARCH + FILTERS
+            ====================================================== */}
+
+            <motion.div
+                initial={{
+                    opacity: 0,
+                    y: 18,
+                }}
+                animate={{
+                    opacity: 1,
+                    y: 0,
+                }}
+                transition={{
+                    delay: 0.18,
+                    duration: 0.55,
+                }}
+                className="
+                    mt-8
+                    rounded-[28px]
+                    border
+                    border-slate-200/80
+                    bg-white/90
+                    p-4
+                    shadow-[0_15px_45px_rgba(15,23,42,0.055)]
+                    backdrop-blur-sm
+                    sm:p-5
+                "
+            >
+                <div className="mb-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                        <div className="
+                            flex
+                            h-9
+                            w-9
+                            items-center
+                            justify-center
+                            rounded-xl
+                            bg-blue-50
+                            text-blue-600
+                        ">
+                            <Search size={17} />
+                        </div>
+
+                        <div>
+                            <p className="text-sm font-extrabold text-slate-800">
+                                Find a note
+                            </p>
+
+                            <p className="hidden text-xs text-slate-400 sm:block">
+                                Search by title, subject,
+                                department or uploader
                             </p>
                         </div>
-
-                        {/* Result count */}
-
-                        <div className="inline-flex items-center gap-2 bg-slate-50 border border-slate-100 px-4 py-2 rounded-full text-sm font-bold text-slate-600">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            {filteredNotes.length} Notes Found
-                        </div>
                     </div>
 
-                    {/* Controls */}
+                    {(search ||
+                        department !== "All") && (
+                        <button
+                            onClick={clearFilters}
+                            className="
+                                rounded-lg
+                                px-3
+                                py-2
+                                text-xs
+                                font-bold
+                                text-red-500
+                                transition-colors
+                                hover:bg-red-50
+                            "
+                        >
+                            Clear all
+                        </button>
+                    )}
+                </div>
 
-                    <div className="grid lg:grid-cols-[1fr_auto] gap-4">
+                <div className="grid gap-3 lg:grid-cols-[1fr_220px]">
 
-                        {/* Search */}
+                    {/* Search */}
 
-                        <div className="relative">
+                    <div className="relative">
+                        <Search
+                            size={19}
+                            className="
+                                pointer-events-none
+                                absolute
+                                left-4
+                                top-1/2
+                                -translate-y-1/2
+                                text-slate-400
+                            "
+                        />
 
-                            <Search
-                                size={19}
-                                className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
-                            />
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(event) => {
+                                setSearch(
+                                    event.target.value
+                                );
+                                setPage(1);
+                            }}
+                            placeholder="Search notes..."
+                            className="
+                                h-13
+                                w-full
+                                rounded-xl
+                                border
+                                border-slate-200
+                                bg-slate-50/80
+                                pl-11
+                                pr-11
+                                text-sm
+                                font-medium
+                                text-slate-700
+                                outline-none
+                                transition-all
+                                duration-200
+                                placeholder:text-slate-400
+                                focus:border-blue-400
+                                focus:bg-white
+                                focus:ring-4
+                                focus:ring-blue-100/60
+                            "
+                        />
 
-                            <input
-                                type="text"
-                                placeholder="Search notes, subjects, departments..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="w-full h-14 bg-slate-50 border border-slate-200 rounded-2xl pl-14 pr-12 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all"
-                            />
-
-                            {search && (
-
-                                <button
-                                    onClick={() => setSearch("")}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-slate-200 text-slate-500 flex items-center justify-center hover:bg-red-100 hover:text-red-500 transition">
-                                        <X size={16} />
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Department */}
-
-                        <div className="relative min-w-[230px]">
-
-                            <SlidersHorizontal
-                                size={18}
-                                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                            />
-
-                            <select
-                                value={department}
-                                onChange={(e) => setDepartment(e.target.value)}
-                                className="w-full h-14 bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-10 text-slate-700 font-semibold outline-none cursor-pointer focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all">
-                                    
-                                    <option value="All">
-                                        All Departments
-                                    </option>
-
-                                    <option value="CSE">
-                                        CSE
-                                    </option>
-
-                                    <option value="EEE">
-                                        EEE
-                                    </option>
-
-                                    <option value="BBA">
-                                        BBA
-                                    </option>
-
-                                    <option value="English">
-                                        English
-                                    </option>
-
-                                    <option value="Law">
-                                        Law
-                                    </option>
-                            </select> 
-                        </div>
-                    </div>
-
-                    {/* Active Filter */}
-
-                    {(search || department !== "All") && (
-
-                        <div className="flex flex-wrap items-center gap-3 mt-5 pt-5 border-t border-slate-100">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                Active Filters
-                            </span>
-
-                            {search && (
-
-                                <button
-                                    onClick={() => setSearch("")}
-                                    className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-100 px-3 py-1.5 rounded-full text-xs font-bold hover:bg-blue-100 transition">
-
-                                        Search: "{search}"
-
-                                        <X size={13} />
-                                </button>
-                            )}
-
-                            {department !== "All" && (
-
-                                <button
-                                    onClick={() => setDepartment("All")}
-                                    className="inline-flex items-center gap-2 bg-violet-50 text-violet-700 border border-violet-100 px-3 py-1.5 rounded-full text-xs font-bold hover:bg-violet-100 transition">
-
-                                        {department}
-                                        <X size={13} />
-                                    </button>
-
-                            )}
-
+                        {search && (
                             <button
                                 onClick={() => {
                                     setSearch("");
-                                    setDepartment("All");
+                                    setPage(1);
                                 }}
-
-                                className="text-xs font-bold text-red-500 hover:text-red-600 transition"
+                                className="
+                                    absolute
+                                    right-3
+                                    top-1/2
+                                    flex
+                                    h-8
+                                    w-8
+                                    -translate-y-1/2
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    bg-slate-200
+                                    text-slate-500
+                                    transition
+                                    hover:bg-slate-300
+                                "
+                                title="Clear search"
                             >
-                                Clear All
-                            </button> 
-                        </div>
+                                <X size={15} />
+                            </button>
+                        )}
+                    </div>
 
-                    )}
+                    {/* Department */}
 
+                    <div className="relative">
+                        <SlidersHorizontal
+                            size={17}
+                            className="
+                                pointer-events-none
+                                absolute
+                                left-4
+                                top-1/2
+                                -translate-y-1/2
+                                text-slate-400
+                            "
+                        />
+
+                        <select
+                            value={department}
+                            onChange={(event) => {
+                                setDepartment(
+                                    event.target.value
+                                );
+                                setPage(1);
+                            }}
+                            className="
+                                h-13
+                                w-full
+                                appearance-none
+                                rounded-xl
+                                border
+                                border-slate-200
+                                bg-slate-50/80
+                                pl-10
+                                pr-4
+                                text-sm
+                                font-semibold
+                                text-slate-700
+                                outline-none
+                                transition-all
+                                duration-200
+                                focus:border-blue-400
+                                focus:bg-white
+                                focus:ring-4
+                                focus:ring-blue-100/60
+                            "
+                        >
+                            {departmentOptions.map(
+                                (item) => (
+                                    <option
+                                        key={item}
+                                        value={item}
+                                    >
+                                        {item ===
+                                        "All"
+                                            ? "All Departments"
+                                            : item}
+                                    </option>
+                                )
+                            )}
+                        </select>
+                    </div>
                 </div>
 
+                {/* Active filters */}
 
-            </section>
-            
-            {/* =====================================================
-                EXPLORE NOTES
-            ====================================================== */}
-
-            <div className="mt-16">
-
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 mb-8">
-
-                    <div>
-
-                        <span className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-bold border border-blue-100">
-
-                            <Sparkles size={15} />
-
-                            Study Collection
-
+                {(search ||
+                    department !== "All") && (
+                    <div
+                        className="
+                            mt-4
+                            flex
+                            flex-wrap
+                            items-center
+                            gap-2
+                            border-t
+                            border-slate-100
+                            pt-4
+                        "
+                    >
+                        <span className="
+                            mr-1
+                            text-[10px]
+                            font-black
+                            uppercase
+                            tracking-[0.16em]
+                            text-slate-400
+                        ">
+                            Active
                         </span>
 
-
-                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-5 tracking-tight">
-
-                            Explore Notes
-
-                        </h2>
-
-
-                        <p className="text-slate-500 mt-3 text-lg">
-
-                            Find useful study materials shared by students.
-
-                        </p>
-
-                    </div>
-
-
-                    <div className="bg-slate-100 px-5 py-3 rounded-2xl text-sm font-bold text-slate-600">
-
-                        {filteredNotes.length} notes found
-
-                    </div>
-
-                </div>
-
-
-                {/* Notes */}
-
-                {filteredNotes.length === 0 ? (
-
-                    <div className="bg-white border border-slate-200 rounded-[30px] p-16 text-center shadow-sm">
-
-                        <div className="w-20 h-20 mx-auto rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center">
-
-                            <BookOpen size={36} />
-
-                        </div>
-
-
-                        <h3 className="text-2xl font-black text-slate-800 mt-6">
-
-                            No Notes Found
-
-                        </h3>
-
-
-                        <p className="text-slate-500 mt-3 max-w-md mx-auto">
-
-                            Try another keyword or select a different department.
-
-                        </p>
-
-
-                        {(search || department !== "All") && (
-
+                        {search && (
                             <button
-                                onClick={clearFilters}
-                                className="mt-7 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold transition"
+                                onClick={() =>
+                                    setSearch("")
+                                }
+                                className="
+                                    inline-flex
+                                    items-center
+                                    gap-2
+                                    rounded-full
+                                    border
+                                    border-blue-100
+                                    bg-blue-50
+                                    px-3
+                                    py-1.5
+                                    text-xs
+                                    font-bold
+                                    text-blue-700
+                                "
                             >
-
-                                Clear Filters
-
+                                Search:
+                                <span className="max-w-[180px] truncate">
+                                    {search}
+                                </span>
+                                <X size={12} />
                             </button>
-
                         )}
 
+                        {department !==
+                            "All" && (
+                            <button
+                                onClick={() =>
+                                    setDepartment(
+                                        "All"
+                                    )
+                                }
+                                className="
+                                    inline-flex
+                                    items-center
+                                    gap-2
+                                    rounded-full
+                                    border
+                                    border-violet-100
+                                    bg-violet-50
+                                    px-3
+                                    py-1.5
+                                    text-xs
+                                    font-bold
+                                    text-violet-700
+                                "
+                            >
+                                {department}
+                                <X size={12} />
+                            </button>
+                        )}
                     </div>
-
-                ) : (
-
-                    <div className="grid md:grid-cols-2 gap-7">
-
-                        {filteredNotes.map((note) => (
-
-                            <NoteCard
-                                key={note.id}
-                                note={note}
-                            />
-
-                        ))}
-
-                    </div>
-
                 )}
-
-
-                {/* Pagination */}
-
-                {totalPages > 1 && (
-
-                    <div className="flex justify-center items-center gap-3 mt-12">
-
-                        <button
-                            onClick={() =>
-                                setPage((prev) =>
-                                    Math.max(prev - 1, 1)
-                                )
-                            }
-                            disabled={page === 1}
-                            className="
-                                w-12
-                                h-12
-                                rounded-xl
-                                bg-slate-900
-                                text-white
-                                flex
-                                items-center
-                                justify-center
-                                disabled:opacity-30
-                                disabled:cursor-not-allowed
-                                hover:bg-blue-600
-                                transition
-                            "
-                        >
-
-                            <ChevronLeft size={20} />
-
-                        </button>
-
-
-                        <div className="px-6 h-12 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-700">
-
-                            Page {page} of {totalPages}
-
-                        </div>
-
-
-                        <button
-                            onClick={() =>
-                                setPage((prev) =>
-                                    Math.min(prev + 1, totalPages)
-                                )
-                            }
-                            disabled={page === totalPages}
-                            className="
-                                w-12
-                                h-12
-                                rounded-xl
-                                bg-blue-600
-                                text-white
-                                flex
-                                items-center
-                                justify-center
-                                disabled:opacity-30
-                                disabled:cursor-not-allowed
-                                hover:bg-blue-700
-                                transition
-                            "
-                        >
-
-                            <ChevronRight size={20} />
-
-                        </button>
-
-                    </div>
-
-                )}
-
-            </div>
-
+            </motion.div>
 
             {/* =====================================================
-              PREMIUM POPULAR NOTES
+                NOTES HEADER
             ====================================================== */}
 
-            <section className="mt-20">
-
-                <div className="relative overflow-hidden rounded-[34px] bg-white border border-slate-100 shadow-[0_15px_50px_rgba(15,23,42,0.07)]">
-
-                    {/* Decorative Background */}
-
-                    <div className="absolute -top-24 -right-24 w-72 h-72 bg-blue-100/50 rounded-full blur-3xl"></div>
-
-                    <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-violet-100/40 rounded-full blur-3xl"></div>
-
-                    {/* Header */}
-
-                    <div className="relative px-7 md:px-10 pt-9 pb-7">
-
-                        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-
-                            <div>
-                                <div className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 text-slate-600 px-4 py-2 rounded-full text-sm font-bold">
-
-                                    <Sparkles size={15} />
-
-                                    Community Highlights
-
-                                </div>
-
-                                <h2 className="text-3xl md:text-4xl font-black text-slate-900 mt-5 tracking-tight">
-                                    Popular Study Resources
-                                </h2>
-
-                                <p className="text-slate-500 mt-3 text-base md:text-lg max-w-2xl leading-7">
-
-                                    Discover the notes students are viewing and downloading the most.
-
-                                </p>
-                            </div>
-
-                            <div className="hidden lg:flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2.5 rounded-xl text-sm font-bold">
-
-                                <BookOpen size={16} />
-
-                                Student Picks
-
-                            </div>
-
-                        </div>
-
+            <motion.div
+                initial={{
+                    opacity: 0,
+                    y: 18,
+                }}
+                animate={{
+                    opacity: 1,
+                    y: 0,
+                }}
+                transition={{
+                    delay: 0.25,
+                    duration: 0.5,
+                }}
+                className="
+                    mt-14
+                    flex
+                    flex-col
+                    gap-5
+                    sm:flex-row
+                    sm:items-end
+                    sm:justify-between
+                "
+            >
+                <div>
+                    <div className="
+                        inline-flex
+                        items-center
+                        gap-2
+                        rounded-full
+                        border
+                        border-blue-100
+                        bg-blue-50
+                        px-3
+                        py-1.5
+                        text-[10px]
+                        font-black
+                        uppercase
+                        tracking-[0.16em]
+                        text-blue-600
+                    ">
+                        <Layers3 size={13} />
+                        Study Collection
                     </div>
 
-                    {/* Rankings */}
+                    <h2 className="
+                        mt-4
+                        text-3xl
+                        font-black
+                        tracking-tight
+                        text-slate-900
+                        sm:text-4xl
+                    ">
+                        Explore Notes
+                    </h2>
 
-                    <div className="relative px-5 md:px-8 pb-8">
-
-                        <div className="grid lg:grid-cols-2 gap-6">
-
-                            {/* Most Downloaded */}
-
-                            <div className="group rounded-[28px] bg-gradient-to-br from-blue-50 via-white to-cyan-50 border border-blue-100 p-1 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-500">
-                            
-                                <div className="bg-white rounded-[25px] overflow-hidden">
-
-                                    <TopNotes
-                                        title=" Most Downloaded Notes"
-                                        notes={mostDownloaded}
-                                        type="download"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Most Viewed */}
-
-                            <div className="group rounded-[28px] bg-gradient-to-br from-violet-50 via-white to-purple-50 border border-violet-100 p-1 hover:shadow-xl hover:shadow-violet-100/50 transition-all duration-500">
-                            
-                                <div className="bg-white rounded-[25px] overflow-hidden">
-
-                                    <TopNotes
-                                    title=" Most Viewed Notes"
-                                    notes={mostViewed}
-                                    type="view"
-                                    />
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    {/* =====================================================
-                        PREMIUM UPLOAD CTA
-                    ====================================================== */}
-
-                    <section className="mt-16">
-
-
-                        <div className="relative overflow-hidden rounded-[34px] bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-800 p-8 md:p-10 lg:p-12 shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
-
-                             {/* Background Effects */}
-
-                            <div className="absolute -top-24 -right-24 w-72 h-72 bg-cyan-400/20 rounded-full blur-3xl"></div>
-
-                            <div className="absolute -bottom-28 -left-20 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl"></div>
-
-                            <div className="absolute top-0 right-1/3 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
-
-
-                             <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-10">
-
-                                {/* Text */}
-
-                                <div className="max-w-2xl">
-
-                                    <div className="inline-flex items-center gap-2 bg-white/10 border border-white/10 backdrop-blur-md text-blue-100 px-4 py-2 rounded-full text-sm font-bold">
-
-                                        <Sparkles size={15} />
-
-                                        Contribute to NoteShare
-
-                                    </div>
-
-
-                                    <h3 className="text-3xl md:text-4xl font-black text-white mt-5 tracking-tight">
-
-                                        Have useful study materials?
-
-                                    </h3>
-
-
-                                    <p className="text-blue-100/80 mt-4 text-base md:text-lg leading-7 max-w-xl">
-
-                                        Share your lecture notes with other students and help build a stronger academic community.
-
-                                    </p>
-
-
-                                    {/* Small Benefits */}
-
-                                    <div className="flex flex-wrap gap-3 mt-6">
-
-                                        <span className="inline-flex items-center gap-2 bg-white/10 border border-white/10 text-blue-50 px-3 py-2 rounded-xl text-xs font-semibold">
-
-                                            <BookOpen size={14} />
-
-                                            Share Resources
-
-                                        </span>
-
-                                        <span className="inline-flex items-center gap-2 bg-white/10 border border-white/10 text-blue-50 px-3 py-2 rounded-xl text-xs font-semibold">
-
-                                            <Download size={14} />
-
-                                            Help Students
-
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-
-                                {/* Button */}
-
-                                <button
-                                    onClick={() => navigate("/upload")}
-                                    className="group shrink-0 inline-flex items-center justify-center gap-3 bg-white text-blue-700 px-7 md:px-8 py-4 rounded-2xl font-black shadow-xl hover:shadow-2xl hover:scale-[1.03] transition-all duration-300"
-                                >
-
-                                    Upload a Note
-
-                                    <ArrowRight
-                                        size={19}
-                                        className="group-hover:translate-x-1 transition-transform"
-                                    />
-
-                                </button>
-
-                            </div>
-
-                        </div>
-
-
-                    </section>
-
+                    <p className="
+                        mt-2
+                        text-sm
+                        leading-6
+                        text-slate-500
+                        sm:text-base
+                    ">
+                        Find the material you need and
+                        get back to learning faster.
+                    </p>
                 </div>
-                
-            </section>
-        
-        </section>
 
-    )}
+                <div className="
+                    inline-flex
+                    w-fit
+                    items-center
+                    gap-2
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white
+                    px-4
+                    py-3
+                    text-sm
+                    font-bold
+                    text-slate-600
+                    shadow-sm
+                ">
+                    <Filter
+                        size={16}
+                        className="text-blue-600"
+                    />
+
+                    {filteredNotes.length}
+                    {" "}
+                    matching notes
+                </div>
+            </motion.div>
+
+            {/* =====================================================
+                NOTES GRID
+            ====================================================== */}
+
+            {filteredNotes.length === 0 ? (
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 18,
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0,
+                    }}
+                    transition={{
+                        duration: 0.45,
+                    }}
+                    className="
+                        mt-8
+                        rounded-[30px]
+                        border
+                        border-dashed
+                        border-slate-300
+                        bg-white
+                        px-6
+                        py-16
+                        text-center
+                        shadow-sm
+                    "
+                >
+                    <div className="
+                        mx-auto
+                        flex
+                        h-20
+                        w-20
+                        items-center
+                        justify-center
+                        rounded-3xl
+                        bg-gradient-to-br
+                        from-blue-50
+                        to-cyan-50
+                        text-blue-600
+                        shadow-sm
+                    ">
+                        <BookOpen size={34} />
+                    </div>
+
+                    <h3 className="
+                        mt-6
+                        text-2xl
+                        font-black
+                        text-slate-800
+                    ">
+                        No notes found
+                    </h3>
+
+                    <p className="
+                        mx-auto
+                        mt-3
+                        max-w-md
+                        text-sm
+                        leading-6
+                        text-slate-500
+                    ">
+                        Try a different keyword or
+                        select another department to
+                        discover more study materials.
+                    </p>
+
+                    {(search ||
+                        department !== "All") && (
+                        <motion.button
+                            whileHover={{
+                                y: -2,
+                            }}
+                            whileTap={{
+                                scale: 0.98,
+                            }}
+                            onClick={
+                                clearFilters
+                            }
+                            className="
+                                mt-7
+                                rounded-xl
+                                bg-blue-600
+                                px-6
+                                py-3
+                                text-sm
+                                font-bold
+                                text-white
+                                shadow-lg
+                                shadow-blue-500/20
+                                transition
+                                hover:bg-blue-700
+                            "
+                        >
+                            Clear filters
+                        </motion.button>
+                    )}
+                </motion.div>
+            ) : (
+                <div className="mt-8 grid gap-6 md:grid-cols-2">
+                    {filteredNotes.map(
+                        (note, index) => (
+                            <motion.div
+                                key={note.id}
+                                initial={{
+                                    opacity: 0,
+                                    y: 22,
+                                }}
+                                animate={{
+                                    opacity: 1,
+                                    y: 0,
+                                }}
+                                transition={{
+                                    duration: 0.45,
+                                    delay:
+                                        (index % 4) *
+                                        0.06,
+                                    ease: "easeOut",
+                                }}
+                                whileHover={{
+                                    y: -4,
+                                }}
+                            >
+                                <NoteCard
+                                    note={note}
+                                />
+                            </motion.div>
+                        )
+                    )}
+                </div>
+            )}
+
+            {/* =====================================================
+                PAGINATION
+            ====================================================== */}
+
+            {totalPages > 1 && (
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 15,
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0,
+                    }}
+                    transition={{
+                        duration: 0.45,
+                        delay: 0.15,
+                    }}
+                    className="
+                        mt-10
+                        flex
+                        items-center
+                        justify-center
+                        gap-3
+                    "
+                >
+                    <motion.button
+                        whileHover={
+                            page > 1
+                                ? { y: -2 }
+                                : {}
+                        }
+                        whileTap={
+                            page > 1
+                                ? { scale: 0.96 }
+                                : {}
+                        }
+                        onClick={
+                            previousPage
+                        }
+                        disabled={
+                            page === 1
+                        }
+                        className="
+                            flex
+                            h-11
+                            w-11
+                            items-center
+                            justify-center
+                            rounded-xl
+                            border
+                            border-slate-200
+                            bg-white
+                            text-slate-700
+                            shadow-sm
+                            transition
+                            hover:border-blue-200
+                            hover:bg-blue-50
+                            hover:text-blue-600
+                            disabled:cursor-not-allowed
+                            disabled:opacity-35
+                        "
+                        title="Previous page"
+                    >
+                        <ChevronLeft size={19} />
+                    </motion.button>
+
+                    <div
+                        className="
+                            flex
+                            h-11
+                            items-center
+                            gap-2
+                            rounded-xl
+                            border
+                            border-slate-200
+                            bg-slate-50
+                            px-5
+                            text-sm
+                            font-bold
+                            text-slate-600
+                        "
+                    >
+                        <span className="text-blue-600">
+                            {page}
+                        </span>
+
+                        <span>/</span>
+
+                        <span>
+                            {totalPages}
+                        </span>
+                    </div>
+
+                    <motion.button
+                        whileHover={
+                            page < totalPages
+                                ? { y: -2 }
+                                : {}
+                        }
+                        whileTap={
+                            page < totalPages
+                                ? { scale: 0.96 }
+                                : {}
+                        }
+                        onClick={nextPage}
+                        disabled={
+                            page === totalPages
+                        }
+                        className="
+                            flex
+                            h-11
+                            w-11
+                            items-center
+                            justify-center
+                            rounded-xl
+                            bg-blue-600
+                            text-white
+                            shadow-lg
+                            shadow-blue-500/20
+                            transition
+                            hover:bg-blue-700
+                            disabled:cursor-not-allowed
+                            disabled:opacity-35
+                        "
+                        title="Next page"
+                    >
+                        <ChevronRight size={19} />
+                    </motion.button>
+                </motion.div>
+            )}
+
+            {/* =====================================================
+                UPLOAD CTA
+            ====================================================== */}
+
+            <motion.section
+                initial={{
+                    opacity: 0,
+                    y: 24,
+                }}
+                whileInView={{
+                    opacity: 1,
+                    y: 0,
+                }}
+                viewport={{
+                    once: true,
+                    amount: 0.15,
+                }}
+                transition={{
+                    duration: 0.6,
+                }}
+                className="mt-16"
+            >
+                <div
+                    className="
+                        relative
+                        overflow-hidden
+                        rounded-[30px]
+                        bg-gradient-to-r
+                        from-blue-600
+                        via-blue-700
+                        to-cyan-600
+                        p-7
+                        text-white
+                        shadow-[0_25px_60px_rgba(37,99,235,0.20)]
+                        sm:p-9
+                        lg:p-10
+                    "
+                >
+                    <motion.div
+                        animate={{
+                            x: [0, 25, 0],
+                            y: [0, -15, 0],
+                            scale: [1, 1.08, 1],
+                        }}
+                        transition={{
+                            duration: 8,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                        }}
+                        className="
+                            pointer-events-none
+                            absolute
+                            -right-16
+                            -top-16
+                            h-56
+                            w-56
+                            rounded-full
+                            bg-white/10
+                            blur-3xl
+                        "
+                    />
+
+                    <div className="
+                        relative
+                        flex
+                        flex-col
+                        gap-7
+                        sm:flex-row
+                        sm:items-center
+                        sm:justify-between
+                    ">
+                        <div>
+                            <div className="
+                                inline-flex
+                                items-center
+                                gap-2
+                                text-xs
+                                font-bold
+                                uppercase
+                                tracking-[0.16em]
+                                text-blue-100
+                            ">
+                                <Sparkles size={14} />
+                                Keep sharing
+                            </div>
+
+                            <h3 className="
+                                mt-3
+                                text-2xl
+                                font-black
+                                tracking-tight
+                                sm:text-3xl
+                            ">
+                                Have useful notes?
+                            </h3>
+
+                            <p className="
+                                mt-2
+                                max-w-2xl
+                                text-sm
+                                leading-6
+                                text-blue-100
+                                sm:text-base
+                            ">
+                                Share your study resources
+                                and help another student learn
+                                a little faster.
+                            </p>
+                        </div>
+
+                        <Link
+                            to="/upload"
+                            className="
+                                group
+                                inline-flex
+                                shrink-0
+                                items-center
+                                justify-center
+                                gap-2.5
+                                rounded-2xl
+                                bg-white
+                                px-6
+                                py-3.5
+                                text-sm
+                                font-extrabold
+                                text-blue-700
+                                shadow-xl
+                                transition-all
+                                duration-300
+                                hover:-translate-y-1
+                                hover:shadow-2xl
+                            "
+                        >
+                            <Upload size={18} />
+                            Upload a Note
+
+                            <ArrowUpRight
+                                size={17}
+                                className="
+                                    transition-transform
+                                    duration-300
+                                    group-hover:translate-x-0.5
+                                    group-hover:-translate-y-0.5
+                                "
+                            />
+                        </Link>
+                    </div>
+                </div>
+            </motion.section>
+        </section>
+    );
+}
 
 export default Notes;

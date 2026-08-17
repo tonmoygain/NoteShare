@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motion } from "motion/react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import {
@@ -8,12 +9,14 @@ import {
     Save,
     Loader2,
     Eye,
+    Sparkles,
+    CheckCircle2,
+    ShieldCheck,
 } from "lucide-react";
 
 import API from "../services/api";
 
 function EditNote() {
-
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -28,13 +31,9 @@ function EditNote() {
 
     const [error, setError] = useState("");
 
-
     useEffect(() => {
-
         const loadNote = async () => {
-
             try {
-
                 setLoading(true);
                 setError("");
 
@@ -57,9 +56,7 @@ function EditNote() {
                 setOldFile(
                     response.data.file || ""
                 );
-
             } catch (err) {
-
                 console.error(
                     "Edit Note Load Error:",
                     err
@@ -67,52 +64,41 @@ function EditNote() {
 
                 setError(
                     err.response?.data?.detail ||
-                    "Failed to load this note."
+                        "Failed to load this note."
                 );
-
             } finally {
-
                 setLoading(false);
-
             }
-
         };
 
         loadNote();
-
     }, [id]);
 
-
     const handleSubmit = async (e) => {
-
         e.preventDefault();
 
-        if (!title.trim()) {
+        setError("");
 
-            alert(
+        if (!title.trim()) {
+            setError(
                 "Please enter a note title."
             );
-
             return;
-
         }
 
         if (!department) {
-
-            alert(
+            setError(
                 "Please select a department."
             );
-
             return;
-
         }
 
-        try {
+        if (saving) return;
 
+        try {
             setSaving(true);
 
-            const formData =
-                new FormData();
+            const formData = new FormData();
 
             formData.append(
                 "title",
@@ -130,12 +116,10 @@ function EditNote() {
             );
 
             if (file) {
-
                 formData.append(
                     "file",
                     file
                 );
-
             }
 
             await API.put(
@@ -154,9 +138,7 @@ function EditNote() {
             );
 
             navigate(`/note/${id}`);
-
         } catch (err) {
-
             console.error(
                 "Update Note Error:",
                 err
@@ -165,105 +147,86 @@ function EditNote() {
             if (
                 err.response?.status === 401
             ) {
-
-                alert(
-                    "Please login first."
-                );
-
+                alert("Please login first.");
                 navigate("/login");
-
             } else if (
                 err.response?.status === 403
             ) {
-
                 alert(
                     "You do not have permission to edit this note."
                 );
-
             } else {
-
-                alert(
+                setError(
                     err.response?.data?.detail ||
-                    err.response?.data?.error ||
-                    JSON.stringify(
-                        err.response?.data ||
+                        err.response?.data?.error ||
                         "Failed to update note."
-                    )
                 );
-
             }
-
         } finally {
-
             setSaving(false);
-
         }
-
     };
 
+    // =========================================================
+    // LOADING
+    // =========================================================
 
     if (loading) {
-
         return (
+            <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+                <div className="animate-pulse">
+                    <div className="h-5 w-32 rounded-full bg-slate-200" />
 
-            <div className="min-h-[70vh] flex items-center justify-center px-6">
+                    <div className="mt-7 overflow-hidden rounded-[34px] border border-slate-200 bg-white">
+                        <div className="h-64 bg-gradient-to-r from-slate-300 via-slate-200 to-slate-300 sm:h-72" />
 
-                <div className="text-center">
+                        <div className="space-y-6 p-6 sm:p-10">
+                            <div className="h-14 rounded-2xl bg-slate-100" />
 
-                    <div className="w-16 h-16 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                            <div className="h-14 rounded-2xl bg-slate-100" />
 
-                        <Loader2
-                            size={32}
-                            className="animate-spin"
-                        />
+                            <div className="h-44 rounded-2xl bg-slate-100" />
 
+                            <div className="h-24 rounded-2xl bg-slate-100" />
+
+                            <div className="h-20 rounded-2xl bg-slate-100" />
+
+                            <div className="h-14 rounded-2xl bg-slate-200" />
+                        </div>
                     </div>
-
-                    <h2 className="text-lg font-black text-slate-700 mt-5">
-
-                        Loading Note
-
-                    </h2>
-
-                    <p className="text-sm text-slate-400 mt-2">
-
-                        Please wait while we load the note.
-
-                    </p>
-
                 </div>
-
-            </div>
-
+            </section>
         );
-
     }
 
+    // =========================================================
+    // ERROR
+    // =========================================================
 
-    if (error) {
-
+    if (error && !title && !department) {
         return (
-
-            <div className="min-h-[70vh] flex items-center justify-center px-6">
-
-                <div className="max-w-lg w-full bg-white border border-slate-100 rounded-[30px] shadow-xl p-10 text-center">
-
-                    <div className="w-16 h-16 mx-auto rounded-2xl bg-red-50 text-red-500 flex items-center justify-center">
-
+            <div className="min-h-[70vh] px-6 flex items-center justify-center">
+                <motion.div
+                    initial={{
+                        opacity: 0,
+                        y: 16,
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0,
+                    }}
+                    className="w-full max-w-lg rounded-[30px] border border-slate-200 bg-white p-10 text-center shadow-[0_20px_55px_rgba(15,23,42,0.08)]"
+                >
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-500">
                         <FileText size={28} />
-
                     </div>
 
-                    <h2 className="text-2xl font-black text-slate-800 mt-5">
-
+                    <h2 className="mt-6 text-2xl font-black text-slate-800">
                         Unable to Edit Note
-
                     </h2>
 
-                    <p className="text-slate-500 mt-3 leading-7">
-
+                    <p className="mt-3 leading-7 text-slate-500">
                         {error}
-
                     </p>
 
                     <button
@@ -272,141 +235,448 @@ function EditNote() {
                                 `/note/${id}`
                             )
                         }
-                        className="mt-7 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold transition"
+                        className="mt-7 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg"
                     >
-
                         <ArrowLeft size={18} />
-
                         Back to Note
-
                     </button>
-
-                </div>
-
+                </motion.div>
             </div>
-
         );
-
     }
 
-
     return (
+        <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
 
-        <section className="max-w-5xl mx-auto px-6 py-10">
+            {/* =====================================================
+                TOP NAV
+            ====================================================== */}
 
-            <div className="bg-white border border-slate-100 rounded-[32px] shadow-2xl overflow-hidden">
+            <motion.button
+                initial={{
+                    opacity: 0,
+                    x: -8,
+                }}
+                animate={{
+                    opacity: 1,
+                    x: 0,
+                }}
+                onClick={() =>
+                    navigate(`/note/${id}`)
+                }
+                className="
+                    group
+                    inline-flex
+                    items-center
+                    gap-2
+                    rounded-full
+                    border
+                    border-slate-200
+                    bg-white/80
+                    px-4
+                    py-2.5
+                    text-sm
+                    font-bold
+                    text-slate-600
+                    shadow-sm
+                    backdrop-blur-sm
+                    transition
+                    hover:border-blue-200
+                    hover:text-blue-600
+                "
+            >
+                <ArrowLeft
+                    size={17}
+                    className="transition-transform duration-300 group-hover:-translate-x-0.5"
+                />
 
-                {/* Header */}
+                Back to Note
+            </motion.button>
 
-                <div className="relative overflow-hidden bg-gradient-to-r from-amber-500 via-orange-500 to-blue-600 px-8 md:px-10 py-10 md:py-12 text-white">
+            {/* =====================================================
+                MAIN CARD
+            ====================================================== */}
 
-                    <div className="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-white/10 blur-3xl"></div>
+            <motion.div
+                initial={{
+                    opacity: 0,
+                    y: 18,
+                }}
+                animate={{
+                    opacity: 1,
+                    y: 0,
+                }}
+                transition={{
+                    duration: 0.55,
+                    ease: "easeOut",
+                }}
+                className="
+                    mt-7
+                    overflow-hidden
+                    rounded-[34px]
+                    border
+                    border-slate-200/80
+                    bg-white
+                    shadow-[0_25px_70px_rgba(15,23,42,0.08)]
+                "
+            >
 
-                    <div className="relative">
+                {/* =================================================
+                    HERO
+                ================================================== */}
 
-                        <button
-                            onClick={() =>
-                                navigate(
-                                    `/note/${id}`
-                                )
-                            }
-                            className="inline-flex items-center gap-2 bg-white/15 border border-white/10 px-5 py-2.5 rounded-xl hover:bg-white/20 transition font-semibold"
-                        >
+                <div className="
+                    relative
+                    overflow-hidden
+                    bg-gradient-to-br
+                    from-slate-950
+                    via-blue-950
+                    to-cyan-800
+                    text-white
+                ">
+                    <motion.div
+                        animate={{
+                            x: [0, 25, 0],
+                            y: [0, -20, 0],
+                            scale: [1, 1.08, 1],
+                        }}
+                        transition={{
+                            duration: 9,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                        }}
+                        className="
+                            pointer-events-none
+                            absolute
+                            -right-24
+                            -top-24
+                            h-96
+                            w-96
+                            rounded-full
+                            bg-cyan-400/15
+                            blur-3xl
+                        "
+                    />
 
-                            <ArrowLeft size={18} />
+                    <motion.div
+                        animate={{
+                            x: [0, -20, 0],
+                            y: [0, 18, 0],
+                            scale: [1, 1.08, 1],
+                        }}
+                        transition={{
+                            duration: 11,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                        }}
+                        className="
+                            pointer-events-none
+                            absolute
+                            -bottom-28
+                            -left-24
+                            h-80
+                            w-80
+                            rounded-full
+                            bg-blue-500/15
+                            blur-3xl
+                        "
+                    />
 
-                            Back to Note
+                    <div
+                        className="
+                            pointer-events-none
+                            absolute
+                            inset-0
+                            opacity-15
+                            [background-image:linear-gradient(rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.07)_1px,transparent_1px)]
+                            [background-size:36px_36px]
+                        "
+                    />
 
-                        </button>
+                    <div className="relative px-6 py-9 sm:px-9 sm:py-12 lg:px-12 lg:py-14">
 
+                        <div className="flex flex-col gap-7 md:flex-row md:items-center">
 
-                        <div className="flex items-center gap-4 mt-8">
-
-                            <div className="w-14 h-14 rounded-2xl bg-white/15 border border-white/10 flex items-center justify-center">
-
-                                <FileText size={28} />
-
-                            </div>
+                            <motion.div
+                                initial={{
+                                    opacity: 0,
+                                    scale: 0.85,
+                                    rotate: -5,
+                                }}
+                                animate={{
+                                    opacity: 1,
+                                    scale: 1,
+                                    rotate: 0,
+                                }}
+                                transition={{
+                                    duration: 0.5,
+                                }}
+                                className="
+                                    flex
+                                    h-20
+                                    w-20
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-[24px]
+                                    border
+                                    border-white/10
+                                    bg-white/10
+                                    backdrop-blur-xl
+                                    shadow-xl
+                                "
+                            >
+                                <FileText size={34} />
+                            </motion.div>
 
                             <div>
+                                <div className="
+                                    inline-flex
+                                    items-center
+                                    gap-2
+                                    rounded-full
+                                    border
+                                    border-white/10
+                                    bg-white/10
+                                    px-4
+                                    py-2
+                                    text-[10px]
+                                    font-black
+                                    uppercase
+                                    tracking-[0.18em]
+                                    text-cyan-100
+                                    backdrop-blur-sm
+                                ">
+                                    <Sparkles size={13} />
+                                    Resource Editor
+                                </div>
 
-                                <h1 className="text-3xl md:text-4xl font-black">
-
+                                <h1 className="
+                                    mt-5
+                                    text-4xl
+                                    font-black
+                                    tracking-tight
+                                    sm:text-5xl
+                                ">
                                     Edit Note
-
                                 </h1>
 
-                                <p className="text-orange-100 mt-2">
-
-                                    Update your study resource.
-
+                                <p className="
+                                    mt-3
+                                    max-w-2xl
+                                    text-sm
+                                    leading-7
+                                    text-blue-100
+                                    sm:text-base
+                                ">
+                                    Update your study resource,
+                                    improve the description or replace
+                                    the existing file.
                                 </p>
-
                             </div>
-
                         </div>
 
-                    </div>
+                        <div className="
+                            mt-8
+                            flex
+                            flex-wrap
+                            gap-2
+                            border-t
+                            border-white/10
+                            pt-6
+                        ">
+                            <span className="
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-full
+                                bg-white/5
+                                px-3
+                                py-2
+                                text-xs
+                                font-semibold
+                                text-slate-300
+                            ">
+                                <ShieldCheck size={14} />
+                                Your resource
+                            </span>
 
+                            <span className="
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-full
+                                bg-white/5
+                                px-3
+                                py-2
+                                text-xs
+                                font-semibold
+                                text-slate-300
+                            ">
+                                Keep existing file unless replaced
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
-
-                {/* Form */}
+                {/* =================================================
+                    FORM
+                ================================================== */}
 
                 <form
                     onSubmit={handleSubmit}
-                    className="p-7 md:p-10 space-y-8"
+                    className="space-y-8 p-6 sm:p-9 lg:p-12"
                 >
 
-                    {/* Title */}
+                    {/* Error */}
+
+                    {error && (
+                        <motion.div
+                            initial={{
+                                opacity: 0,
+                                y: -8,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            className="
+                                flex
+                                items-start
+                                gap-3
+                                rounded-2xl
+                                border
+                                border-red-100
+                                bg-red-50
+                                px-4
+                                py-3.5
+                                text-red-700
+                            "
+                        >
+                            <span className="
+                                flex
+                                h-6
+                                w-6
+                                shrink-0
+                                items-center
+                                justify-center
+                                rounded-full
+                                bg-red-100
+                                text-xs
+                                font-black
+                            ">
+                                !
+                            </span>
+
+                            <p className="text-sm font-semibold leading-6">
+                                {error}
+                            </p>
+                        </motion.div>
+                    )}
+
+                    {/* =================================================
+                        TITLE
+                    ================================================== */}
 
                     <div>
-
-                        <label className="font-bold text-slate-700 flex items-center gap-2">
-
-                            <FileText size={18} />
-
+                        <label className="
+                            flex
+                            items-center
+                            gap-2
+                            text-sm
+                            font-bold
+                            text-slate-700
+                        ">
+                            <FileText
+                                size={17}
+                                className="text-blue-600"
+                            />
                             Note Title
-
                         </label>
 
                         <input
                             type="text"
                             value={title}
-                            onChange={(e) =>
+                            onChange={(e) => {
                                 setTitle(
                                     e.target.value
-                                )
-                            }
+                                );
+                                setError("");
+                            }}
                             placeholder="Enter note title..."
-                            className="w-full mt-3 h-14 border-2 border-slate-200 rounded-2xl px-5 text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition"
+                            disabled={saving}
                             required
+                            className="
+                                mt-3
+                                h-14
+                                w-full
+                                rounded-2xl
+                                border
+                                border-slate-200
+                                bg-slate-50/80
+                                px-5
+                                text-slate-700
+                                outline-none
+                                transition
+                                placeholder:text-slate-400
+                                focus:border-blue-500
+                                focus:bg-white
+                                focus:ring-4
+                                focus:ring-blue-100
+                                disabled:cursor-not-allowed
+                                disabled:opacity-60
+                            "
                         />
-
                     </div>
 
-
-                    {/* Department */}
+                    {/* =================================================
+                        DEPARTMENT
+                    ================================================== */}
 
                     <div>
-
-                        <label className="font-bold text-slate-700">
-
+                        <label className="
+                            flex
+                            items-center
+                            gap-2
+                            text-sm
+                            font-bold
+                            text-slate-700
+                        ">
+                            <BookOpenIcon />
                             Department
-
                         </label>
 
                         <select
                             value={department}
-                            onChange={(e) =>
+                            onChange={(e) => {
                                 setDepartment(
                                     e.target.value
-                                )
-                            }
-                            className="w-full mt-3 h-14 border-2 border-slate-200 rounded-2xl px-5 text-slate-700 outline-none bg-white cursor-pointer focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition"
+                                );
+                                setError("");
+                            }}
+                            disabled={saving}
                             required
+                            className="
+                                mt-3
+                                h-14
+                                w-full
+                                appearance-none
+                                rounded-2xl
+                                border
+                                border-slate-200
+                                bg-slate-50/80
+                                px-5
+                                text-slate-700
+                                outline-none
+                                transition
+                                focus:border-blue-500
+                                focus:bg-white
+                                focus:ring-4
+                                focus:ring-blue-100
+                                disabled:cursor-not-allowed
+                                disabled:opacity-60
+                            "
                         >
-
                             <option value="">
                                 Select Department
                             </option>
@@ -430,167 +700,435 @@ function EditNote() {
                             <option value="Law">
                                 Law
                             </option>
-
                         </select>
-
                     </div>
 
-
-                    {/* Description */}
+                    {/* =================================================
+                        DESCRIPTION
+                    ================================================== */}
 
                     <div>
+                        <div className="flex items-end justify-between gap-3">
+                            <label className="
+                                flex
+                                items-center
+                                gap-2
+                                text-sm
+                                font-bold
+                                text-slate-700
+                            ">
+                                <FileText
+                                    size={17}
+                                    className="text-blue-600"
+                                />
+                                Description
+                            </label>
 
-                        <label className="font-bold text-slate-700 flex items-center gap-2">
-
-                            <FileText size={18} />
-
-                            Description
-
-                        </label>
+                            <span className="text-[10px] font-semibold text-slate-400">
+                                Update the context students will see
+                            </span>
+                        </div>
 
                         <textarea
                             rows={8}
                             value={description}
-                            onChange={(e) =>
+                            onChange={(e) => {
                                 setDescription(
                                     e.target.value
-                                )
-                            }
+                                );
+                                setError("");
+                            }}
                             placeholder="Describe what this note contains..."
-                            className="w-full mt-3 border-2 border-slate-200 rounded-2xl px-5 py-4 resize-none text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition"
+                            disabled={saving}
+                            className="
+                                mt-3
+                                w-full
+                                resize-none
+                                rounded-2xl
+                                border
+                                border-slate-200
+                                bg-slate-50/80
+                                px-5
+                                py-4
+                                leading-7
+                                text-slate-700
+                                outline-none
+                                transition
+                                placeholder:text-slate-400
+                                focus:border-blue-500
+                                focus:bg-white
+                                focus:ring-4
+                                focus:ring-blue-100
+                                disabled:cursor-not-allowed
+                                disabled:opacity-60
+                            "
                         />
-
                     </div>
 
-
-                    {/* Current File */}
+                    {/* =================================================
+                        CURRENT FILE
+                    ================================================== */}
 
                     {oldFile && (
+                        <div className="
+                            overflow-hidden
+                            rounded-[24px]
+                            border
+                            border-slate-200
+                            bg-slate-50/70
+                        ">
+                            <div className="
+                                flex
+                                flex-col
+                                gap-4
+                                p-5
+                                sm:flex-row
+                                sm:items-center
+                                sm:justify-between
+                            ">
+                                <div className="flex items-center gap-3">
+                                    <div className="
+                                        flex
+                                        h-11
+                                        w-11
+                                        shrink-0
+                                        items-center
+                                        justify-center
+                                        rounded-xl
+                                        bg-blue-50
+                                        text-blue-600
+                                    ">
+                                        <Eye size={18} />
+                                    </div>
 
-                        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+                                    <div>
+                                        <p className="
+                                            text-[10px]
+                                            font-black
+                                            uppercase
+                                            tracking-[0.16em]
+                                            text-slate-400
+                                        ">
+                                            Current File
+                                        </p>
 
-                            <div className="flex items-center gap-3">
-
-                                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-
-                                    <Eye size={18} />
-
+                                        <p className="mt-1 text-sm font-bold text-slate-700">
+                                            Existing resource is still active
+                                        </p>
+                                    </div>
                                 </div>
 
-                                <div>
-
-                                    <p className="text-xs uppercase tracking-wider font-black text-slate-400">
-
-                                        Current File
-
-                                    </p>
-
-                                    <a
-                                        href={`http://127.0.0.1:8000${oldFile}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 hover:text-blue-700 font-bold text-sm mt-1 inline-block"
-                                    >
-
-                                        View Current File
-
-                                    </a>
-
-                                </div>
-
+                                <a
+                                    href={`${API.defaults.baseURL.replace(/\/api\/?$/, "")}${oldFile}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="
+                                        inline-flex
+                                        items-center
+                                        justify-center
+                                        gap-2
+                                        rounded-xl
+                                        border
+                                        border-blue-100
+                                        bg-white
+                                        px-4
+                                        py-2.5
+                                        text-sm
+                                        font-bold
+                                        text-blue-600
+                                        shadow-sm
+                                        transition
+                                        hover:border-blue-200
+                                        hover:bg-blue-50
+                                    "
+                                >
+                                    <Eye size={16} />
+                                    View Current File
+                                </a>
                             </div>
-
                         </div>
-
                     )}
 
-
-                    {/* Replace File */}
+                    {/* =================================================
+                        REPLACE FILE
+                    ================================================== */}
 
                     <div>
-
-                        <label className="font-bold text-slate-700 flex items-center gap-2">
-
-                            <Upload size={18} />
-
-                            Replace File
-                            <span className="text-slate-400 font-medium">
-                                (Optional)
-                            </span>
-
-                        </label>
-
-                        <input
-                            type="file"
-                            onChange={(e) =>
-                                setFile(
-                                    e.target.files?.[0] ||
-                                    null
-                                )
-                            }
-                            className="w-full mt-3 border-2 border-dashed border-slate-300 rounded-2xl p-5 file:bg-blue-600 file:text-white file:border-0 file:px-5 file:py-2 file:rounded-xl file:mr-4 cursor-pointer"
-                        />
-
-                        {file && (
-
-                            <p className="mt-3 text-emerald-600 font-semibold">
-
-                                New file selected:
-                                {" "}
-                                {file.name}
-
-                            </p>
-
-                        )}
-
-                        <p className="text-xs text-slate-400 mt-2">
-
-                            Leave this empty to keep the existing file.
-
-                        </p>
-
-                    </div>
-
-
-                    {/* Submit */}
-
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white py-4 rounded-2xl text-lg font-black transition flex items-center justify-center gap-3 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-
-                        {saving ? (
-
-                            <>
-                                <Loader2
-                                    size={20}
-                                    className="animate-spin"
+                        <div className="flex items-center justify-between gap-3">
+                            <label className="
+                                flex
+                                items-center
+                                gap-2
+                                text-sm
+                                font-bold
+                                text-slate-700
+                            ">
+                                <Upload
+                                    size={17}
+                                    className="text-blue-600"
                                 />
 
-                                Saving Changes...
+                                Replace File
 
-                            </>
+                                <span className="font-medium text-slate-400">
+                                    Optional
+                                </span>
+                            </label>
+                        </div>
 
+                        {!file ? (
+                            <label className="
+                                group
+                                mt-3
+                                flex
+                                cursor-pointer
+                                flex-col
+                                items-center
+                                justify-center
+                                rounded-[26px]
+                                border-2
+                                border-dashed
+                                border-slate-300
+                                bg-slate-50/60
+                                px-6
+                                py-10
+                                text-center
+                                transition
+                                hover:border-blue-300
+                                hover:bg-blue-50/40
+                            ">
+                                <div className="
+                                    flex
+                                    h-14
+                                    w-14
+                                    items-center
+                                    justify-center
+                                    rounded-2xl
+                                    bg-white
+                                    text-blue-600
+                                    shadow-sm
+                                    transition
+                                    group-hover:scale-105
+                                ">
+                                    <Upload size={24} />
+                                </div>
+
+                                <h3 className="mt-4 text-sm font-black text-slate-700">
+                                    Choose a replacement file
+                                </h3>
+
+                                <p className="mt-1 text-xs leading-5 text-slate-400">
+                                    Leave this untouched to keep the current file.
+                                </p>
+
+                                <input
+                                    type="file"
+                                    onChange={(e) =>
+                                        setFile(
+                                            e.target
+                                                .files?.[0] ||
+                                                null
+                                        )
+                                    }
+                                    disabled={saving}
+                                    className="hidden"
+                                />
+                            </label>
                         ) : (
+                            <motion.div
+                                initial={{
+                                    opacity: 0,
+                                    y: 8,
+                                }}
+                                animate={{
+                                    opacity: 1,
+                                    y: 0,
+                                }}
+                                className="
+                                    mt-3
+                                    rounded-[24px]
+                                    border
+                                    border-emerald-100
+                                    bg-emerald-50
+                                    p-5
+                                "
+                            >
+                                <div className="flex items-center justify-between gap-4">
+                                    <div className="flex min-w-0 items-center gap-3">
+                                        <div className="
+                                            flex
+                                            h-11
+                                            w-11
+                                            shrink-0
+                                            items-center
+                                            justify-center
+                                            rounded-xl
+                                            bg-emerald-100
+                                            text-emerald-600
+                                        ">
+                                            <CheckCircle2
+                                                size={21}
+                                            />
+                                        </div>
 
-                            <>
-                                <Save size={20} />
+                                        <div className="min-w-0">
+                                            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-600">
+                                                New File Selected
+                                            </p>
 
-                                Save Changes
+                                            <p className="mt-1 truncate text-sm font-bold text-slate-700">
+                                                {file.name}
+                                            </p>
+                                        </div>
+                                    </div>
 
-                            </>
-
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setFile(
+                                                null
+                                            )
+                                        }
+                                        disabled={saving}
+                                        className="
+                                            rounded-xl
+                                            bg-white
+                                            px-3
+                                            py-2
+                                            text-xs
+                                            font-bold
+                                            text-slate-500
+                                            shadow-sm
+                                            transition
+                                            hover:bg-red-50
+                                            hover:text-red-600
+                                            disabled:opacity-50
+                                        "
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+                            </motion.div>
                         )}
+                    </div>
 
-                    </button>
+                    {/* =================================================
+                        ACTIONS
+                    ================================================== */}
 
+                    <div className="
+                        flex
+                        flex-col-reverse
+                        gap-3
+                        border-t
+                        border-slate-100
+                        pt-6
+                        sm:flex-row
+                        sm:justify-end
+                    ">
+                        <button
+                            type="button"
+                            onClick={() =>
+                                navigate(
+                                    `/note/${id}`
+                                )
+                            }
+                            disabled={saving}
+                            className="
+                                rounded-xl
+                                bg-slate-100
+                                px-5
+                                py-3.5
+                                font-bold
+                                text-slate-600
+                                transition
+                                hover:bg-slate-200
+                                disabled:opacity-50
+                            "
+                        >
+                            Cancel
+                        </button>
+
+                        <motion.button
+                            type="submit"
+                            disabled={saving}
+                            whileHover={
+                                !saving
+                                    ? {
+                                          y: -2,
+                                      }
+                                    : {}
+                            }
+                            whileTap={{
+                                scale: 0.99,
+                            }}
+                            className="
+                                inline-flex
+                                items-center
+                                justify-center
+                                gap-2
+                                rounded-xl
+                                bg-gradient-to-r
+                                from-blue-600
+                                to-cyan-500
+                                px-7
+                                py-3.5
+                                font-black
+                                text-white
+                                shadow-lg
+                                shadow-blue-500/15
+                                transition
+                                hover:from-blue-700
+                                hover:to-cyan-600
+                                hover:shadow-xl
+                                disabled:cursor-not-allowed
+                                disabled:opacity-50
+                            "
+                        >
+                            {saving ? (
+                                <>
+                                    <Loader2
+                                        size={18}
+                                        className="animate-spin"
+                                    />
+                                    Saving Changes...
+                                </>
+                            ) : (
+                                <>
+                                    <Save size={18} />
+                                    Save Changes
+                                </>
+                            )}
+                        </motion.button>
+                    </div>
                 </form>
-
-            </div>
-
+            </motion.div>
         </section>
+    );
+}
 
+function BookOpenIcon() {
+    return (
+        <BookIconFallback />
+    );
+}
+
+function BookIconFallback() {
+    return (
+        <svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-blue-600"
+        >
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z" />
+        </svg>
     );
 }
 

@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
+import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 
 import {
+    ArrowRight,
     BookOpen,
     Users,
     GraduationCap,
-    ArrowRight,
     FileText,
+    Sparkles,
+    ShieldCheck,
+    BrainCircuit,
 } from "lucide-react";
 
 import API from "../services/api";
+
 
 function Hero() {
 
@@ -20,155 +25,185 @@ function Hero() {
         blogs: 0,
     });
 
+    const [loading, setLoading] = useState(true);
+
+
     useEffect(() => {
+    const loadStats = async () => {
+        try {
+            // ==========================================
+            // FETCH FIRST NOTES PAGE
+            // ==========================================
 
-        const loadStats = async () => {
+            const firstNotesResponse = await API.get(
+                "notes/?page=1"
+            );
 
-            try {
+            const firstNotesData =
+                firstNotesResponse?.data || {};
 
-                // =========================
-                // LOAD NOTES
-                // =========================
+            const firstNotes =
+                Array.isArray(firstNotesData.notes)
+                    ? firstNotesData.notes
+                    : [];
 
-                const notesResponse = await API.get("notes/");
+            const totalPages =
+                Number(firstNotesData.total_pages) || 1;
 
-                const notes = Array.isArray(notesResponse.data)
-                    ? notesResponse.data
-                    : notesResponse.data.results || [];
+            // ==========================================
+            // FETCH REMAINING NOTE PAGES
+            // ==========================================
 
+            let allNotes = [...firstNotes];
 
-                // =========================
-                // LOAD BLOGS
-                // =========================
-
-                const blogsResponse = await API.get("blogs/");
-
-                const blogs = Array.isArray(blogsResponse.data)
-                    ? blogsResponse.data
-                    : blogsResponse.data.results || [];
-
-
-                // =========================
-                // FIND UNIQUE STUDENTS
-                // =========================
-
-                const students = new Set();
-
-                notes.forEach((note) => {
-
-                    const student =
-                        note.uploader_name ||
-                        note.uploader ||
-                        note.author ||
-                        note.user ||
-                        note.uploaded_by;
-
-                    if (student) {
-
-                        if (typeof student === "object") {
-
-                            students.add(
-                                student.id ||
-                                student.username ||
-                                student.email
-                            );
-
-                        } else {
-
-                            students.add(student);
-
-                        }
-
-                    }
-
-                });
-
-
-                // =========================
-                // FIND UNIQUE DEPARTMENTS
-                // =========================
-
-                const departments = new Set();
-
-                notes.forEach((note) => {
-
-                    const department =
-                        note.department_name ||
-                        note.department ||
-                        note.department_title;
-
-                    if (department) {
-
-                        if (typeof department === "object") {
-
-                            departments.add(
-                                department.id ||
-                                department.name ||
-                                department.title
-                            );
-
-                        } else {
-
-                            departments.add(department);
-
-                        }
-
-                    }
-
-                });
-
-
-                // =========================
-                // UPDATE STATISTICS
-                // =========================
-
-                setStats({
-                    notes: notes.length,
-                    students: students.size,
-                    departments: departments.size,
-                    blogs: blogs.length,
-                });
-
-            } catch (error) {
-
-                console.error(
-                    "Failed to load Hero statistics:",
-                    error
+            if (totalPages > 1) {
+                const remainingPages = await Promise.all(
+                    Array.from(
+                        { length: totalPages - 1 },
+                        (_, index) =>
+                            API.get(
+                                `notes/?page=${index + 2}`
+                            )
+                    )
                 );
 
+                remainingPages.forEach((response) => {
+                    const pageData =
+                        response?.data || {};
+
+                    if (Array.isArray(pageData.notes)) {
+                        allNotes.push(
+                            ...pageData.notes
+                        );
+                    }
+                });
             }
 
-        };
+            // ==========================================
+            // FETCH BLOGS
+            // ==========================================
 
-        loadStats();
+            const blogsResponse =
+                await API.get("blogs/");
 
-    }, []);
+            const blogsData =
+                blogsResponse?.data;
+
+            const allBlogs =
+                Array.isArray(blogsData)
+                    ? blogsData
+                    : Array.isArray(blogsData?.blogs)
+                        ? blogsData.blogs
+                        : Array.isArray(blogsData?.results)
+                            ? blogsData.results
+                            : [];
+
+            // ==========================================
+            // UNIQUE STUDENTS / UPLOADERS
+            // ==========================================
+
+            const students = new Set();
+
+            allNotes.forEach((note) => {
+                if (note?.uploader) {
+                    students.add(
+                        String(note.uploader)
+                    );
+                    return;
+                }
+
+                if (note?.uploader_name) {
+                    students.add(
+                        note.uploader_name
+                    );
+                }
+            });
+
+            // ==========================================
+            // UNIQUE DEPARTMENTS
+            // ==========================================
+
+            const departments = new Set();
+
+            allNotes.forEach((note) => {
+                if (note?.department) {
+                    departments.add(
+                        note.department
+                    );
+                }
+            });
+
+            // ==========================================
+            // FINAL STATS
+            // ==========================================
+
+            setStats({
+                notes: allNotes.length,
+                students: students.size,
+                departments: departments.size,
+                blogs: allBlogs.length,
+            });
+
+        } catch (error) {
+            console.error(
+                "Failed to load Hero statistics:",
+                error
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    loadStats();
+}, []);
+
+        
 
 
     const statsData = [
 
         {
-            icon: <BookOpen size={32} />,
-            title: stats.notes,
-            subtitle: "Study Notes",
+            icon: (
+                <BookOpen
+                    size={22}
+                    strokeWidth={2.2}
+                />
+            ),
+            value: stats.notes,
+            label: "Study Notes",
         },
 
         {
-            icon: <Users size={32} />,
-            title: stats.students,
-            subtitle: "Students",
+            icon: (
+                <Users
+                    size={22}
+                    strokeWidth={2.2}
+                />
+            ),
+            value: stats.students,
+            label: "Students",
         },
 
         {
-            icon: <GraduationCap size={32} />,
-            title: stats.departments,
-            subtitle: "Departments",
+            icon: (
+                <GraduationCap
+                    size={22}
+                    strokeWidth={2.2}
+                />
+            ),
+            value: stats.departments,
+            label: "Departments",
         },
 
         {
-            icon: <FileText size={32} />,
-            title: stats.blogs,
-            subtitle: "Blogs",
+            icon: (
+                <FileText
+                    size={22}
+                    strokeWidth={2.2}
+                />
+            ),
+            value: stats.blogs,
+            label: "Academic Blogs",
         },
 
     ];
@@ -176,134 +211,548 @@ function Hero() {
 
     return (
 
-        <section className="max-w-7xl mx-auto px-8 mt-8">
+        <section
+            className="
+                relative
+                mx-auto
+                max-w-7xl
+                px-5
+                pt-6
+                sm:px-6
+                lg:px-8
+                lg:pt-8
+            "
+        >
 
-            <div className="relative overflow-hidden rounded-[36px] bg-gradient-to-r from-slate-900 via-blue-900 to-cyan-700 shadow-2xl">
+            <motion.div
+                initial={{
+                    opacity: 0,
+                    y: 22,
+                }}
+                animate={{
+                    opacity: 1,
+                    y: 0,
+                }}
+                transition={{
+                    duration: 0.65,
+                    ease: "easeOut",
+                }}
+                className="
+                    relative
+                    overflow-hidden
+                    rounded-[34px]
+                    border
+                    border-slate-800/30
+                    bg-slate-950
+                    shadow-[0_30px_80px_rgba(15,23,42,0.20)]
+                "
+            >
 
-                <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-400/20 rounded-full blur-3xl"></div>
+                {/* ==========================================
+                    BACKGROUND GLOWS
+                ========================================== */}
 
-                <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl"></div>
+                <motion.div
+                    animate={{
+                        x: [0, 35, 0],
+                        y: [0, -25, 0],
+                        scale: [1, 1.08, 1],
+                    }}
+                    transition={{
+                        duration: 10,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                    }}
+                    className="
+                        absolute
+                        -right-28
+                        -top-32
+                        h-[420px]
+                        w-[420px]
+                        rounded-full
+                        bg-cyan-400/20
+                        blur-3xl
+                    "
+                />
 
-                <div className="relative px-12 py-16 flex flex-col lg:flex-row justify-between items-center gap-12">
+                <motion.div
+                    animate={{
+                        x: [0, -30, 0],
+                        y: [0, 30, 0],
+                        scale: [1, 1.12, 1],
+                    }}
+                    transition={{
+                        duration: 12,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                    }}
+                    className="
+                        absolute
+                        -bottom-40
+                        -left-28
+                        h-[440px]
+                        w-[440px]
+                        rounded-full
+                        bg-blue-600/25
+                        blur-3xl
+                    "
+                />
 
-                    {/* LEFT SIDE */}
-
-                    <div className="max-w-2xl">
-
-                        <span className="inline-block bg-white/15 backdrop-blur-md px-5 py-2 rounded-full text-sm tracking-wider font-semibold">
-
-                            🎓 Academic Resource Platform
-
-                        </span>
+                <div
+                    className="
+                        absolute
+                        inset-0
+                        bg-[radial-gradient(circle_at_30%_20%,rgba(37,99,235,0.18),transparent_32%),radial-gradient(circle_at_85%_75%,rgba(6,182,212,0.14),transparent_28%)]
+                    "
+                />
 
 
-                        <h1 className="text-6xl font-black text-white leading-tight mt-6">
+                {/* ==========================================
+                    CONTENT
+                ========================================== */}
 
-                            Share.
+                <div
+                    className="
+                        relative
+                        grid
+                        gap-12
+                        px-6
+                        py-10
+                        sm:px-10
+                        sm:py-14
+                        lg:grid-cols-[1.15fr_0.85fr]
+                        lg:px-14
+                        lg:py-16
+                    "
+                >
 
-                            <span className="text-cyan-300">
+                    {/* ==========================================
+                        LEFT
+                    ========================================== */}
 
-                                Learn.
+                    <div
+                        className="
+                            flex
+                            max-w-3xl
+                            flex-col
+                            justify-center
+                        "
+                    >
 
-                            </span>
+                        <motion.div
+                            initial={{
+                                opacity: 0,
+                                y: 12,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            transition={{
+                                delay: 0.12,
+                                duration: 0.45,
+                            }}
+                            className="
+                                inline-flex
+                                w-fit
+                                items-center
+                                gap-2
+                                rounded-full
+                                border
+                                border-white/10
+                                bg-white/10
+                                px-4
+                                py-2
+                                text-xs
+                                font-bold
+                                uppercase
+                                tracking-[0.16em]
+                                text-cyan-200
+                                backdrop-blur-xl
+                            "
+                        >
 
+                            <Sparkles
+                                size={14}
+                            />
+
+                            Academic Resource Platform
+
+                        </motion.div>
+
+
+                        <motion.h1
+                            initial={{
+                                opacity: 0,
+                                y: 18,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            transition={{
+                                delay: 0.2,
+                                duration: 0.6,
+                            }}
+                            className="
+                                mt-7
+                                max-w-3xl
+                                text-4xl
+                                font-black
+                                leading-[1.05]
+                                tracking-[-0.04em]
+                                text-white
+                                sm:text-5xl
+                                lg:text-7xl
+                            "
+                        >
+
+                            Share. Learn.
                             <br />
 
-                            Grow Together.
+                            <span
+                                className="
+                                    bg-gradient-to-r
+                                    from-cyan-300
+                                    via-sky-300
+                                    to-blue-300
+                                    bg-clip-text
+                                    text-transparent
+                                "
+                            >
+                                Grow Together.
+                            </span>
 
-                        </h1>
+                        </motion.h1>
 
 
-                        <p className="mt-7 text-lg leading-8 text-slate-200">
+                        <motion.p
+                            initial={{
+                                opacity: 0,
+                                y: 15,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            transition={{
+                                delay: 0.3,
+                                duration: 0.55,
+                            }}
+                            className="
+                                mt-7
+                                max-w-2xl
+                                text-base
+                                leading-7
+                                text-slate-300
+                                sm:text-lg
+                                sm:leading-8
+                            "
+                        >
 
-                            Upload study notes, discover learning materials,
-                            read academic blogs and collaborate with students
-                            from different departments through one modern
+                            Discover study notes, share knowledge,
+                            publish academic blogs, and explore your
+                            learning resources in one modern student
                             platform.
 
-                        </p>
+                        </motion.p>
 
 
-                        <div className="flex flex-wrap gap-5 mt-10">
+                        {/* ==========================================
+                            ACTIONS
+                        ========================================== */}
 
-                            {/* Explore Notes */}
+                        <motion.div
+                            initial={{
+                                opacity: 0,
+                                y: 14,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            transition={{
+                                delay: 0.4,
+                                duration: 0.5,
+                            }}
+                            className="
+                                mt-9
+                                flex
+                                flex-wrap
+                                gap-3
+                            "
+                        >
 
-                            <button
-                                onClick={() => {
-
-                                    document
-                                        .getElementById("notes-section")
-                                        ?.scrollIntoView({
-                                            behavior: "smooth",
-                                        });
-
-                                }}
-                                className="bg-white text-blue-700 font-bold px-8 py-4 rounded-2xl hover:scale-105 transition-all duration-300 shadow-lg flex items-center gap-3"
+                            <Link
+                                to="/notes"
+                                className="
+                                    group
+                                    inline-flex
+                                    items-center
+                                    gap-2.5
+                                    rounded-xl
+                                    bg-white
+                                    px-6
+                                    py-3.5
+                                    text-sm
+                                    font-extrabold
+                                    text-blue-700
+                                    shadow-xl
+                                    shadow-black/10
+                                    transition-all
+                                    duration-300
+                                    hover:-translate-y-1
+                                    hover:shadow-2xl
+                                "
                             >
 
-                                Explore Study Resources
+                                Explore Notes
 
-                                <ArrowRight size={20} />
+                                <ArrowRight
+                                    size={18}
+                                    className="
+                                        transition-transform
+                                        duration-300
+                                        group-hover:translate-x-1
+                                    "
+                                />
 
-                            </button>
-
-                        </div>
+                            </Link>
 
 
-                        <p className="text-slate-300 mt-8">
+                            <Link
+                                to="/blogs"
+                                className="
+                                    inline-flex
+                                    items-center
+                                    gap-2.5
+                                    rounded-xl
+                                    border
+                                    border-white/15
+                                    bg-white/5
+                                    px-6
+                                    py-3.5
+                                    text-sm
+                                    font-bold
+                                    text-white
+                                    backdrop-blur-xl
+                                    transition-all
+                                    duration-300
+                                    hover:-translate-y-1
+                                    hover:bg-white/10
+                                "
+                            >
 
-                            📚 Share Notes • 📝 Read Blogs • 🤝 Connect Students
+                                Read Academic Blogs
 
-                        </p>
+                            </Link>
+
+                        </motion.div>
+
+
+                        {/* ==========================================
+                            TRUST LINE
+                        ========================================== */}
+
+                        <motion.div
+                            initial={{
+                                opacity: 0,
+                            }}
+                            animate={{
+                                opacity: 1,
+                            }}
+                            transition={{
+                                delay: 0.55,
+                                duration: 0.5,
+                            }}
+                            className="
+                                mt-8
+                                flex
+                                flex-wrap
+                                items-center
+                                gap-x-5
+                                gap-y-2
+                                text-xs
+                                font-semibold
+                                text-slate-400
+                            "
+                        >
+
+                            <span className="flex items-center gap-1.5">
+                                <ShieldCheck
+                                    size={15}
+                                    className="text-emerald-400"
+                                />
+                                Secure sharing
+                            </span>
+
+                            <span className="flex items-center gap-1.5">
+                                <BrainCircuit
+                                    size={15}
+                                    className="text-cyan-400"
+                                />
+                                AI-powered assistance
+                            </span>
+
+                            <span className="flex items-center gap-1.5">
+                                <BookOpen
+                                    size={15}
+                                    className="text-blue-400"
+                                />
+                                Student focused
+                            </span>
+
+                        </motion.div>
 
                     </div>
 
 
-                    {/* RIGHT SIDE */}
+                    {/* ==========================================
+                        RIGHT STATS
+                    ========================================== */}
 
-                    <div className="grid grid-cols-2 gap-6">
+                    <div
+                        className="
+                            flex
+                            items-center
+                            justify-center
+                            lg:justify-end
+                        "
+                    >
 
-                        {statsData.map((item) => (
+                        <div
+                            className="
+                                grid
+                                w-full
+                                max-w-xl
+                                grid-cols-2
+                                gap-3
+                                sm:gap-4
+                            "
+                        >
 
-                            <div
-                                key={item.subtitle}
-                                className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-7 w-48 hover:-translate-y-2 hover:bg-white/20 transition-all duration-300"
-                            >
+                            {statsData.map(
+                                (item, index) => (
 
-                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center justify-center text-white shadow-lg">
+                                    <motion.div
+                                        key={item.label}
+                                        initial={{
+                                            opacity: 0,
+                                            y: 18,
+                                        }}
+                                        animate={{
+                                            opacity: 1,
+                                            y: 0,
+                                        }}
+                                        transition={{
+                                            delay:
+                                                0.22 +
+                                                index * 0.08,
+                                            duration: 0.5,
+                                        }}
+                                        whileHover={{
+                                            y: -5,
+                                            scale: 1.015,
+                                        }}
+                                        className="
+                                            group
+                                            relative
+                                            overflow-hidden
+                                            rounded-2xl
+                                            border
+                                            border-white/10
+                                            bg-white/[0.07]
+                                            p-5
+                                            backdrop-blur-xl
+                                            transition-colors
+                                            duration-300
+                                            hover:bg-white/[0.11]
+                                            sm:p-6
+                                        "
+                                    >
 
-                                    {item.icon}
+                                        <div
+                                            className="
+                                                absolute
+                                                -right-8
+                                                -top-8
+                                                h-24
+                                                w-24
+                                                rounded-full
+                                                bg-cyan-400/10
+                                                blur-2xl
+                                                transition-transform
+                                                duration-500
+                                                group-hover:scale-150
+                                            "
+                                        />
 
-                                </div>
+                                        <div
+                                            className="
+                                                relative
+                                                flex
+                                                h-11
+                                                w-11
+                                                items-center
+                                                justify-center
+                                                rounded-xl
+                                                bg-gradient-to-br
+                                                from-blue-500
+                                                to-cyan-400
+                                                text-white
+                                                shadow-lg
+                                                shadow-blue-500/20
+                                            "
+                                        >
+                                            {item.icon}
+                                        </div>
 
+                                        <p
+                                            className="
+                                                relative
+                                                mt-5
+                                                text-3xl
+                                                font-black
+                                                tracking-tight
+                                                text-white
+                                                sm:text-4xl
+                                            "
+                                        >
+                                            {loading
+                                                ? "—"
+                                                : item.value.toLocaleString()}
+                                        </p>
 
-                                <h2 className="text-4xl font-black text-white mt-6">
+                                        <p
+                                            className="
+                                                relative
+                                                mt-1
+                                                text-xs
+                                                font-semibold
+                                                text-slate-400
+                                                sm:text-sm
+                                            "
+                                        >
+                                            {item.label}
+                                        </p>
 
-                                    {item.title}
+                                    </motion.div>
 
-                                </h2>
+                                )
+                            )}
 
-
-                                <p className="text-slate-200 mt-2">
-
-                                    {item.subtitle}
-
-                                </p>
-
-                            </div>
-
-                        ))}
+                        </div>
 
                     </div>
 
                 </div>
 
-            </div>
+            </motion.div>
 
         </section>
 
     );
-
 }
+
 
 export default Hero;

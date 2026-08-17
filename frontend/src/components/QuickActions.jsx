@@ -1,10 +1,11 @@
+import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 
 import {
     Upload,
     BookOpen,
     MessageSquare,
-    ArrowRight,
+    ArrowUpRight,
     Sparkles,
     FileText,
 } from "lucide-react";
@@ -14,258 +15,399 @@ function QuickActions() {
 
     const actions = [
         {
+            number: "01",
             title: "Upload Note",
             description:
                 "Share lecture notes, assignments and useful study materials with other students.",
-            icon: <Upload size={25} />,
+            icon: Upload,
             path: "/upload",
             iconStyle: "from-blue-600 to-cyan-500",
-            bgStyle: "bg-blue-50",
+            softBg: "bg-blue-50",
             textStyle: "text-blue-600",
-            borderStyle: "hover:border-blue-200",
+            borderHover:
+                "hover:border-blue-200",
+            glow: "bg-blue-400/10",
         },
-
         {
+            number: "02",
             title: "Browse Notes",
             description:
                 "Find organized study resources and lecture notes shared across departments.",
-            icon: <FileText size={25} />,
+            icon: FileText,
             path: "/notes",
             iconStyle: "from-violet-600 to-purple-500",
-            bgStyle: "bg-violet-50",
+            softBg: "bg-violet-50",
             textStyle: "text-violet-600",
-            borderStyle: "hover:border-violet-200",
+            borderHover:
+                "hover:border-violet-200",
+            glow: "bg-violet-400/10",
         },
-
         {
+            number: "03",
             title: "Read Blogs",
             description:
                 "Explore tutorials, experiences, academic articles and useful learning tips.",
-            icon: <BookOpen size={25} />,
+            icon: BookOpen,
             path: "/blogs",
             iconStyle: "from-emerald-600 to-teal-500",
-            bgStyle: "bg-emerald-50",
+            softBg: "bg-emerald-50",
             textStyle: "text-emerald-600",
-            borderStyle: "hover:border-emerald-200",
+            borderHover:
+                "hover:border-emerald-200",
+            glow: "bg-emerald-400/10",
         },
-
         {
+            number: "04",
             title: "Discussion Room",
             description:
                 "Connect with classmates and discuss academic topics, questions and ideas.",
-            icon: <MessageSquare size={25} />,
+            icon: MessageSquare,
             path: "/rooms",
             iconStyle: "from-orange-500 to-amber-400",
-            bgStyle: "bg-orange-50",
+            softBg: "bg-orange-50",
             textStyle: "text-orange-600",
-            borderStyle: "hover:border-orange-200",
+            borderHover:
+                "hover:border-orange-200",
+            glow: "bg-orange-400/10",
         },
     ];
 
     return (
         <section className="w-full">
 
-            {/* Section Header */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-7">
+            {/* =====================================================
+                SECTION HEADER
+            ====================================================== */}
 
+            <motion.div
+                initial={{
+                    opacity: 0,
+                    y: 16,
+                }}
+                whileInView={{
+                    opacity: 1,
+                    y: 0,
+                }}
+                viewport={{
+                    once: true,
+                    amount: 0.2,
+                }}
+                transition={{
+                    duration: 0.45,
+                    ease: "easeOut",
+                }}
+                className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+            >
                 <div className="flex items-center gap-4">
 
                     <div className="relative">
-
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                        <motion.div
+                            whileHover={{
+                                rotate: -3,
+                                scale: 1.04,
+                            }}
+                            className="
+                                flex
+                                h-12
+                                w-12
+                                items-center
+                                justify-center
+                                rounded-2xl
+                                bg-gradient-to-br
+                                from-blue-600
+                                to-cyan-500
+                                text-white
+                                shadow-lg
+                                shadow-blue-500/15
+                            "
+                        >
                             <Sparkles size={21} />
-                        </div>
+                        </motion.div>
 
-                        <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white"></div>
-
+                        <span className="
+                            absolute
+                            -right-1
+                            -top-1
+                            h-3
+                            w-3
+                            rounded-full
+                            border-2
+                            border-[#e8edf4]
+                            bg-emerald-400
+                        " />
                     </div>
 
                     <div>
-
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
+                        <p className="
+                            text-[10px]
+                            font-black
+                            uppercase
+                            tracking-[0.18em]
+                            text-blue-600
+                        ">
                             Get Started
                         </p>
 
-                        <h2 className="text-2xl md:text-3xl font-black text-slate-800 mt-1">
+                        <h2 className="
+                            mt-1
+                            text-2xl
+                            font-black
+                            tracking-tight
+                            text-slate-800
+                            sm:text-3xl
+                        ">
                             Quick Actions
                         </h2>
-
                     </div>
-
                 </div>
 
-                <p className="text-sm text-slate-400 max-w-sm sm:text-right">
+                <p className="
+                    max-w-sm
+                    text-sm
+                    leading-6
+                    text-slate-400
+                    sm:text-right
+                ">
                     Everything you need to explore and contribute to NoteShare.
                 </p>
+            </motion.div>
 
-            </div>
+            {/* =====================================================
+                ACTION CARDS
+            ====================================================== */}
 
+            <div className="grid gap-5 sm:grid-cols-2">
 
-            {/* Action Cards */}
-            <div className="grid sm:grid-cols-2 gap-5">
+                {actions.map((action, index) => {
+                    const Icon = action.icon;
 
-                {actions.map((action) => (
-
-                    <button
-                        key={action.title}
-                        onClick={() => navigate(action.path)}
-                        className={`
-                            group
-                            relative
-                            w-full
-                            text-left
-                            bg-white
-                            border
-                            border-slate-100
-                            ${action.borderStyle}
-                            rounded-[28px]
-                            p-6
-                            shadow-[0_10px_35px_rgba(15,23,42,0.06)]
-                            hover:shadow-[0_20px_45px_rgba(15,23,42,0.10)]
-                            hover:-translate-y-1.5
-                            transition-all
-                            duration-400
-                            overflow-hidden
-                            focus:outline-none
-                            focus:ring-2
-                            focus:ring-blue-500
-                            focus:ring-offset-2
-                        `}
-                    >
-
-                        {/* Decorative Glow */}
-                        <div
+                    return (
+                        <motion.button
+                            key={action.title}
+                            type="button"
+                            initial={{
+                                opacity: 0,
+                                y: 20,
+                            }}
+                            whileInView={{
+                                opacity: 1,
+                                y: 0,
+                            }}
+                            viewport={{
+                                once: true,
+                                amount: 0.15,
+                            }}
+                            transition={{
+                                duration: 0.45,
+                                delay:
+                                    index * 0.07,
+                                ease: "easeOut",
+                            }}
+                            whileHover={{
+                                y: -6,
+                            }}
+                            whileTap={{
+                                scale: 0.99,
+                            }}
+                            onClick={() =>
+                                navigate(
+                                    action.path
+                                )
+                            }
                             className={`
-                                absolute
-                                -right-14
-                                -top-14
-                                w-36
-                                h-36
-                                ${action.bgStyle}
-                                rounded-full
-                                blur-3xl
-                                opacity-70
-                                group-hover:opacity-100
-                                group-hover:scale-125
-                                transition-all
-                                duration-700
+                                group
+                                relative
+                                w-full
+                                overflow-hidden
+                                rounded-[28px]
+                                border
+                                border-slate-200/80
+                                bg-white
+                                p-6
+                                text-left
+                                shadow-[0_10px_30px_rgba(15,23,42,0.045)]
+                                transition-shadow
+                                duration-300
+                                hover:shadow-[0_25px_55px_rgba(15,23,42,0.09)]
+                                ${action.borderHover}
+                                focus:outline-none
+                                focus:ring-4
+                                focus:ring-blue-100
                             `}
-                        ></div>
+                        >
 
+                            {/* Ambient glow */}
 
-                        {/* Small Decorative Line */}
-                        <div
-                            className={`
-                                absolute
-                                left-0
-                                top-0
-                                h-1
-                                w-0
-                                bg-gradient-to-r
-                                ${action.iconStyle}
-                                group-hover:w-full
-                                transition-all
-                                duration-500
-                            `}
-                        ></div>
+                            <div
+                                className={`
+                                    pointer-events-none
+                                    absolute
+                                    -right-12
+                                    -top-12
+                                    h-36
+                                    w-36
+                                    rounded-full
+                                    ${action.glow}
+                                    blur-3xl
+                                    transition-transform
+                                    duration-700
+                                    group-hover:scale-150
+                                `}
+                            />
 
+                            {/* Top gradient line */}
 
-                        <div className="relative">
+                            <div
+                                className={`
+                                    absolute
+                                    left-6
+                                    right-6
+                                    top-0
+                                    h-1
+                                    rounded-b-full
+                                    bg-gradient-to-r
+                                    ${action.iconStyle}
+                                    opacity-60
+                                `}
+                            />
 
-                            {/* Top */}
-                            <div className="flex items-start justify-between">
+                            <div className="relative">
 
-                                <div
-                                    className={`
-                                        w-14
-                                        h-14
-                                        rounded-2xl
-                                        bg-gradient-to-br
-                                        ${action.iconStyle}
-                                        text-white
-                                        flex
-                                        items-center
-                                        justify-center
-                                        shadow-lg
-                                        group-hover:scale-110
-                                        group-hover:rotate-2
-                                        transition-all
-                                        duration-500
-                                    `}
-                                >
-                                    {action.icon}
+                                {/* Top row */}
+
+                                <div className="flex items-start justify-between gap-4">
+
+                                    <motion.div
+                                        whileHover={{
+                                            rotate: -4,
+                                            scale: 1.05,
+                                        }}
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 300,
+                                            damping: 18,
+                                        }}
+                                        className={`
+                                            flex
+                                            h-14
+                                            w-14
+                                            shrink-0
+                                            items-center
+                                            justify-center
+                                            rounded-2xl
+                                            bg-gradient-to-br
+                                            ${action.iconStyle}
+                                            text-white
+                                            shadow-lg
+                                        `}
+                                    >
+                                        <Icon size={24} />
+                                    </motion.div>
+
+                                    <div className="flex items-center gap-3">
+
+                                        <span className={`
+                                            text-[10px]
+                                            font-black
+                                            uppercase
+                                            tracking-[0.16em]
+                                            ${action.textStyle}
+                                        `}>
+                                            {action.number}
+                                        </span>
+
+                                        <motion.div
+                                            whileHover={{
+                                                rotate: 5,
+                                            }}
+                                            className={`
+                                                flex
+                                                h-10
+                                                w-10
+                                                items-center
+                                                justify-center
+                                                rounded-xl
+                                                ${action.softBg}
+                                                ${action.textStyle}
+                                            `}
+                                        >
+                                            <ArrowUpRight
+                                                size={18}
+                                            />
+                                        </motion.div>
+                                    </div>
+
                                 </div>
 
+                                {/* Content */}
 
-                                <div
-                                    className={`
-                                        w-10
-                                        h-10
-                                        rounded-xl
-                                        ${action.bgStyle}
-                                        ${action.textStyle}
-                                        flex
-                                        items-center
-                                        justify-center
-                                        group-hover:translate-x-1
-                                        group-hover:scale-105
-                                        transition-all
+                                <div className="mt-6">
+                                    <h3 className="
+                                        text-xl
+                                        font-black
+                                        tracking-tight
+                                        text-slate-800
+                                        transition-colors
                                         duration-300
-                                    `}
-                                >
-                                    <ArrowRight size={19} />
-                                </div>
-
-                            </div>
-
-
-                            {/* Content */}
-                            <div className="mt-6">
-
-                                <div className="flex items-center gap-2">
-
-                                    <h3 className="text-xl font-black text-slate-800 group-hover:text-blue-600 transition-colors duration-300">
+                                        group-hover:text-blue-600
+                                    ">
                                         {action.title}
                                     </h3>
 
+                                    <p className="
+                                        mt-3
+                                        text-sm
+                                        leading-7
+                                        text-slate-500
+                                    ">
+                                        {action.description}
+                                    </p>
                                 </div>
 
-                                <p className="text-sm text-slate-500 mt-3 leading-7">
-                                    {action.description}
-                                </p>
+                                {/* Bottom CTA */}
+
+                                <div className="
+                                    mt-6
+                                    flex
+                                    items-center
+                                    justify-between
+                                    border-t
+                                    border-slate-100
+                                    pt-5
+                                ">
+                                    <span
+                                        className={`
+                                            text-[10px]
+                                            font-black
+                                            uppercase
+                                            tracking-[0.16em]
+                                            ${action.textStyle}
+                                        `}
+                                    >
+                                        Explore
+                                    </span>
+
+                                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 transition-colors group-hover:text-slate-600">
+                                        Open
+
+                                        <motion.span
+                                            className="inline-flex"
+                                            whileHover={{
+                                                x: 3,
+                                            }}
+                                        >
+                                            <ArrowUpRight
+                                                size={14}
+                                            />
+                                        </motion.span>
+                                    </div>
+                                </div>
 
                             </div>
-
-
-                            {/* Bottom */}
-                            <div className="flex items-center justify-between mt-6 pt-5 border-t border-slate-100">
-
-                                <span
-                                    className={`
-                                        text-xs
-                                        font-bold
-                                        uppercase
-                                        tracking-wider
-                                        ${action.textStyle}
-                                    `}
-                                >
-                                    Explore
-                                </span>
-
-                                <span className="text-xs text-slate-400 group-hover:text-slate-600 transition-colors">
-                                    Click to continue
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </button>
-
-                ))}
-
+                        </motion.button>
+                    );
+                })}
             </div>
-
         </section>
     );
 }
