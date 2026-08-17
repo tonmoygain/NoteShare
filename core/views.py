@@ -1,11 +1,14 @@
 import requests
 import re
 import os
+import mimetypes
 
 from django.http import HttpResponseRedirect
 from difflib import SequenceMatcher
 
 from google import genai
+
+from google.genai import types
 
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
@@ -1230,12 +1233,14 @@ def change_password(request):
 
 def get_note_text(note):
     """
-    Extract readable text from a Note file.
+    Extract text from a Note when possible.
 
     PDF  -> PyMuPDF
-    PNG/JPG/JPEG -> Tesseract OCR
+    PNG/JPG/JPEG -> Tesseract OCR if available
 
-    Returns empty string if the file cannot be processed.
+    Returns empty string if extraction is unavailable.
+    AI chat can still send the original image/PDF directly
+    to Gemini when this returns an empty string.
     """
 
     if not note.file:
@@ -1276,21 +1281,38 @@ def get_note_text(note):
             (".png", ".jpg", ".jpeg")
         ):
 
+            from io import BytesIO
             from PIL import Image
             import pytesseract
+            import shutil
 
-            # Tesseract executable path
-            pytesseract.pytesseract.tesseract_cmd = (
-                r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+            tesseract_path = shutil.which(
+                "tesseract"
             )
 
-            with note.file.open("rb") as file:
+            if not tesseract_path:
+                return ""
 
-                image = Image.open(file)
+            pytesseract.pytesseract.tesseract_cmd = (
+                tesseract_path
+            )
 
-                extracted_text = pytesseract.image_to_string(
+            response = requests.get(
+                note.file.url,
+                timeout=30
+            )
+
+            response.raise_for_status()
+
+            image = Image.open(
+                BytesIO(response.content)
+            )
+
+            extracted_text = (
+                pytesseract.image_to_string(
                     image
                 )
+            )
 
             return extracted_text.strip()
 
@@ -1306,7 +1328,7 @@ def get_note_text(note):
 
         print(
             "Note Text Extraction Error:",
-            error
+            repr(error)
         )
 
         return ""
@@ -1579,104 +1601,204 @@ def ai_chat(request):
         )
 
     # ==========================================
-    # FIND RELEVANT NOTES
+    # NOTE AVAILABILITY QUESTIONS
     # ==========================================
 
-    relevant_notes = find_relevant_notes(
-        message,
-        max_notes=3
-    )
+    availability_keywords = [
+        "what notes",
+        "which notes",
+        "available notes",
+        "list notes",
+        "show notes",
+        "what documents",
+        "which documents",
+    ]
 
-    # ==========================================
-    # BUILD NOTE CONTEXT
-    # ==========================================
+    message_lower = message.lower()
 
-    note_context = ""
-    sources = []
+    if any(
+        keyword in message_lower
+        for keyword in availability_keywords
+    ):
 
-    for note in relevant_notes:
+        all_notes = Note.objects.all().order_by("-uploaded_at")
 
-        text = get_note_text(note)
+        note_names = [
+            f"{index}. {note.title}"
+            for index, note in enumerate(
+                all_notes,
+                start=1
+            )
+        ]
 
-        if not text:
-            continue
-
-        # Limit each note to avoid huge prompts
-        text = text[:8000]
-
-        note_context += (
-            f"\n\n--- NOTE: {note.title} ---\n"
-            f"{text}\n"
+        reply = (
+            "The following notes are currently available "
+            "in NoteShare:\n\n"
+            + "\n".join(note_names)
         )
 
-        sources.append({
-            "id": note.id,
-            "title": note.title,
+        return Response({
+            "reply": reply,
+            "sources": [
+                {
+                    "id": note.id,
+                    "title": note.title,
+                }
+                for note in all_notes
+            ],
         })
 
-    # ==========================================
-    # SYSTEM PROMPT
-    # ==========================================
-
-    system_prompt = """
-You are NoteShare AI Assistant.
-
-Your primary job is to answer questions using
-the uploaded notes provided in the context.
-
-Rules:
-
-1. Use the provided note context whenever it contains
-   information relevant to the user's question.
-
-2. Do not invent information that is not present
-   in the provided notes.
-
-3. If the answer cannot be found in the uploaded notes,
-   clearly say that the information was not found
-   in the uploaded notes.
-
-4. You may give a short general explanation only after
-   stating that the uploaded notes do not contain
-   the requested information.
-
-5. Keep answers clear, useful, and student-friendly.
-"""
 
     # ==========================================
-    # USER PROMPT
+    # SELECT RELEVANT NOTES
     # ==========================================
 
-    if note_context:
+    message_lower = message.lower().strip()
 
-        user_prompt = f"""
-Uploaded Note Context:
+    all_notes = list(
+        Note.objects.all().order_by("-uploaded_at")
+    )
 
-{note_context}
+    # -------------------------------------------------
+    # 1. Exact title match gets absolute priority
+    # -------------------------------------------------
 
-User Question:
+    exact_matches = []
 
-{message}
+    for note in all_notes:
 
-Answer the user's question based primarily on
-the uploaded note context above.
-"""
+        title = (note.title or "").strip().lower()
+
+        if not title:
+            continue
+
+        if title == message_lower:
+            exact_matches.append(note)
+            continue
+
+        # Example:
+        # "What is the COC note about?"
+        # should match note title "COC"
+
+        title_pattern = rf"\b{re.escape(title)}\b"
+
+        if re.search(
+            title_pattern,
+            message_lower
+        ):
+            exact_matches.append(note)
+
+    if exact_matches:
+
+        relevant_notes = exact_matches[:3]
 
     else:
 
-        user_prompt = f"""
-No relevant uploaded note content was found.
+        # -------------------------------------------------
+        # 2. Metadata-based matching
+        # -------------------------------------------------
 
-User Question:
+        query_words = set(
+            re.findall(
+                r"\b[a-zA-Z0-9]+\b",
+                message_lower
+            )
+        )
 
-{message}
+        scored_notes = []
 
-Explain that the information was not found
-in the uploaded notes.
-"""
+        for note in all_notes:
+
+            title = (
+                note.title or ""
+            ).lower()
+
+            department = (
+                note.department or ""
+            ).lower()
+
+            description = (
+                note.description or ""
+            ).lower()
+
+            metadata_text = (
+                f"{title} "
+                f"{department} "
+                f"{description}"
+            )
+
+            metadata_words = set(
+                re.findall(
+                    r"\b[a-zA-Z0-9]+\b",
+                    metadata_text
+                )
+            )
+
+            matches = query_words.intersection(
+                metadata_words
+            )
+
+            score = len(matches)
+
+            title_words = set(
+                re.findall(
+                    r"\b[a-zA-Z0-9]+\b",
+                    title
+                )
+            )
+
+            title_matches = query_words.intersection(
+                title_words
+            )
+
+            score += len(title_matches) * 20
+
+            description_words = set(
+                re.findall(
+                    r"\b[a-zA-Z0-9]+\b",
+                    description
+                )
+            )
+
+            score += len(
+                query_words.intersection(
+                    description_words
+                )
+            ) * 5
+
+            if score > 0:
+
+                scored_notes.append(
+                    (
+                        score,
+                        note
+                    )
+                )
+
+        scored_notes.sort(
+            key=lambda item: item[0],
+            reverse=True
+        )
+
+        relevant_notes = [
+            note
+            for score, note in scored_notes[:3]
+        ]
+
+        # -------------------------------------------------
+        # 3. Existing relevance system as final fallback
+        # -------------------------------------------------
+
+        if not relevant_notes:
+
+            relevant_notes = find_relevant_notes(
+                message,
+                max_notes=3
+            )
+    
 
     # ==========================================
-    # GEMINI
+    # GEMINI CLIENT
     # ==========================================
 
     try:
@@ -1685,39 +1807,213 @@ in the uploaded notes.
             api_key=os.getenv("GEMINI_API_KEY")
         )
 
-        response = client.models.generate_content(
-            model="gemini-3.1-flash-lite",
-            contents=[
-                {
-                    "role": "user",
-                    "parts": [
-                        {
-                            "text": (
-                                system_prompt
-                                + "\n\n"
-                                + user_prompt
-                            )
-                        }
-                    ],
-                }
-            ],
+    except Exception as error:
+
+        print("Gemini Client Error:", error)
+
+        return Response(
+            {
+                "error":
+                    "Gemini AI is currently unavailable."
+            },
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
         )
 
-        reply = response.text or "No response received from AI."
+    # ==========================================
+    # BUILD GEMINI CONTENT
+    # ==========================================
+
+    contents = []
+
+    system_prompt = """
+You are NoteShare AI Assistant.
+
+Your job is to answer questions using the
+uploaded notes selected by the NoteShare system.
+
+Rules:
+
+1. Answer primarily from the provided note files
+   and extracted note text.
+
+2. If a note file is provided as an image or PDF,
+   inspect the file directly.
+
+3. Do not invent information.
+
+4. If the requested information is not present
+   in the provided notes, clearly say so.
+
+5. Do not use unrelated notes to answer a question
+   about a specific note.
+
+6. If the user mentions a specific note title,
+   prioritize that exact note.
+
+7. Keep answers clear and student-friendly.
+"""
+
+    contents.append(system_prompt)
+
+    contents.append(
+        f"""
+User Question:
+
+{message}
+
+Use the following NoteShare materials to answer.
+"""
+    )
+
+    sources = []
+
+    # ==========================================
+    # ADD SELECTED NOTES
+    # ==========================================
+
+    for note in relevant_notes[:3]:
+
+        sources.append({
+            "id": note.id,
+            "title": note.title,
+        })
+
+        extracted_text = get_note_text(note)
+
+        if extracted_text:
+
+            extracted_text = extracted_text[:12000]
+
+            contents.append(
+                f"""
+--- NOTE TEXT: {note.title} ---
+
+{extracted_text}
+"""
+            )
+
+            continue
+
+        # ==========================================
+        # FALLBACK: DIRECT FILE INPUT
+        # ==========================================
+
+        try:
+
+            file_url = note.file.url
+
+            file_response = requests.get(
+                file_url,
+                timeout=30
+            )
+
+            file_response.raise_for_status()
+
+            file_bytes = file_response.content
+
+            # Cloudinary provides the real MIME type in the response header.
+            mime_type = (
+                file_response.headers.get("Content-Type", "")
+                .split(";")[0]
+                .strip()
+            )
+
+            # Fallback for any unusual case.
+            if not mime_type:
+
+                mime_type, _ = mimetypes.guess_type(
+                    note.file.name
+                )
+
+            if not mime_type:
+
+                if note.file.name.lower().endswith(".pdf"):
+                    mime_type = "application/pdf"
+                else:
+                    mime_type = "image/jpeg"
+
+            contents.append(
+                f"""
+            --- NOTE FILE: {note.title} ---
+
+            This file is the actual uploaded NoteShare file.
+            If it is an image, inspect the visual content directly.
+            If it is a PDF, read the document content directly.
+            """
+            )
+
+            contents.append(
+            types.Part.from_bytes(
+                data=file_bytes,
+                mime_type=mime_type
+            ) 
+        )
+
+        except Exception as error:
+
+            print(
+                f"Gemini file input error for "
+                f"{note.title}:",
+                error
+            )
+
+    # ==========================================
+    # NO MATERIAL FOUND
+    # ==========================================
+
+    if not relevant_notes:
 
         return Response({
+            "reply": (
+                "I could not identify a relevant uploaded "
+                "note for this question."
+            ),
+            "sources": [],
+        })
+
+    # ==========================================
+    # GEMINI REQUEST
+    # ==========================================
+
+    try:
+
+        response = client.models.generate_content(
+
+            model="gemini-3.1-flash-lite",
+
+            contents=contents,
+
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt
+            ),
+        )
+
+        reply = (
+            response.text
+            or "No response received from AI."
+        )
+
+        return Response({
+
             "reply": reply,
+
             "sources": sources,
+
         })
 
     except Exception as error:
 
-        print("Gemini Error:", error)
+        print(
+            "Gemini Error:",
+            error
+        )
 
         return Response(
             {
-                "error": "Gemini AI is currently unavailable.",
-                "details": str(error)
+                "error":
+                    "Gemini AI is currently unavailable.",
+                "details":
+                    str(error),
             },
             status=status.HTTP_503_SERVICE_UNAVAILABLE
         )
