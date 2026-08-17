@@ -1,7 +1,11 @@
 import requests
 import re
+import os
+
 from django.http import HttpResponseRedirect
 from difflib import SequenceMatcher
+
+from google import genai
 
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
@@ -1588,7 +1592,6 @@ def ai_chat(request):
     # ==========================================
 
     note_context = ""
-
     sources = []
 
     for note in relevant_notes:
@@ -1641,7 +1644,7 @@ Rules:
 """
 
     # ==========================================
-    # USER PROMPT WITH NOTE CONTEXT
+    # USER PROMPT
     # ==========================================
 
     if note_context:
@@ -1672,77 +1675,49 @@ Explain that the information was not found
 in the uploaded notes.
 """
 
+    # ==========================================
+    # GEMINI
+    # ==========================================
+
     try:
 
-        # ==========================================
-        # SEND TO OLLAMA
-        # ==========================================
-
-        ollama_response = requests.post(
-
-            "http://127.0.0.1:11434/api/chat",
-
-            json={
-
-                "model": "llama3.2:3b",
-
-                "messages": [
-
-                    {
-                        "role": "system",
-                        "content": system_prompt,
-                    },
-
-                    {
-                        "role": "user",
-                        "content": user_prompt,
-                    },
-
-                ],
-
-                "stream": False,
-
-            },
-
-            timeout=120,
-
+        client = genai.Client(
+            api_key=os.getenv("GEMINI_API_KEY")
         )
 
-        ollama_response.raise_for_status()
-
-        data = ollama_response.json()
-
-        reply = data.get(
-            "message",
-            {}
-        ).get(
-            "content",
-            "No response received from AI."
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-lite",
+            contents=[
+                {
+                    "role": "user",
+                    "parts": [
+                        {
+                            "text": (
+                                system_prompt
+                                + "\n\n"
+                                + user_prompt
+                            )
+                        }
+                    ],
+                }
+            ],
         )
+
+        reply = response.text or "No response received from AI."
 
         return Response({
-
             "reply": reply,
-
             "sources": sources,
-
         })
 
-    except requests.exceptions.RequestException as error:
+    except Exception as error:
 
-        print(
-            "Ollama Error:",
-            error
-        )
+        print("Gemini Error:", error)
 
         return Response(
-
             {
-                "error":
-                    "Ollama is not available. "
-                    "Please make sure Ollama is running."
+                "error": "Gemini AI is currently unavailable.",
+                "details": str(error)
             },
-
             status=status.HTTP_503_SERVICE_UNAVAILABLE
-
         )

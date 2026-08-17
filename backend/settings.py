@@ -10,6 +10,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env")
 
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 if not SECRET_KEY:
