@@ -621,7 +621,7 @@ def delete_blog(request, id):
 
     })
 
-@api_view(["PUT"])
+@api_view(["PUT", "PATCH"])
 @permission_classes([IsAuthenticated])
 def update_blog(request, id):
 
