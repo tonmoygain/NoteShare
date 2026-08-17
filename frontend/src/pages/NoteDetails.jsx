@@ -544,7 +544,7 @@ function NoteDetails() {
 
 
                             <a
-                                href={`http://127.0.0.1:8000/api/notes/download/${note.id}/`}
+                                href={`${API.defaults.baseURL}notes/download/${note.id}/`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="shrink-0 inline-flex items-center justify-center gap-2 bg-white text-blue-700 hover:bg-blue-50 px-6 py-3.5 rounded-xl font-black transition shadow-lg"

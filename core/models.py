@@ -1,6 +1,30 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from cloudinary_storage.storage import (
+    MediaCloudinaryStorage,
+    RawMediaCloudinaryStorage,
+)
+
+
+# ==========================================
+# CUSTOM CLOUDINARY STORAGE FOR NOTES
+# ==========================================
+
+class NoteCloudinaryStorage(MediaCloudinaryStorage):
+
+    def _get_resource_type(self, name):
+        name = name.lower()
+
+        if name.endswith(".pdf"):
+            return "raw"
+
+        return "image"
+
+
+# =========================================================
+# USER PROFILE
+# =========================================================
 
 class UserProfile(models.Model):
 
@@ -12,6 +36,7 @@ class UserProfile(models.Model):
 
     photo = models.ImageField(
         upload_to="profiles/",
+        storage=MediaCloudinaryStorage(),
         blank=True,
         null=True
     )
@@ -55,6 +80,10 @@ class UserProfile(models.Model):
         return f"{self.user.username} Profile"
 
 
+# =========================================================
+# NOTE
+# =========================================================
+
 class Note(models.Model):
 
     uploader = models.ForeignKey(
@@ -65,26 +94,47 @@ class Note(models.Model):
         blank=True
     )
 
-    title = models.CharField(max_length=200)
+    title = models.CharField(
+        max_length=200
+    )
 
-    department = models.CharField(max_length=100)
+    department = models.CharField(
+        max_length=100
+    )
 
-    description = models.TextField(blank=True)
+    description = models.TextField(
+        blank=True
+    )
 
-    file = models.FileField(upload_to="notes/")
+    file = models.FileField(
+        upload_to="notes/",
+        storage=NoteCloudinaryStorage()
+    )
 
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
-    views = models.PositiveIntegerField(default=0)
+    views = models.PositiveIntegerField(
+        default=0
+    )
 
-    downloads = models.PositiveIntegerField(default=0)
+    downloads = models.PositiveIntegerField(
+        default=0
+    )
 
-    featured = models.BooleanField(default=False)
+    featured = models.BooleanField(
+        default=False
+    )
 
     def __str__(self):
-
         return self.title
-    
+
+
+# =========================================================
+# BLOG
+# =========================================================
+
 class Blog(models.Model):
 
     author = models.ForeignKey(
@@ -93,12 +143,15 @@ class Blog(models.Model):
         related_name="blogs"
     )
 
-    title = models.CharField(max_length=250)
+    title = models.CharField(
+        max_length=250
+    )
 
     content = models.TextField()
 
     image = models.ImageField(
         upload_to="blogs/",
+        storage=MediaCloudinaryStorage(),
         blank=True,
         null=True
     )
@@ -111,21 +164,35 @@ class Blog(models.Model):
         auto_now=True
     )
 
-    views = models.PositiveIntegerField(default=0)
+    views = models.PositiveIntegerField(
+        default=0
+    )
 
-    featured = models.BooleanField(default=False)
+    featured = models.BooleanField(
+        default=False
+    )
 
     def __str__(self):
-
         return self.title
+
+
+# =========================================================
+# DISCUSSION ROOM
+# =========================================================
 
 class DiscussionRoom(models.Model):
 
-    name = models.CharField(max_length=150)
+    name = models.CharField(
+        max_length=150
+    )
 
-    description = models.TextField(blank=True)
+    description = models.TextField(
+        blank=True
+    )
 
-    category = models.CharField(max_length=100)
+    category = models.CharField(
+        max_length=100
+    )
 
     department = models.CharField(
         max_length=100,
@@ -151,9 +218,6 @@ class DiscussionRoom(models.Model):
         auto_now_add=True
     )
 
-    def __str__(self):
-        return self.name
-
     parent_room = models.ForeignKey(
         "self",
         on_delete=models.CASCADE,
@@ -162,6 +226,13 @@ class DiscussionRoom(models.Model):
         related_name="child_rooms"
     )
 
+    def __str__(self):
+        return self.name
+
+
+# =========================================================
+# DISCUSSION MESSAGE
+# =========================================================
 
 class DiscussionMessage(models.Model):
 

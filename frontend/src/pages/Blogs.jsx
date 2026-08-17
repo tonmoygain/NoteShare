@@ -318,6 +318,21 @@ function Blogs() {
 
                             <div className="h-1.5 bg-gradient-to-r from-blue-600 via-cyan-500 to-emerald-400"></div>
 
+                            {/* Blog Image */}
+
+                            {blog.image && (
+                                <div className="w-full h-52 overflow-hidden bg-slate-100">
+                                    <img
+                                        src={blog.image}
+                                        alt={blog.title}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        loading="lazy"
+                                    />
+
+                                </div>
+
+                            )}
+
                             <div className="p-7">
 
                                 {/* Card Top */}

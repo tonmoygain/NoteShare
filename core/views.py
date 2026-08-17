@@ -379,13 +379,10 @@ def extract_note_text(request, id):
 @api_view(["GET"])
 def download_note(request, id):
 
-
     try:
-
         note = Note.objects.get(id=id)
 
     except Note.DoesNotExist:
-
         return Response(
             {
                 "error": "Note not found"
@@ -393,12 +390,31 @@ def download_note(request, id):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    # Increase Download Count
+    if not note.file:
+        return Response(
+            {
+                "error": "This note does not have a file."
+            },
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    try:
+        file_url = note.file.url
+
+    except Exception as error:
+
+        print("Cloudinary URL Error:", error)
+
+        return Response(
+            {
+                "error": "Could not generate file URL.",
+                "details": str(error)
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
     note.downloads += 1
     note.save(update_fields=["downloads"])
-
-    # Cloudinary file URL
-    file_url = note.file.url
 
     return HttpResponseRedirect(file_url)
 

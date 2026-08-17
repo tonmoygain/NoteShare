@@ -230,13 +230,10 @@ function BlogDetails() {
 
                     {blog.image ? (
                         <img
-                            src={
-                                blog.image.startsWith("http")
-                                    ? blog.image
-                                    : `http://127.0.0.1:8000${blog.image}`
-                            }
+                            src={blog.image}
                             alt={blog.title}
                             className="w-full h-full object-cover"
+                            loading="lazy"
                         />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center">
