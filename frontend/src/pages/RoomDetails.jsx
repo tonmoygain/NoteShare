@@ -509,7 +509,7 @@ function RoomDetails() {
             ====================================================== */}
 
             {isParentRoom ? (
-                <div className="room-study-icon section mt-12">
+                <div className="room-study-section mt-12">
                     <div className="flex items-center gap-3">
                         <div className="room-study-icon flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
                             <Hash size={21} />

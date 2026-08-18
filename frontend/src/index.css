@@ -2232,3 +2232,190 @@ html.dark .room-child-empty .text-slate-400 {
 }
 
 
+/* =========================================
+   AI ASSISTANT - COMPLETE DARK MODE
+   ========================================= */
+
+html.dark .ai-assistant-window {
+    background: #111827 !important;
+    border-color: #263247 !important;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45) !important;
+}
+
+
+/* Messages area */
+
+html.dark .ai-assistant-messages {
+    background:
+        linear-gradient(
+            to bottom,
+            #0f172a,
+            #0b1120
+        ) !important;
+}
+
+
+/* Suggested questions */
+
+html.dark .ai-assistant-suggestion {
+    background: rgba(37, 99, 235, 0.12) !important;
+    border-color: rgba(59, 130, 246, 0.28) !important;
+    color: #93c5fd !important;
+}
+
+html.dark .ai-assistant-suggestion:hover {
+    background: rgba(37, 99, 235, 0.20) !important;
+    border-color: rgba(59, 130, 246, 0.42) !important;
+    color: #bfdbfe !important;
+}
+
+
+/* Section label */
+
+html.dark .ai-assistant-section-label {
+    color: #64748b !important;
+}
+
+
+/* AI message */
+
+html.dark .ai-assistant-ai-message {
+    background: #111827 !important;
+    border-color: #263247 !important;
+    color: #d1d5db !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16) !important;
+}
+
+
+/* User message */
+
+html.dark .ai-assistant-user-message {
+    color: #ffffff !important;
+}
+
+
+/* Sources container */
+
+html.dark .ai-assistant-sources {
+    border-color: #263247 !important;
+}
+
+
+/* Source heading */
+
+html.dark .ai-assistant-source-label {
+    color: #64748b !important;
+}
+
+html.dark .ai-assistant-source-icon {
+    color: #60a5fa !important;
+}
+
+
+/* Source card */
+
+html.dark .ai-assistant-source-card {
+    background: rgba(37, 99, 235, 0.11) !important;
+    border-color: rgba(59, 130, 246, 0.24) !important;
+}
+
+html.dark .ai-assistant-source-card:hover {
+    background: rgba(37, 99, 235, 0.19) !important;
+    border-color: rgba(59, 130, 246, 0.40) !important;
+}
+
+
+/* Source title */
+
+html.dark .ai-assistant-source-title {
+    color: #93c5fd !important;
+}
+
+
+/* Source arrow */
+
+html.dark .ai-assistant-source-arrow {
+    color: #60a5fa !important;
+}
+
+
+/* Loading bubble */
+
+html.dark .ai-assistant-loading {
+    background: #111827 !important;
+    border-color: #263247 !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16) !important;
+}
+
+
+/* Footer */
+
+html.dark .ai-assistant-footer {
+    background: #111827 !important;
+    border-top-color: #263247 !important;
+}
+
+
+/* Input wrapper */
+
+html.dark .ai-assistant-input-wrapper {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+html.dark .ai-assistant-input-wrapper:focus-within {
+    background: #111827 !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12) !important;
+}
+
+
+/* Textarea */
+
+html.dark .ai-assistant-textarea {
+    background: transparent !important;
+    color: #e5e7eb !important;
+}
+
+html.dark .ai-assistant-textarea::placeholder {
+    color: #64748b !important;
+}
+
+
+/* Footer hint */
+
+html.dark .ai-assistant-footer-hint {
+    color: #64748b !important;
+}
+
+
+/* Header action buttons */
+
+html.dark .ai-assistant-header-button {
+    color: #bfdbfe !important;
+}
+
+html.dark .ai-assistant-header-button:hover {
+    background: rgba(255, 255, 255, 0.10) !important;
+    color: #ffffff !important;
+}
+
+
+/* AI assistant scrollbar */
+
+html.dark .ai-assistant-messages::-webkit-scrollbar {
+    width: 7px;
+}
+
+html.dark .ai-assistant-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+html.dark .ai-assistant-messages::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 999px;
+}
+
+html.dark .ai-assistant-messages::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}

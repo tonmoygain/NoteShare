@@ -40,6 +40,7 @@ from .models import (
     DiscussionRoom,
     DiscussionMessage,
     UserProfile,
+    Notification,
 )
 
 from .serializers import (
@@ -422,6 +423,15 @@ def download_note(request, id):
 
     note.downloads += 1
     note.save(update_fields=["downloads"])
+
+    if request.user.is_authenticated and request.user != note.uploader:
+        Notification.objects.create(
+            recipient=note.uploader,
+            notification_type="note_download",
+            title="Note Downloaded",
+            message=f'Your note "{note.title}" was downloaded.',
+            link=f"/note/{note.id}",
+        )
 
     return HttpResponseRedirect(file_url)
 
@@ -2017,3 +2027,48 @@ Use the following NoteShare materials to answer.
             },
             status=status.HTTP_503_SERVICE_UNAVAILABLE
         )
+
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def notification_list(request):
+    notifications = Notification.objects.filter(
+        recipient=request.user
+    ).order_by("-created_at")[:20]
+
+    data = []
+
+    for item in notifications:
+        data.append({
+            "id": item.id,
+            "notification_type": item.notification_type,
+            "title": item.title,
+            "message": item.message,
+            "link": item.link,
+            "is_read": item.is_read,
+            "created_at": item.created_at,
+        })
+
+    unread_count = Notification.objects.filter(
+        recipient=request.user,
+        is_read=False
+    ).count()
+
+    return Response({
+        "notifications": data,
+        "unread_count": unread_count,
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def mark_notifications_read(request):
+    Notification.objects.filter(
+        recipient=request.user,
+        is_read=False
+    ).update(is_read=True)
+
+    return Response({
+        "message": "Notifications marked as read."
+    })

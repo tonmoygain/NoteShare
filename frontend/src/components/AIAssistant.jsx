@@ -21,7 +21,6 @@ function AIAssistant() {
     const navigate = useNavigate();
 
     const [isOpen, setIsOpen] = useState(false);
-
     const [message, setMessage] = useState("");
 
     const [messages, setMessages] = useState([
@@ -63,34 +62,26 @@ function AIAssistant() {
         setLoading(true);
 
         try {
-            const response = await API.post(
-                "ai/chat/",
-                {
-                    message: trimmedMessage,
-                }
-            );
+            const response = await API.post("ai/chat/", {
+                message: trimmedMessage,
+            });
 
             setMessages((previous) => [
                 ...previous,
                 {
                     role: "assistant",
                     content: response.data.reply,
-                    sources:
-                        response.data.sources || [],
+                    sources: response.data.sources || [],
                 },
             ]);
         } catch (error) {
-            console.error(
-                "AI Assistant Error:",
-                error
-            );
+            console.error("AI Assistant Error:", error);
 
             let errorMessage =
                 "Sorry, I couldn't process your request.";
 
             if (error.response?.data?.error) {
-                errorMessage =
-                    error.response.data.error;
+                errorMessage = error.response.data.error;
             }
 
             setMessages((previous) => [
@@ -106,10 +97,7 @@ function AIAssistant() {
     };
 
     const handleKeyDown = (event) => {
-        if (
-            event.key === "Enter" &&
-            !event.shiftKey
-        ) {
+        if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
             sendMessage();
         }
@@ -152,9 +140,7 @@ function AIAssistant() {
                         whileTap={{
                             scale: 0.94,
                         }}
-                        onClick={() =>
-                            setIsOpen(true)
-                        }
+                        onClick={() => setIsOpen(true)}
                         className="
                             fixed
                             bottom-6
@@ -185,20 +171,22 @@ function AIAssistant() {
                             className="relative z-10"
                         />
 
-                        <span className="
-                            absolute
-                            -right-1
-                            -top-1
-                            flex
-                            h-5
-                            w-5
-                            items-center
-                            justify-center
-                            rounded-full
-                            border-2
-                            border-white
-                            bg-emerald-400
-                        ">
+                        <span
+                            className="
+                                absolute
+                                -right-1
+                                -top-1
+                                flex
+                                h-5
+                                w-5
+                                items-center
+                                justify-center
+                                rounded-full
+                                border-2
+                                border-white
+                                bg-emerald-400
+                            "
+                        >
                             <Sparkles
                                 size={9}
                                 className="text-white"
@@ -235,6 +223,8 @@ function AIAssistant() {
                             ease: "easeOut",
                         }}
                         className="
+                            ai-assistant-window
+
                             fixed
                             bottom-4
                             right-4
@@ -250,32 +240,34 @@ function AIAssistant() {
                             border-slate-200/80
                             bg-white
                             shadow-[0_30px_90px_rgba(15,23,42,0.18)]
+
                             sm:bottom-6
                             sm:right-6
                         "
                     >
-
                         {/* =================================================
                             HEADER
                         ================================================== */}
 
-                        <div className="
-                            relative
-                            overflow-hidden
-                            bg-gradient-to-br
-                            from-slate-950
-                            via-blue-950
-                            to-cyan-800
-                            px-5
-                            py-4
-                            text-white
-                        ">
+                        <div
+                            className="
+                                ai-assistant-header
+
+                                relative
+                                overflow-hidden
+                                bg-gradient-to-br
+                                from-slate-950
+                                via-blue-950
+                                to-cyan-800
+                                px-5
+                                py-4
+                                text-white
+                            "
+                        >
                             <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-cyan-400/15 blur-3xl" />
 
                             <div className="relative flex items-center justify-between gap-3">
-
-                                <div className="flex items-center gap-3 min-w-0">
-
+                                <div className="flex min-w-0 items-center gap-3">
                                     <motion.div
                                         animate={{
                                             y: [0, -2, 0],
@@ -304,23 +296,24 @@ function AIAssistant() {
                                     </motion.div>
 
                                     <div className="min-w-0">
-
                                         <div className="flex items-center gap-2">
                                             <h3 className="truncate font-black">
                                                 NoteShare AI
                                             </h3>
 
-                                            <span className="
-                                                rounded-full
-                                                bg-emerald-400/15
-                                                px-2
-                                                py-0.5
-                                                text-[9px]
-                                                font-black
-                                                uppercase
-                                                tracking-wider
-                                                text-emerald-200
-                                            ">
+                                            <span
+                                                className="
+                                                    rounded-full
+                                                    bg-emerald-400/15
+                                                    px-2
+                                                    py-0.5
+                                                    text-[9px]
+                                                    font-black
+                                                    uppercase
+                                                    tracking-wider
+                                                    text-emerald-200
+                                                "
+                                            >
                                                 Online
                                             </span>
                                         </div>
@@ -328,16 +321,14 @@ function AIAssistant() {
                                         <p className="mt-0.5 truncate text-[11px] text-blue-100">
                                             Your note-aware study assistant
                                         </p>
-
                                     </div>
-
                                 </div>
 
                                 <div className="flex shrink-0 items-center gap-1">
-
                                     <button
                                         onClick={clearChat}
                                         className="
+                                            ai-assistant-header-button
                                             rounded-xl
                                             p-2
                                             text-blue-100
@@ -351,10 +342,9 @@ function AIAssistant() {
                                     </button>
 
                                     <button
-                                        onClick={() =>
-                                            setIsOpen(false)
-                                        }
+                                        onClick={() => setIsOpen(false)}
                                         className="
+                                            ai-assistant-header-button
                                             rounded-xl
                                             p-2
                                             text-blue-100
@@ -366,28 +356,28 @@ function AIAssistant() {
                                     >
                                         <X size={19} />
                                     </button>
-
                                 </div>
-
                             </div>
 
-                            <div className="
-                                relative
-                                mt-4
-                                flex
-                                items-center
-                                gap-2
-                                rounded-xl
-                                border
-                                border-white/10
-                                bg-white/5
-                                px-3
-                                py-2
-                                text-[10px]
-                                font-semibold
-                                text-slate-300
-                                backdrop-blur-sm
-                            ">
+                            <div
+                                className="
+                                    relative
+                                    mt-4
+                                    flex
+                                    items-center
+                                    gap-2
+                                    rounded-xl
+                                    border
+                                    border-white/10
+                                    bg-white/5
+                                    px-3
+                                    py-2
+                                    text-[10px]
+                                    font-semibold
+                                    text-slate-300
+                                    backdrop-blur-sm
+                                "
+                            >
                                 <FileText
                                     size={13}
                                     className="text-cyan-300"
@@ -403,6 +393,8 @@ function AIAssistant() {
 
                         <div
                             className="
+                                ai-assistant-messages
+
                                 flex-1
                                 overflow-y-auto
                                 bg-gradient-to-b
@@ -412,103 +404,100 @@ function AIAssistant() {
                                 py-5
                             "
                         >
-
                             {/* Suggested prompts */}
 
-                            {messages.length === 1 &&
-                                !loading && (
-                                    <motion.div
-                                        initial={{
-                                            opacity: 0,
-                                            y: 8,
-                                        }}
-                                        animate={{
-                                            opacity: 1,
-                                            y: 0,
-                                        }}
-                                        className="mb-5"
-                                    >
-                                        <p className="
+                            {messages.length === 1 && !loading && (
+                                <motion.div
+                                    initial={{
+                                        opacity: 0,
+                                        y: 8,
+                                    }}
+                                    animate={{
+                                        opacity: 1,
+                                        y: 0,
+                                    }}
+                                    className="mb-5"
+                                >
+                                    <p
+                                        className="
+                                            ai-assistant-section-label
+
                                             mb-2
                                             text-[10px]
                                             font-black
                                             uppercase
                                             tracking-[0.15em]
                                             text-slate-400
-                                        ">
-                                            Try asking
-                                        </p>
+                                        "
+                                    >
+                                        Try asking
+                                    </p>
 
-                                        <div className="flex flex-wrap gap-2">
-                                            {suggestedQuestions.map(
-                                                (question) => (
-                                                    <button
-                                                        key={
-                                                            question
-                                                        }
-                                                        type="button"
-                                                        onClick={() =>
-                                                            setMessage(
-                                                                question
-                                                            )
-                                                        }
-                                                        className="
-                                                            rounded-full
-                                                            border
-                                                            border-blue-100
-                                                            bg-blue-50
-                                                            px-3
-                                                            py-2
-                                                            text-left
-                                                            text-[11px]
-                                                            font-bold
-                                                            text-blue-600
-                                                            transition
-                                                            hover:border-blue-200
-                                                            hover:bg-blue-100
-                                                        "
-                                                    >
-                                                        {question}
-                                                    </button>
-                                                )
-                                            )}
-                                        </div>
-                                    </motion.div>
-                                )}
+                                    <div className="flex flex-wrap gap-2">
+                                        {suggestedQuestions.map(
+                                            (question) => (
+                                                <button
+                                                    key={question}
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setMessage(question)
+                                                    }
+                                                    className="
+                                                        ai-assistant-suggestion
+
+                                                        rounded-full
+                                                        border
+                                                        border-blue-100
+                                                        bg-blue-50
+                                                        px-3
+                                                        py-2
+                                                        text-left
+                                                        text-[11px]
+                                                        font-bold
+                                                        text-blue-600
+                                                        transition
+                                                        hover:border-blue-200
+                                                        hover:bg-blue-100
+                                                    "
+                                                >
+                                                    {question}
+                                                </button>
+                                            )
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
 
                             <div className="space-y-4">
+                                {messages.map((item, index) => {
+                                    const isUser =
+                                        item.role === "user";
 
-                                {messages.map(
-                                    (item, index) => {
-                                        const isUser =
-                                            item.role ===
-                                            "user";
-
-                                        return (
-                                            <motion.div
-                                                key={`${item.role}-${index}`}
-                                                initial={{
-                                                    opacity: 0,
-                                                    y: 10,
-                                                    scale: 0.98,
-                                                }}
-                                                animate={{
-                                                    opacity: 1,
-                                                    y: 0,
-                                                    scale: 1,
-                                                }}
-                                                transition={{
-                                                    duration: 0.25,
-                                                }}
-                                                className={
-                                                    isUser
-                                                        ? "flex justify-end"
-                                                        : "flex justify-start"
-                                                }
-                                            >
-
-                                                {!isUser && (
-                                                    <div className="
+                                    return (
+                                        <motion.div
+                                            key={`${item.role}-${index}`}
+                                            initial={{
+                                                opacity: 0,
+                                                y: 10,
+                                                scale: 0.98,
+                                            }}
+                                            animate={{
+                                                opacity: 1,
+                                                y: 0,
+                                                scale: 1,
+                                            }}
+                                            transition={{
+                                                duration: 0.25,
+                                            }}
+                                            className={
+                                                isUser
+                                                    ? "flex justify-end"
+                                                    : "flex justify-start"
+                                            }
+                                        >
+                                            {!isUser && (
+                                                <div
+                                                    className="
                                                         mr-2
                                                         mt-1
                                                         flex
@@ -523,144 +512,169 @@ function AIAssistant() {
                                                         to-cyan-500
                                                         text-white
                                                         shadow-sm
-                                                    ">
-                                                        <Bot
-                                                            size={16}
-                                                        />
-                                                    </div>
-                                                )}
-
-                                                <div
-                                                    className={
-                                                        isUser
-                                                            ? `
-                                                                max-w-[82%]
-                                                                rounded-2xl
-                                                                rounded-br-md
-                                                                bg-gradient-to-br
-                                                                from-blue-600
-                                                                to-blue-500
-                                                                px-4
-                                                                py-3
-                                                                text-sm
-                                                                leading-6
-                                                                text-white
-                                                                shadow-md
-                                                                shadow-blue-500/10
-                                                            `
-                                                            : `
-                                                                max-w-[84%]
-                                                                rounded-2xl
-                                                                rounded-bl-md
-                                                                border
-                                                                border-slate-200
-                                                                bg-white
-                                                                px-4
-                                                                py-3
-                                                                text-sm
-                                                                leading-6
-                                                                text-slate-700
-                                                                shadow-sm
-                                                            `
-                                                    }
+                                                    "
                                                 >
+                                                    <Bot size={16} />
+                                                </div>
+                                            )}
 
-                                                    <p className="whitespace-pre-wrap break-words">
-                                                        {
-                                                            item.content
-                                                        }
-                                                    </p>
+                                            <div
+                                                className={
+                                                    isUser
+                                                        ? `
+                                                            ai-assistant-user-message
 
-                                                    {/* Sources */}
+                                                            max-w-[82%]
+                                                            rounded-2xl
+                                                            rounded-br-md
+                                                            bg-gradient-to-br
+                                                            from-blue-600
+                                                            to-blue-500
+                                                            px-4
+                                                            py-3
+                                                            text-sm
+                                                            leading-6
+                                                            text-white
+                                                            shadow-md
+                                                            shadow-blue-500/10
+                                                        `
+                                                        : `
+                                                            ai-assistant-ai-message
 
-                                                    {item.sources
-                                                        ?.length >
-                                                        0 && (
-                                                        <div className="
+                                                            max-w-[84%]
+                                                            rounded-2xl
+                                                            rounded-bl-md
+                                                            border
+                                                            border-slate-200
+                                                            bg-white
+                                                            px-4
+                                                            py-3
+                                                            text-sm
+                                                            leading-6
+                                                            text-slate-700
+                                                            shadow-sm
+                                                        `
+                                                }
+                                            >
+                                                <p className="whitespace-pre-wrap break-words">
+                                                    {item.content}
+                                                </p>
+
+                                                {/* Sources */}
+
+                                                {item.sources?.length > 0 && (
+                                                    <div
+                                                        className="
+                                                            ai-assistant-sources
+
                                                             mt-3
                                                             border-t
                                                             border-slate-200
                                                             pt-3
-                                                        ">
-                                                            <div className="
+                                                        "
+                                                    >
+                                                        <div
+                                                            className="
                                                                 mb-2
                                                                 flex
                                                                 items-center
                                                                 gap-2
-                                                            ">
-                                                                <BookOpen
-                                                                    size={13}
-                                                                    className="text-blue-600"
-                                                                />
+                                                            "
+                                                        >
+                                                            <BookOpen
+                                                                size={13}
+                                                                className="
+                                                                    ai-assistant-source-icon
+                                                                    text-blue-600
+                                                                "
+                                                            />
 
-                                                                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                                                                    Note Sources
-                                                                </p>
-                                                            </div>
+                                                            <p
+                                                                className="
+                                                                    ai-assistant-source-label
 
-                                                            <div className="space-y-1.5">
-                                                                {item.sources.map(
-                                                                    (
-                                                                        source
-                                                                    ) => (
-                                                                        <button
-                                                                            key={
-                                                                                source.id
-                                                                            }
-                                                                            onClick={() =>
-                                                                                navigate(
-                                                                                    `/note/${source.id}`
-                                                                                )
-                                                                            }
+                                                                    text-[10px]
+                                                                    font-black
+                                                                    uppercase
+                                                                    tracking-wider
+                                                                    text-slate-400
+                                                                "
+                                                            >
+                                                                Note Sources
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="space-y-1.5">
+                                                            {item.sources.map(
+                                                                (source) => (
+                                                                    <button
+                                                                        key={
+                                                                            source.id
+                                                                        }
+                                                                        onClick={() =>
+                                                                            navigate(
+                                                                                `/note/${source.id}`
+                                                                            )
+                                                                        }
+                                                                        className="
+                                                                            ai-assistant-source-card
+
+                                                                            group
+                                                                            flex
+                                                                            w-full
+                                                                            items-center
+                                                                            justify-between
+                                                                            gap-2
+                                                                            rounded-xl
+                                                                            border
+                                                                            border-blue-100
+                                                                            bg-blue-50
+                                                                            px-3
+                                                                            py-2.5
+                                                                            text-left
+                                                                            transition
+                                                                            hover:border-blue-200
+                                                                            hover:bg-blue-100
+                                                                        "
+                                                                    >
+                                                                        <span
                                                                             className="
-                                                                                group
-                                                                                flex
-                                                                                w-full
-                                                                                items-center
-                                                                                justify-between
-                                                                                gap-2
-                                                                                rounded-xl
-                                                                                border
-                                                                                border-blue-100
-                                                                                bg-blue-50
-                                                                                px-3
-                                                                                py-2.5
-                                                                                text-left
-                                                                                transition
-                                                                                hover:border-blue-200
-                                                                                hover:bg-blue-100
+                                                                                ai-assistant-source-title
+
+                                                                                line-clamp-2
+                                                                                min-w-0
+                                                                                text-[11px]
+                                                                                font-bold
+                                                                                text-blue-700
                                                                             "
                                                                         >
-                                                                            <span className="line-clamp-2 min-w-0 text-[11px] font-bold text-blue-700">
-                                                                                {
-                                                                                    source.title
-                                                                                }
-                                                                            </span>
+                                                                            {
+                                                                                source.title
+                                                                            }
+                                                                        </span>
 
-                                                                            <ArrowUpRight
-                                                                                size={
-                                                                                    14
-                                                                                }
-                                                                                className="
-                                                                                    shrink-0
-                                                                                    text-blue-400
-                                                                                    transition
-                                                                                    group-hover:translate-x-0.5
-                                                                                    group-hover:-translate-y-0.5
-                                                                                "
-                                                                            />
-                                                                        </button>
-                                                                    )
-                                                                )}
-                                                            </div>
+                                                                        <ArrowUpRight
+                                                                            size={14}
+                                                                            className="
+                                                                                ai-assistant-source-arrow
+
+                                                                                shrink-0
+                                                                                text-blue-400
+                                                                                transition
+                                                                                group-hover:translate-x-0.5
+                                                                                group-hover:-translate-y-0.5
+                                                                            "
+                                                                        />
+                                                                    </button>
+                                                                )
+                                                            )}
                                                         </div>
-                                                    )}
-                                                </div>
-
-                                            </motion.div>
-                                        );
-                                    }
-                                )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })}
 
                                 {/* AI loading */}
 
@@ -681,37 +695,41 @@ function AIAssistant() {
                                             }}
                                             className="flex items-end gap-2"
                                         >
-                                            <div className="
-                                                flex
-                                                h-8
-                                                w-8
-                                                shrink-0
-                                                items-center
-                                                justify-center
-                                                rounded-xl
-                                                bg-gradient-to-br
-                                                from-blue-600
-                                                to-cyan-500
-                                                text-white
-                                            ">
-                                                <Bot
-                                                    size={16}
-                                                />
+                                            <div
+                                                className="
+                                                    flex
+                                                    h-8
+                                                    w-8
+                                                    shrink-0
+                                                    items-center
+                                                    justify-center
+                                                    rounded-xl
+                                                    bg-gradient-to-br
+                                                    from-blue-600
+                                                    to-cyan-500
+                                                    text-white
+                                                "
+                                            >
+                                                <Bot size={16} />
                                             </div>
 
-                                            <div className="
-                                                flex
-                                                items-center
-                                                gap-1
-                                                rounded-2xl
-                                                rounded-bl-md
-                                                border
-                                                border-slate-200
-                                                bg-white
-                                                px-4
-                                                py-3
-                                                shadow-sm
-                                            ">
+                                            <div
+                                                className="
+                                                    ai-assistant-loading
+
+                                                    flex
+                                                    items-center
+                                                    gap-1
+                                                    rounded-2xl
+                                                    rounded-bl-md
+                                                    border
+                                                    border-slate-200
+                                                    bg-white
+                                                    px-4
+                                                    py-3
+                                                    shadow-sm
+                                                "
+                                            >
                                                 <span className="h-2 w-2 animate-bounce rounded-full bg-blue-500 [animation-delay:-0.3s]" />
                                                 <span className="h-2 w-2 animate-bounce rounded-full bg-blue-400 [animation-delay:-0.15s]" />
                                                 <span className="h-2 w-2 animate-bounce rounded-full bg-cyan-400" />
@@ -719,7 +737,6 @@ function AIAssistant() {
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
-
                             </div>
                         </div>
 
@@ -727,42 +744,50 @@ function AIAssistant() {
                             INPUT
                         ================================================== */}
 
-                        <div className="border-t border-slate-200 bg-white p-3">
+                        <div
+                            className="
+                                ai-assistant-footer
 
-                            <div className="
-                                flex
-                                items-end
-                                gap-2
-                                rounded-2xl
-                                border
+                                border-t
                                 border-slate-200
-                                bg-slate-50
-                                p-2
-                                transition
-                                focus-within:border-blue-300
-                                focus-within:bg-white
-                                focus-within:ring-4
-                                focus-within:ring-blue-100
-                            ">
+                                bg-white
+                                p-3
+                            "
+                        >
+                            <div
+                                className="
+                                    ai-assistant-input-wrapper
 
+                                    flex
+                                    items-end
+                                    gap-2
+                                    rounded-2xl
+                                    border
+                                    border-slate-200
+                                    bg-slate-50
+                                    p-2
+                                    transition
+
+                                    focus-within:border-blue-300
+                                    focus-within:bg-white
+                                    focus-within:ring-4
+                                    focus-within:ring-blue-100
+                                "
+                            >
                                 <textarea
                                     value={message}
-                                    onChange={(
-                                        event
-                                    ) =>
+                                    onChange={(event) =>
                                         setMessage(
-                                            event
-                                                .target
-                                                .value
+                                            event.target.value
                                         )
                                     }
-                                    onKeyDown={
-                                        handleKeyDown
-                                    }
+                                    onKeyDown={handleKeyDown}
                                     placeholder="Ask about your notes..."
                                     rows={1}
                                     disabled={loading}
                                     className="
+                                        ai-assistant-textarea
+
                                         max-h-24
                                         min-h-[40px]
                                         flex-1
@@ -826,24 +851,26 @@ function AIAssistant() {
                                         <Send size={18} />
                                     )}
                                 </motion.button>
-
                             </div>
 
-                            <div className="
-                                mt-2
-                                flex
-                                items-center
-                                justify-center
-                                gap-1.5
-                                text-[10px]
-                                font-semibold
-                                text-slate-400
-                            ">
+                            <div
+                                className="
+                                    ai-assistant-footer-hint
+
+                                    mt-2
+                                    flex
+                                    items-center
+                                    justify-center
+                                    gap-1.5
+                                    text-[10px]
+                                    font-semibold
+                                    text-slate-400
+                                "
+                            >
                                 <MessageCircle size={11} />
                                 Enter to send · Shift + Enter for a new line
                             </div>
                         </div>
-
                     </motion.div>
                 )}
             </AnimatePresence>
