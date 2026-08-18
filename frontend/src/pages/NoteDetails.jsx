@@ -132,48 +132,13 @@ function NoteDetails() {
         }
     };
 
-    // =========================================================
-    // LOADING
-    // =========================================================
 
-    if (loading) {
-        return (
-            <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
-                <div className="animate-pulse">
-                    <div className="h-5 w-32 rounded-full bg-slate-200" />
-
-                    <div className="mt-7 overflow-hidden rounded-[34px] border border-slate-200 bg-white">
-                        <div className="h-72 bg-gradient-to-br from-slate-300 via-slate-200 to-slate-300 sm:h-80" />
-
-                        <div className="space-y-6 p-6 sm:p-10">
-                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                                {[1, 2, 3, 4].map(
-                                    (item) => (
-                                        <div
-                                            key={
-                                                item
-                                            }
-                                            className="h-28 rounded-2xl bg-slate-100"
-                                        />
-                                    )
-                                )}
-                            </div>
-
-                            <div className="h-48 rounded-[26px] bg-slate-100" />
-
-                            <div className="h-36 rounded-[28px] bg-slate-100" />
-                        </div>
-                    </div>
-                </div>
-            </section>
-        );
-    }
 
     // =========================================================
     // ERROR
     // =========================================================
 
-    if (error || !note) {
+    if (error) {
         return (
             <div className="min-h-[70vh] px-6 flex items-center justify-center">
                 <motion.div
@@ -214,6 +179,11 @@ function NoteDetails() {
         );
     }
 
+
+    if (!note) {
+        return null;
+    }
+
     const uploadedDate = note.uploaded_at
         ? new Date(
               note.uploaded_at
@@ -248,6 +218,7 @@ function NoteDetails() {
                 }}
                 onClick={() => navigate("/notes")}
                 className="
+                    note-details-back
                     group
                     inline-flex
                     items-center
@@ -294,6 +265,7 @@ function NoteDetails() {
                     ease: "easeOut",
                 }}
                 className="
+                    note-details-card
                     mt-7
                     overflow-hidden
                     rounded-[34px]
@@ -572,6 +544,7 @@ function NoteDetails() {
                                 y: -2,
                             }}
                             className="
+                                note-details-meta
                                 rounded-2xl
                                 border
                                 border-slate-200
@@ -602,6 +575,7 @@ function NoteDetails() {
                                 y: -2,
                             }}
                             className="
+                                note-details-meta
                                 rounded-2xl
                                 border
                                 border-slate-200
@@ -652,6 +626,7 @@ function NoteDetails() {
                                 y: -2,
                             }}
                             className="
+                                note-details-meta
                                 rounded-2xl
                                 border
                                 border-slate-200
@@ -688,6 +663,7 @@ function NoteDetails() {
                                 y: -2,
                             }}
                             className="
+                                note-details-meta
                                 rounded-2xl
                                 border
                                 border-slate-200
@@ -752,6 +728,7 @@ function NoteDetails() {
                         </div>
 
                         <div className="
+                            note-details-description
                             mt-5
                             rounded-[26px]
                             border
@@ -906,6 +883,7 @@ function NoteDetails() {
                                 once: true,
                             }}
                             className="
+                                note-details-owner
                                 mt-10
                                 rounded-[28px]
                                 border
@@ -1017,6 +995,7 @@ function NoteDetails() {
                     ================================================== */}
 
                     <div className="
+                        note-details-footer
                         mt-10
                         flex
                         flex-col

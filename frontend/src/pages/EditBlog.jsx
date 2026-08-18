@@ -153,30 +153,6 @@ function EditBlog() {
         }
     };
 
-    // =========================================================
-    // LOADING
-    // =========================================================
-
-    if (loading) {
-        return (
-            <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
-                <div className="animate-pulse">
-                    <div className="h-5 w-32 rounded-full bg-slate-200" />
-
-                    <div className="mt-7 overflow-hidden rounded-[34px] border border-slate-200 bg-white">
-                        <div className="h-64 bg-gradient-to-r from-slate-300 via-slate-200 to-slate-300 sm:h-72" />
-
-                        <div className="space-y-6 p-6 sm:p-10">
-                            <div className="h-14 rounded-2xl bg-slate-100" />
-                            <div className="h-64 rounded-2xl bg-slate-100" />
-                            <div className="h-28 rounded-2xl bg-slate-100" />
-                            <div className="h-14 rounded-2xl bg-slate-200" />
-                        </div>
-                    </div>
-                </div>
-            </section>
-        );
-    }
 
     // =========================================================
     // ERROR
@@ -194,9 +170,9 @@ function EditBlog() {
                         opacity: 1,
                         y: 0,
                     }}
-                    className="w-full max-w-lg rounded-[30px] border border-slate-200 bg-white p-10 text-center shadow-[0_20px_55px_rgba(15,23,42,0.08)]"
+                    className="edit-blog-error-card w-full max-w-lg rounded-[30px] border border-slate-200 bg-white p-10 text-center shadow-[0_20px_55px_rgba(15,23,42,0.08)]"
                 >
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+                    <div className="edit-blog-error-icon mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-500">
                         <FileText size={28} />
                     </div>
 
@@ -229,19 +205,13 @@ function EditBlog() {
                 TOP NAV
             ====================================================== */}
 
-            <motion.button
-                initial={{
-                    opacity: 0,
-                    x: -8,
-                }}
-                animate={{
-                    opacity: 1,
-                    x: 0,
-                }}
+            <button
+                
                 onClick={() =>
                     navigate(`/blog/${id}`)
                 }
                 className="
+                    edit-blog-back
                     group
                     inline-flex
                     items-center
@@ -268,26 +238,16 @@ function EditBlog() {
                 />
 
                 Back to Blog
-            </motion.button>
+            </button>
 
             {/* =====================================================
                 MAIN CARD
             ====================================================== */}
 
-            <motion.div
-                initial={{
-                    opacity: 0,
-                    y: 18,
-                }}
-                animate={{
-                    opacity: 1,
-                    y: 0,
-                }}
-                transition={{
-                    duration: 0.55,
-                    ease: "easeOut",
-                }}
+            <div
+                
                 className="
+                    edit-blog-card
                     mt-7
                     overflow-hidden
                     rounded-[34px]
@@ -585,6 +545,7 @@ function EditBlog() {
                             disabled={updating}
                             required
                             className="
+                                edit-blog-control
                                 mt-3
                                 h-14
                                 w-full
@@ -647,6 +608,7 @@ function EditBlog() {
                             disabled={updating}
                             required
                             className="
+                                edit-blog-control
                                 mt-3
                                 w-full
                                 resize-none
@@ -709,6 +671,7 @@ function EditBlog() {
 
                         {!image ? (
                             <label className="
+                                edit-blog-dropzone
                                 group
                                 mt-3
                                 flex
@@ -729,6 +692,7 @@ function EditBlog() {
                                 hover:bg-blue-50/40
                             ">
                                 <div className="
+                                    edit-blog-upload-icon
                                     flex
                                     h-14
                                     w-14
@@ -777,6 +741,7 @@ function EditBlog() {
                                     y: 0,
                                 }}
                                 className="
+                                    edit-blog-selected-image
                                     mt-3
                                     rounded-[24px]
                                     border
@@ -829,6 +794,7 @@ function EditBlog() {
                                         }
                                         disabled={updating}
                                         className="
+                                            edit-blog-remove-image
                                             inline-flex
                                             items-center
                                             gap-1.5
@@ -858,6 +824,7 @@ function EditBlog() {
                     ================================================== */}
 
                     <div className="
+                        edit-blog-preview-info
                         flex
                         items-start
                         gap-3
@@ -869,6 +836,7 @@ function EditBlog() {
                         py-4
                     ">
                         <div className="
+                            edit-blog-preview-icon
                             flex
                             h-9
                             w-9
@@ -900,6 +868,7 @@ function EditBlog() {
                     ================================================== */}
 
                     <div className="
+                        edit-blog-actions
                         flex
                         flex-col-reverse
                         gap-3
@@ -918,6 +887,7 @@ function EditBlog() {
                             }
                             disabled={updating}
                             className="
+                                edit-blog-cancel
                                 rounded-xl
                                 bg-slate-100
                                 px-5
@@ -985,7 +955,7 @@ function EditBlog() {
                         </motion.button>
                     </div>
                 </form>
-            </motion.div>
+            </div>
         </section>
     );
 }

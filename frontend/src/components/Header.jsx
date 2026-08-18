@@ -12,6 +12,8 @@ import {
     Upload,
     FilePenLine,
     Sparkles,
+    FileText,
+    BookOpen,
 } from "lucide-react";
 
 import { Link, useNavigate } from "react-router-dom";
@@ -26,6 +28,13 @@ function Header({ search, setSearch }) {
     // ==========================================
     // AUTH
     // ==========================================
+
+    const [headerSearch, setHeaderSearch] = useState(
+        search || ""
+    );
+
+    const [showSearchOptions, setShowSearchOptions] =
+        useState(false);
 
     const [isLoggedIn, setIsLoggedIn] = useState(
         !!localStorage.getItem("access")
@@ -51,6 +60,74 @@ function Header({ search, setSearch }) {
     const [showProfileMenu, setShowProfileMenu] =
         useState(false);
 
+
+    // ==========================================
+    // HEADER SEARCH
+    // ==========================================
+
+
+    const submitSearch = (type = "notes") => {
+
+        const query =
+            headerSearch.trim();
+
+        if (!query) {
+            return;
+        }
+
+        setShowSearchOptions(false);
+
+        if (setSearch) {
+            setSearch(query);
+        }
+
+        navigate(
+            `/${type}?search=${encodeURIComponent(query)}`
+        );
+
+    };
+
+
+    const handleHeaderSearchChange = (
+        event
+    ) => {
+
+        const value =
+            event.target.value;
+
+        setHeaderSearch(value);
+
+        if (setSearch) {
+            setSearch(value);
+        }
+
+        setShowSearchOptions(
+            value.trim().length > 0
+        );
+
+    };
+
+
+    const handleHeaderSearchKeyDown = (
+        event
+    ) => {
+
+        if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            submitSearch("notes");
+
+        }
+
+        if (event.key === "Escape") {
+
+            setShowSearchOptions(false);
+
+        }
+
+    };
+
     // ==========================================
     // DATE
     // ==========================================
@@ -72,21 +149,18 @@ function Header({ search, setSearch }) {
 
     useEffect(() => {
 
+        const root =
+            document.documentElement;
+
         localStorage.setItem("theme", theme);
 
         if (theme === "dark") {
 
-            document.documentElement.classList.add("dark");
-
-            document.body.style.background = "#0f172a";
-            document.body.style.color = "#e2e8f0";
+            root.classList.add("dark");
 
         } else {
 
-            document.documentElement.classList.remove("dark");
-
-            document.body.style.background = "#f8fafc";
-            document.body.style.color = "#0f172a";
+            root.classList.remove("dark");
 
         }
 
@@ -318,61 +392,289 @@ function Header({ search, setSearch }) {
                     "
                 >
 
-                    {/* Search */}
+                    {/* =====================================================
+                        SEARCH
+                    ====================================================== */}
 
-                    <div
-                        className="
-                            relative
-                            hidden
-                            xl:block
-                        "
-                    >
+                    <div className="relative hidden xl:block">
 
-                        <Search
-                            size={17}
-                            className="
-                                pointer-events-none
-                                absolute
-                                left-4
-                                top-1/2
-                                -translate-y-1/2
-                                text-slate-400
-                            "
-                        />
+                        <form
+                            onSubmit={(event) => {
+                                event.preventDefault();
 
-                        <input
-                            type="text"
-                            value={search || ""}
-                            onChange={(event) =>
-                                setSearch?.(
-                                    event.target.value
-                                )
-                            }
-                            placeholder="Search notes..."
-                            className="
-                                h-11
-                                w-[280px]
-                                rounded-xl
-                                border
-                                border-slate-200
-                                bg-slate-50
-                                pl-11
-                                pr-4
-                                text-sm
-                                font-medium
-                                text-slate-700
-                                outline-none
-                                transition-all
-                                duration-200
-                                placeholder:text-slate-400
-                                focus:border-blue-400
-                                focus:bg-white
-                                focus:ring-4
-                                focus:ring-blue-100/70
-                            "
-                        />
+                                submitSearch("notes");
+                            }}
+                            className="relative"
+                        >
 
-                    </div>
+                            <Search
+                                size={17}
+                                className="
+                                    pointer-events-none
+                                    absolute
+                                    left-4
+                                    top-1/2
+                                    -translate-y-1/2
+                                    text-slate-400
+                                "
+                            />
+
+                            <input
+                                type="text"
+                                value={headerSearch}
+                                onChange={
+                                    handleHeaderSearchChange
+                                }
+                                onFocus={() => {
+
+                                    if (
+                                        headerSearch.trim()
+                                    ) {
+                                        setShowSearchOptions(
+                                            true
+                                        );
+                                    }
+
+                                }}
+                                onKeyDown={
+                                    handleHeaderSearchKeyDown
+                                }
+                                placeholder="Search notes or blogs..."
+                                autoComplete="off"
+                                className="
+                                    h-11
+                                    w-[300px]
+                                    rounded-xl
+                                    border
+                                    border-slate-200
+                                    bg-slate-50
+                                    pl-11
+                                    pr-4
+                                    text-sm
+                                    font-medium
+                                    text-slate-700
+                                    outline-none
+                                    transition-all
+                                    duration-200
+                                    placeholder:text-slate-400
+                                    focus:border-blue-400
+                                    focus:bg-white
+                                    focus:ring-4
+                                    focus:ring-blue-100/70
+                                "
+                            />
+
+                        </form>
+
+
+                        {/* =================================================
+                            SEARCH OPTIONS
+                        ================================================== */}
+
+                        <AnimatePresence>
+
+                            {showSearchOptions &&
+                                headerSearch.trim() && (
+
+                                    <motion.div
+                                        initial={{
+                                            opacity: 0,
+                                            y: -8,
+                                            scale: 0.97,
+                                        }}
+                                        animate={{
+                                            opacity: 1,
+                                            y: 0,
+                                            scale: 1,
+                                        }}
+                                        exit={{
+                                            opacity: 0,
+                                            y: -8,
+                                            scale: 0.97,
+                                        }}
+                                        transition={{
+                                            duration: 0.18,
+                                        }}
+                                        className="
+                                            absolute
+                                            right-0
+                                            top-14
+                                            z-50
+                                            w-[300px]
+                                            overflow-hidden
+                                            rounded-2xl
+                                            border
+                                            border-slate-200
+                                            bg-white
+                                            p-1.5
+                                            shadow-2xl
+                                        "
+                                    >
+
+                                        <div className="px-3 py-2.5">
+
+                                            <p className="
+                                                text-[10px]
+                                                font-black
+                                                uppercase
+                                                tracking-[0.16em]
+                                                text-slate-400
+                                            ">
+                                                Search for
+                                            </p>
+
+                                        </div>
+
+
+                                        {/* Search Notes */}
+
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                submitSearch(
+                                                    "notes"
+                                                )
+                                            }
+                                            className="
+                                                flex
+                                                w-full
+                                                items-center
+                                                gap-3
+                                                rounded-xl
+                                                px-3
+                                                py-3
+                                                text-left
+                                                transition
+                                                hover:bg-blue-50
+                                            "
+                                        >
+
+                                            <div className="
+                                                flex
+                                                h-9
+                                                w-9
+                                                shrink-0
+                                                items-center
+                                                justify-center
+                                                rounded-xl
+                                                bg-blue-50
+                                                text-blue-600
+                                            ">
+                                                <FileText
+                                                    size={17}
+                                                />
+                                            </div>
+
+                                        <div>
+
+                                            <p className="
+                                                text-sm
+                                                font-bold
+                                                text-slate-700
+                                            ">
+                                                Search Notes
+                                            </p>
+
+                                            <p className="
+                                                mt-0.5
+                                                text-[11px]
+                                                text-slate-400
+                                            ">
+                                                Find study resources
+                                           </p>
+
+                                        </div>
+
+                                    </button>
+
+
+                                    {/* Search Blogs */}
+
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            submitSearch(
+                                                "blogs"
+                                            )
+                                        }
+                                        className="
+                                            flex
+                                            w-full
+                                            items-center
+                                            gap-3
+                                            rounded-xl
+                                            px-3
+                                            py-3
+                                            text-left
+                                            transition
+                                            hover:bg-cyan-50
+                                        "
+                                    >
+
+                                        <div className="
+                                            flex
+                                            h-9
+                                            w-9
+                                            shrink-0
+                                            items-center
+                                            justify-center
+                                            rounded-xl
+                                            bg-cyan-50
+                                            text-cyan-600
+                                        ">
+                                            <BookOpen
+                                                size={17}
+                                            />
+                                        </div>
+
+                                        <div>
+
+                                            <p className="
+                                                text-sm
+                                                font-bold
+                                                text-slate-700
+                                            ">
+                                                Search Blogs
+                                            </p>
+
+                                            <p className="
+                                                mt-0.5
+                                                text-[11px]
+                                                text-slate-400
+                                            ">
+                                                Find academic articles
+                                            </p>
+
+                                        </div>
+
+                                    </button>
+
+
+                                    {/* Hint */}
+
+                                    <div className="
+                                        border-t
+                                        border-slate-100
+                                        px-3
+                                        py-2
+                                    ">
+
+                                    <p className="
+                                        text-[10px]
+                                        text-slate-400
+                                    ">
+                                        Press Enter to search Notes
+                                    </p>
+
+                                </div>
+
+                            </motion.div>
+
+                        )}
+
+                    </AnimatePresence>
+
+                </div>
 
 
                     {/* Theme */}

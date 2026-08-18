@@ -405,38 +405,6 @@ function Profile() {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-[70vh] flex items-center justify-center px-6">
-                <motion.div
-                    initial={{
-                        opacity: 0,
-                        y: 12,
-                    }}
-                    animate={{
-                        opacity: 1,
-                        y: 0,
-                    }}
-                    className="text-center"
-                >
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-blue-100 bg-white shadow-lg shadow-slate-200/50">
-                        <Loader2
-                            size={28}
-                            className="animate-spin text-blue-600"
-                        />
-                    </div>
-
-                    <h2 className="mt-5 text-lg font-black text-slate-700">
-                        Loading Profile
-                    </h2>
-
-                    <p className="mt-2 text-sm text-slate-400">
-                        Please wait while we load your profile.
-                    </p>
-                </motion.div>
-            </div>
-        );
-    }
 
     if (error) {
         return (
@@ -450,9 +418,9 @@ function Profile() {
                         opacity: 1,
                         y: 0,
                     }}
-                    className="w-full max-w-lg rounded-[30px] border border-slate-200 bg-white p-10 text-center shadow-xl"
+                    className="profile-error-card w-full max-w-lg rounded-[30px] border border-slate-200 bg-white p-10 text-center shadow-xl"
                 >
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+                    <div className="profile-error-icon mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-500">
                         <ShieldCheck size={28} />
                     </div>
 
@@ -536,20 +504,9 @@ function Profile() {
                 PROFILE HERO
             ====================================================== */}
 
-            <motion.div
-                initial={{
-                    opacity: 0,
-                    y: 18,
-                }}
-                animate={{
-                    opacity: 1,
-                    y: 0,
-                }}
-                transition={{
-                    duration: 0.55,
-                    ease: "easeOut",
-                }}
-                className="relative overflow-hidden rounded-[36px] border border-slate-200/70 bg-gradient-to-br from-slate-950 via-blue-950 to-cyan-800 text-white shadow-[0_25px_70px_rgba(15,23,42,0.16)]"
+            <div
+            
+                className="profile-hero relative overflow-hidden rounded-[36px] border border-slate-200/70 bg-gradient-to-br from-slate-950 via-blue-950 to-cyan-800 text-white shadow-[0_25px_70px_rgba(15,23,42,0.16)]"
             >
                 <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-cyan-400/15 blur-3xl" />
 
@@ -766,26 +723,15 @@ function Profile() {
                         </div>
                     )}
                 </div>
-            </motion.div>
+            </div>
 
             {/* =====================================================
                 STATS
             ====================================================== */}
 
-            <motion.div
-                initial={{
-                    opacity: 0,
-                    y: 18,
-                }}
-                animate={{
-                    opacity: 1,
-                    y: 0,
-                }}
-                transition={{
-                    duration: 0.5,
-                    delay: 0.08,
-                }}
-                className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
+            <div
+                
+                className="profile-stats mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
             >
                 {stats.map((stat, index) => {
                     const Icon = stat.icon;
@@ -793,24 +739,10 @@ function Profile() {
                     return (
                         <motion.div
                             key={stat.label}
-                            initial={{
-                                opacity: 0,
-                                y: 16,
-                            }}
-                            animate={{
-                                opacity: 1,
-                                y: 0,
-                            }}
-                            transition={{
-                                duration: 0.4,
-                                delay:
-                                    0.08 +
-                                    index * 0.06,
-                            }}
                             whileHover={{
                                 y: -4,
                             }}
-                            className="group relative overflow-hidden rounded-[26px] border border-slate-200/80 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.045)] transition-shadow duration-300 hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)]"
+                            className="profile-stat-card group relative overflow-hidden rounded-[26px] border border-slate-200/80 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.045)] transition-shadow duration-300 hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)]"
                         >
                             <div
                                 className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br ${stat.glow} blur-2xl`}
@@ -834,7 +766,7 @@ function Profile() {
                         </motion.div>
                     );
                 })}
-            </motion.div>
+            </div>
 
             {/* =====================================================
                 ABOUT + ACCOUNT
@@ -858,7 +790,7 @@ function Profile() {
                     transition={{
                         duration: 0.5,
                     }}
-                    className="rounded-[30px] border border-slate-200/80 bg-white p-7 shadow-[0_10px_30px_rgba(15,23,42,0.045)]"
+                    className="profile-about-card rounded-[30px] border border-slate-200/80 bg-white p-7 shadow-[0_10px_30px_rgba(15,23,42,0.045)]"
                 >
                     <div className="flex items-start justify-between gap-4">
                         <div>
@@ -889,7 +821,7 @@ function Profile() {
                         </button>
                     </div>
 
-                    <div className="mt-6 rounded-2xl bg-slate-50/80 p-5">
+                    <div className="profile-about-box mt-6 rounded-2xl bg-slate-50/80 p-5">
                         <p className="leading-8 text-slate-600">
                             {profile.bio ||
                                 "No bio added yet. Tell other students about your academic interests, department and what you like to study."}
@@ -914,7 +846,7 @@ function Profile() {
                         duration: 0.5,
                         delay: 0.05,
                     }}
-                    className="rounded-[30px] border border-slate-200/80 bg-white p-7 shadow-[0_10px_30px_rgba(15,23,42,0.045)]"
+                    className="profile-account-card rounded-[30px] border border-slate-200/80 bg-white p-7 shadow-[0_10px_30px_rgba(15,23,42,0.045)]"
                 >
                     <div className="flex items-center gap-2">
                         <ShieldCheck
@@ -1044,7 +976,7 @@ function Profile() {
                                 whileHover={{
                                     y: -5,
                                 }}
-                                className="group overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-sm transition-shadow duration-300 hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)]"
+                                className="profile-note-card group overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-sm transition-shadow duration-300 hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)]"
                             >
                                 <div className="p-6">
                                     <div className="flex items-start justify-between gap-4">
@@ -1081,7 +1013,7 @@ function Profile() {
                                     </div>
                                 </div>
 
-                                <div className="border-t border-slate-100 bg-slate-50/75 px-6 py-4">
+                                <div className="profile-note-actions border-t border-slate-100 bg-slate-50/75 px-6 py-4">
                                     <div className="grid grid-cols-3 gap-2">
                                         <button
                                             onClick={() =>
@@ -1089,7 +1021,7 @@ function Profile() {
                                                     `/note/${note.id}`
                                                 )
                                             }
-                                            className="h-10 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-blue-300 hover:text-blue-600"
+                                            className="profile-note-action h-10 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-blue-300 hover:text-blue-600"
                                         >
                                             Open
                                         </button>
@@ -1100,7 +1032,7 @@ function Profile() {
                                                     `/edit/${note.id}`
                                                 )
                                             }
-                                            className="h-10 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-amber-300 hover:text-amber-600"
+                                            className="profile-note-action h-10 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-amber-300 hover:text-amber-600"
                                         >
                                             Edit
                                         </button>
@@ -1111,7 +1043,7 @@ function Profile() {
                                                     note.id
                                                 )
                                             }
-                                            className="h-10 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-red-300 hover:text-red-600"
+                                            className="profile-note-action h-10 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-red-300 hover:text-red-600"
                                         >
                                             Delete
                                         </button>
@@ -1133,9 +1065,9 @@ function Profile() {
                         viewport={{
                             once: true,
                         }}
-                        className="mt-7 rounded-[28px] border border-dashed border-slate-300 bg-white p-12 text-center shadow-sm"
+                        className="profile-empty-notes mt-7 rounded-[28px] border border-dashed border-slate-300 bg-white p-12 text-center shadow-sm"
                     >
-                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
+                        <div className="profile-empty-icon mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
                             <BookOpen size={28} />
                         </div>
 
@@ -1211,7 +1143,7 @@ function Profile() {
                                         `/blog/${blog.id}`
                                     )
                                 }
-                                className="group rounded-[28px] border border-slate-200/80 bg-white p-6 text-left shadow-sm transition-shadow duration-300 hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)]"
+                                className="profile-blog-card group rounded-[28px] border border-slate-200/80 bg-white p-6 text-left shadow-sm transition-shadow duration-300 hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)]"
                             >
                                 <div className="flex items-center justify-between">
                                     <span className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1.5 text-xs font-bold text-orange-600">
@@ -1320,9 +1252,9 @@ function Profile() {
                         transition={{
                             duration: 0.25,
                         }}
-                        className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-[30px] border border-white/70 bg-white shadow-[0_25px_80px_rgba(15,23,42,0.18)] sm:max-h-[90vh] sm:rounded-[30px]"
+                        className="profile-edit-modal max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-[30px] border border-white/70 bg-white shadow-[0_25px_80px_rgba(15,23,42,0.18)] sm:max-h-[90vh] sm:rounded-[30px]"
                     >
-                        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/95 px-7 py-5 backdrop-blur">
+                        <div className="profile-modal-header sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/95 px-7 py-5 backdrop-blur">
                             <div>
                                 <h2 className="text-2xl font-black text-slate-800">
                                     Edit Profile
@@ -1340,7 +1272,7 @@ function Profile() {
                                         false
                                     )
                                 }
-                                className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition hover:bg-slate-200"
+                                className="profile-modal-close flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition hover:bg-slate-200"
                             >
                                 <X size={19} />
                             </button>
@@ -1350,7 +1282,7 @@ function Profile() {
                             onSubmit={handleSaveProfile}
                             className="space-y-6 p-7"
                         >
-                            <div className="flex flex-col items-center gap-5 rounded-2xl border border-slate-100 bg-slate-50 p-5 sm:flex-row">
+                            <div className="profile-photo-editor flex flex-col items-center gap-5 rounded-2xl border border-slate-100 bg-slate-50 p-5 sm:flex-row">
                                 <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-3xl font-black text-white">
                                     {editForm.photo ? (
                                         <img
@@ -1455,7 +1387,7 @@ function Profile() {
                                             handleEditChange
                                         }
                                         required
-                                        className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="profile-form-control mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     />
                                 </div>
 
@@ -1474,7 +1406,7 @@ function Profile() {
                                             handleEditChange
                                         }
                                         required
-                                        className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="profile-form-control mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     />
                                 </div>
                             </div>
@@ -1492,7 +1424,7 @@ function Profile() {
                                         handleEditChange
                                     }
                                     placeholder="Tell other students a little about yourself..."
-                                    className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                    className="profile-form-control mt-2 w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                 />
                             </div>
 
@@ -1510,7 +1442,7 @@ function Profile() {
                                         onChange={
                                             handleEditChange
                                         }
-                                        className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="profile-form-control mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     >
                                         <option value="">
                                             Select Department
@@ -1548,7 +1480,7 @@ function Profile() {
                                             handleEditChange
                                         }
                                         placeholder="Dhaka, Bangladesh"
-                                        className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="profile-form-control mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     />
                                 </div>
                             </div>
@@ -1573,7 +1505,7 @@ function Profile() {
                                             handleEditChange
                                         }
                                         placeholder="Website URL"
-                                        className="h-12 rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="profile-form-control h-12 rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     />
 
                                     <input
@@ -1586,7 +1518,7 @@ function Profile() {
                                             handleEditChange
                                         }
                                         placeholder="LinkedIn URL"
-                                        className="h-12 rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="profile-form-control h-12 rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     />
 
                                     <input
@@ -1599,7 +1531,7 @@ function Profile() {
                                             handleEditChange
                                         }
                                         placeholder="GitHub URL"
-                                        className="h-12 rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="profile-form-control h-12 rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     />
 
                                     <input
@@ -1612,7 +1544,7 @@ function Profile() {
                                             handleEditChange
                                         }
                                         placeholder="Facebook URL"
-                                        className="h-12 rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className="profile-form-control h-12 rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                     />
                                 </div>
                             </div>
@@ -1676,9 +1608,9 @@ function Profile() {
                         transition={{
                             duration: 0.25,
                         }}
-                        className="max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-t-[30px] bg-white shadow-[0_25px_80px_rgba(15,23,42,0.18)] sm:rounded-[30px]"
+                        className="profile-password-modal max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-t-[30px] bg-white shadow-[0_25px_80px_rgba(15,23,42,0.18)] sm:rounded-[30px]"
                     >
-                        <div className="flex items-center justify-between border-b border-slate-100 px-7 py-5">
+                        <div className="profile-password-header flex items-center justify-between border-b border-slate-100 px-7 py-5">
                             <div>
                                 <h2 className="text-2xl font-black text-slate-800">
                                     Change Password
@@ -1696,7 +1628,7 @@ function Profile() {
                                         false
                                     )
                                 }
-                                className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition hover:bg-slate-200"
+                                className="profile-modal-close flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition hover:bg-slate-200"
                             >
                                 <X size={19} />
                             </button>
@@ -1708,7 +1640,7 @@ function Profile() {
                             }
                             className="space-y-5 p-7"
                         >
-                            <div className="flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                            <div className="profile-password-info flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4">
                                 <ShieldCheck
                                     size={19}
                                     className="mt-0.5 shrink-0 text-blue-600"
@@ -1734,7 +1666,7 @@ function Profile() {
                                         handlePasswordChange
                                     }
                                     required
-                                    className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                    className="profile-form-control mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                 />
                             </div>
 
@@ -1754,7 +1686,7 @@ function Profile() {
                                     }
                                     required
                                     minLength={6}
-                                    className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                    className="profile-form-control mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                 />
                             </div>
 
@@ -1774,7 +1706,7 @@ function Profile() {
                                     }
                                     required
                                     minLength={6}
-                                    className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                    className="profile-form-control mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                                 />
                             </div>
 
@@ -1786,7 +1718,7 @@ function Profile() {
                                             false
                                         )
                                     }
-                                    className="rounded-xl bg-slate-100 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-200"
+                                    className="profile-modal-cancel rounded-xl bg-slate-100 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-200"
                                 >
                                     Cancel
                                 </button>
@@ -1832,7 +1764,7 @@ function Profile() {
                     once: true,
                     amount: 0.15,
                 }}
-                className="mt-12 rounded-[30px] border border-red-100 bg-gradient-to-br from-red-50 to-white p-7 shadow-sm"
+                className="profile-danger mt-12 rounded-[30px] border border-red-100 bg-gradient-to-br from-red-50 to-white p-7 shadow-sm"
             >
                 <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                     <div>

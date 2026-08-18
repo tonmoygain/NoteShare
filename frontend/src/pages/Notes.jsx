@@ -16,15 +16,22 @@ import {
     Filter,
 } from "lucide-react";
 
-import { Link } from "react-router-dom";
+import {
+    Link,
+    useSearchParams,
+} from "react-router-dom";
 
 import API from "../services/api";
 import NoteCard from "../components/NoteCard";
 
 function Notes() {
+
+    const [searchParams, setSearchParams] = useSearchParams();
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState(
+        searchParams.get("search") || ""
+    );
     const [department, setDepartment] = useState("All");
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -49,9 +56,18 @@ function Notes() {
             setLoading(true);
 
             try {
-                const response = await API.get(
-                    `notes/?page=${page}`
-                );
+                const searchQuery =
+                    searchParams.get("search") || "";
+
+                // =====================================================
+                // NORMAL MODE
+                // Keep existing pagination
+                // =====================================================
+
+                if (!searchQuery.trim()) {
+                    const response = await API.get(
+                        `notes/?page=${page}`
+                    );
 
                 if (!mounted) return;
 
@@ -66,29 +82,126 @@ function Notes() {
                 setTotalPages(
                     Number(data.total_pages) || 1
                 );
-            } catch (error) {
-                console.error(
-                    "Notes API Error:",
-                    error
+
+                return;
+            }
+
+            // =====================================================
+            // SEARCH MODE
+            // Load all pages so search can find every note
+            // =====================================================
+
+            const firstResponse =
+                await API.get(
+                    "notes/?page=1"
                 );
 
-                if (mounted) {
-                    setNotes([]);
-                    setTotalPages(1);
-                }
-            } finally {
-                if (mounted) {
-                    setLoading(false);
-                }
+            if (!mounted) return;
+
+            const firstData =
+                firstResponse?.data || {};
+
+            const totalPagesFromAPI =
+                Number(
+                    firstData.total_pages
+                ) || 1;
+
+            let allNotes = Array.isArray(
+                firstData.notes
+            )
+                ? firstData.notes
+                : [];
+
+            // Fetch remaining pages
+            if (totalPagesFromAPI > 1) {
+
+                const pageRequests =
+                    Array.from(
+                        {
+                            length:
+                                totalPagesFromAPI - 1,
+                        },
+                        (_, index) =>
+                            API.get(
+                                `notes/?page=${index + 2}`
+                            )
+                    );
+
+                const responses =
+                    await Promise.all(
+                        pageRequests
+                    );
+
+                if (!mounted) return;
+
+                responses.forEach(
+                    (response) => {
+
+                        const data =
+                            response?.data || {};
+
+                        if (
+                            Array.isArray(
+                                data.notes
+                            )
+                        ) {
+                            allNotes =
+                                [
+                                    ...allNotes,
+                                    ...data.notes,
+                                ];
+                        }
+                    }
+                );
             }
-        };
 
-        loadNotes();
+            if (!mounted) return;
 
-        return () => {
-            mounted = false;
-        };
-    }, [page]);
+            setNotes(allNotes);
+
+            // Search results are shown together
+            // so pagination doesn't hide matches.
+            setTotalPages(1);
+
+        } catch (error) {
+            console.error(
+                "Notes API Error:",
+                error
+            );
+
+            if (mounted) {
+                setNotes([]);
+                setTotalPages(1);
+            }
+        } finally {
+            if (mounted) {
+                setLoading(false);
+            }
+        }
+    };
+
+    loadNotes();
+
+    return () => {
+        mounted = false;
+    };
+}, [page, searchParams]);
+
+
+    // =========================================
+    // READ SEARCH FROM URL
+    // =========================================
+
+    useEffect(() => {
+
+        const query =
+            searchParams.get("search") || "";
+
+        setSearch(query);
+        setPage(1);
+
+    }, [searchParams]);
+
 
     // =========================================================
     // FILTER
@@ -140,6 +253,8 @@ function Notes() {
         setSearch("");
         setDepartment("All");
         setPage(1);
+
+        setSearchParams({});
     };
 
     // =========================================================
@@ -175,76 +290,7 @@ function Notes() {
     // LOADING UI
     // =========================================================
 
-    if (loading) {
-        return (
-            <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:py-12">
-                <div className="animate-pulse">
-
-                    {/* Hero skeleton */}
-
-                    <div
-                        className="
-                            overflow-hidden
-                            rounded-[34px]
-                            border
-                            border-slate-200
-                            bg-slate-200
-                            p-7
-                            sm:p-10
-                            lg:p-14
-                        "
-                    >
-                        <div className="h-7 w-40 rounded-full bg-slate-300" />
-
-                        <div className="mt-7 h-14 w-3/4 max-w-2xl rounded-2xl bg-slate-300" />
-
-                        <div className="mt-5 h-5 w-full max-w-2xl rounded-lg bg-slate-300" />
-
-                        <div className="mt-3 h-5 w-2/3 max-w-xl rounded-lg bg-slate-300" />
-
-                        <div className="mt-8 flex gap-3">
-                            <div className="h-11 w-40 rounded-xl bg-slate-300" />
-                            <div className="h-11 w-40 rounded-xl bg-slate-300" />
-                        </div>
-                    </div>
-
-                    {/* Filter skeleton */}
-
-                    <div className="mt-8 rounded-[28px] border border-slate-200 bg-white p-5">
-                        <div className="h-14 rounded-2xl bg-slate-200" />
-                    </div>
-
-                    {/* Card skeletons */}
-
-                    <div className="mt-10 grid gap-6 md:grid-cols-2">
-                        {[1, 2, 3, 4].map(
-                            (item) => (
-                                <div
-                                    key={item}
-                                    className="
-                                        rounded-[28px]
-                                        border
-                                        border-slate-200
-                                        bg-white
-                                        p-6
-                                    "
-                                >
-                                    <div className="h-48 rounded-2xl bg-slate-200" />
-
-                                    <div className="mt-6 h-6 w-3/4 rounded-lg bg-slate-200" />
-
-                                    <div className="mt-4 h-4 rounded bg-slate-200" />
-
-                                    <div className="mt-3 h-4 w-2/3 rounded bg-slate-200" />
-                                </div>
-                            )
-                        )}
-                    </div>
-                </div>
-            </section>
-        );
-    }
-
+    
     return (
         <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:py-12">
 
@@ -734,6 +780,7 @@ function Notes() {
                     duration: 0.55,
                 }}
                 className="
+                    notes-search-panel
                     mt-8
                     rounded-[28px]
                     border
@@ -1091,6 +1138,7 @@ function Notes() {
                 </div>
 
                 <div className="
+                    notes-result-count
                     inline-flex
                     w-fit
                     items-center
@@ -1135,6 +1183,7 @@ function Notes() {
                         duration: 0.45,
                     }}
                     className="
+                        notes-empty-state
                         mt-8
                         rounded-[30px]
                         border
@@ -1270,6 +1319,7 @@ function Notes() {
                         delay: 0.15,
                     }}
                     className="
+                        notes-pagination
                         mt-10
                         flex
                         items-center
@@ -1407,6 +1457,7 @@ function Notes() {
             >
                 <div
                     className="
+                        notes-upload-cta
                         relative
                         overflow-hidden
                         rounded-[30px]

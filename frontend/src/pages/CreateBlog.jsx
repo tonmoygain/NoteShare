@@ -80,20 +80,10 @@ function CreateBlog() {
     return (
         <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
 
-            <motion.div
-                initial={{
-                    opacity: 0,
-                    y: 18,
-                }}
-                animate={{
-                    opacity: 1,
-                    y: 0,
-                }}
-                transition={{
-                    duration: 0.55,
-                    ease: "easeOut",
-                }}
+            <div
+                
                 className="
+                    create-blog-card
                     overflow-hidden
                     rounded-[34px]
                     border
@@ -259,6 +249,7 @@ function CreateBlog() {
                             placeholder="Enter your blog title..."
                             disabled={uploading}
                             className="
+                                create-blog-control
                                 mt-3
                                 h-14
                                 w-full
@@ -315,6 +306,7 @@ function CreateBlog() {
                             placeholder="Write your blog here..."
                             disabled={uploading}
                             className="
+                                create-blog-control
                                 mt-3
                                 w-full
                                 resize-none
@@ -368,6 +360,7 @@ function CreateBlog() {
 
                         <label
                             className="
+                                create-blog-dropzone
                                 group
                                 relative
                                 flex
@@ -428,7 +421,7 @@ function CreateBlog() {
                                 JPG, PNG or JPEG
                             </p>
 
-                            <div className="relative mt-4 rounded-full bg-white px-4 py-2 text-xs font-bold text-blue-600 shadow-sm">
+                            <div className="create-blog-browse relative mt-4 rounded-full bg-white px-4 py-2 text-xs font-bold text-blue-600 shadow-sm">
                                 Click to browse
                             </div>
 
@@ -457,6 +450,7 @@ function CreateBlog() {
                                     y: 0,
                                 }}
                                 className="
+                                    create-blog-selected-image
                                     mt-4
                                     flex
                                     items-center
@@ -487,8 +481,8 @@ function CreateBlog() {
 
                     {/* Publish Area */}
 
-                    <div className="border-t border-slate-100 pt-7">
-                        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+                    <div className="create-blog-publish-area border-t border-slate-100 pt-7">
+                        <div className="create-blog-publish-info mb-5 flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
                             <Sparkles
                                 size={18}
                                 className="mt-0.5 shrink-0 text-blue-600"
@@ -555,7 +549,7 @@ function CreateBlog() {
                         </motion.button>
                     </div>
                 </form>
-            </motion.div>
+            </div>
         </section>
     );
 }

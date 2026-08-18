@@ -1,11 +1,10 @@
 import Sidebar from "../components/Sidebar";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { motion } from "motion/react";
 
 import Header from "../components/Header";
 
 function MainLayout() {
-    const location = useLocation();
 
     return (
         <div className="min-h-screen bg-[#f1f4f8] text-slate-900">
@@ -23,9 +22,11 @@ function MainLayout() {
             <div
                 className="
                     relative
-                    ml-72
                     min-h-screen
                     overflow-x-hidden
+                    bg-[#f1f4f8]
+                    transition-colors
+                    duration-300
                     lg:ml-72
                 "
             >
@@ -132,23 +133,9 @@ function MainLayout() {
                             xl:px-8
                         "
                     >
-                        <motion.div
-                            key={location.pathname}
-                            initial={{
-                                opacity: 0,
-                                y: 8,
-                            }}
-                            animate={{
-                                opacity: 1,
-                                y: 0,
-                            }}
-                            transition={{
-                                duration: 0.28,
-                                ease: "easeOut",
-                            }}
-                        >
+                        <div>
                             <Outlet />
-                        </motion.div>
+                        </div>
                     </main>
 
                 </div>

@@ -252,11 +252,22 @@ function Sidebar() {
                     BRAND
                 ================================================== */}
 
-                <div className="
-                    relative
-                    px-5
-                    pt-6
-                ">
+                <div className="relative px-5 pt-6">
+
+                <Link
+                    to="/"
+                    onClick={closeMobileMenu}
+                    className="
+                        group
+                        block
+                        rounded-2xl
+                        outline-none
+                        focus-visible:ring-4
+                        focus-visible:ring-blue-100
+                    "
+                    aria-label="Go to NoteShare home"
+                >
+
                     <motion.div
                         initial={{
                             opacity: 0,
@@ -266,12 +277,15 @@ function Sidebar() {
                             opacity: 1,
                             y: 0,
                         }}
-                        transition={{
-                            duration: 0.5,
-                            ease: "easeOut",
-                        }}
                         whileHover={{
-                            y: -1,
+                            y: -2,
+                        }}
+                        whileTap={{
+                            scale: 0.99,
+                        }}
+                        transition={{
+                            duration: 0.35,
+                            ease: "easeOut",
                         }}
                         className="
                             group
@@ -284,8 +298,15 @@ function Sidebar() {
                             px-4
                             py-4
                             shadow-[0_10px_30px_rgba(15,23,42,0.055)]
+                            transition-all
+                            duration-300
+                            group-hover:border-blue-200
+                            group-hover:shadow-[0_15px_35px_rgba(37,99,235,0.10)]
                         "
                     >
+
+                        {/* Hover Glow */}
+
                         <div
                             className="
                                 pointer-events-none
@@ -297,10 +318,18 @@ function Sidebar() {
                                 rounded-full
                                 bg-blue-100/60
                                 blur-2xl
+                                opacity-60
+                                transition-all
+                                duration-500
+                                group-hover:scale-125
+                                group-hover:opacity-100
                             "
                         />
 
                         <div className="relative flex items-center gap-3">
+
+                            {/* Logo */}
+
                             <motion.div
                                 whileHover={{
                                     rotate: -4,
@@ -334,38 +363,85 @@ function Sidebar() {
                                 />
                             </motion.div>
 
-                            <div className="min-w-0">
-                                <h1 className="
-                                    truncate
-                                    text-xl
-                                    font-extrabold
-                                    tracking-tight
-                                    text-slate-900
-                                ">
+                            {/* Brand Text */}
+
+                            <div className="min-w-0 flex-1">
+
+                                <h1
+                                    className="
+                                        truncate
+                                        text-xl
+                                        font-extrabold
+                                        tracking-tight
+                                        text-slate-900
+                                    "
+                                >
                                     NoteShare
                                 </h1>
 
                                 <div className="mt-1 flex items-center gap-1.5">
+
                                     <Sparkles
                                         size={11}
                                         className="text-blue-500"
                                         strokeWidth={2.5}
                                     />
 
-                                    <p className="
-                                        text-[10px]
-                                        font-bold
-                                        uppercase
-                                        tracking-[0.16em]
-                                        text-slate-400
-                                    ">
+                                    <p
+                                        className="
+                                            text-[10px]
+                                            font-bold
+                                            uppercase
+                                            tracking-[0.16em]
+                                            text-slate-400
+                                        "
+                                    >
                                         Student platform
                                     </p>
+
                                 </div>
+
                             </div>
+
+                            {/* Home Arrow */}
+
+                            <motion.div
+                                animate={{
+                                    x: [0, 2, 0],
+                                }}
+                                transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    ease: "easeInOut",
+                                }}
+                                className="
+                                    flex
+                                    h-8
+                                    w-8
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    bg-slate-50
+                                    text-slate-300
+                                    transition-all
+                                    duration-300
+                                    group-hover:bg-blue-50
+                                    group-hover:text-blue-600
+                                "
+                            >
+                                <ChevronRight
+                                    size={15}
+                                />
+                            </motion.div>
+
                         </div>
+
                     </motion.div>
-                </div>
+
+                </Link>
+
+            </div>
 
                 {/* =================================================
                     NAVIGATION

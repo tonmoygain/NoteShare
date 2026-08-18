@@ -251,51 +251,6 @@ function Rooms() {
         };
     };
 
-    if (loading) {
-        return (
-            <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
-                <div className="animate-pulse">
-                    <div className="h-7 w-40 rounded-full bg-slate-200" />
-
-                    <div className="mt-5 h-12 w-80 max-w-full rounded-2xl bg-slate-200" />
-
-                    <div className="mt-4 h-5 w-full max-w-2xl rounded bg-slate-200" />
-
-                    <div className="mt-8 h-14 rounded-2xl bg-slate-200" />
-
-                    <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                        {[1, 2, 3, 4, 5, 6].map(
-                            (item) => (
-                                <div
-                                    key={item}
-                                    className="overflow-hidden rounded-[28px] border border-slate-200 bg-white p-6"
-                                >
-                                    <div className="h-1.5 rounded-full bg-slate-200" />
-
-                                    <div className="mt-6 flex items-center justify-between">
-                                        <div className="h-14 w-14 rounded-2xl bg-slate-200" />
-                                        <div className="h-7 w-20 rounded-full bg-slate-200" />
-                                    </div>
-
-                                    <div className="mt-6 h-7 rounded bg-slate-200" />
-
-                                    <div className="mt-4 h-4 rounded bg-slate-200" />
-                                    <div className="mt-3 h-4 w-4/5 rounded bg-slate-200" />
-
-                                    <div className="mt-6 h-4 w-28 rounded bg-slate-200" />
-
-                                    <div className="mt-7 flex justify-between border-t border-slate-100 pt-5">
-                                        <div className="h-4 w-28 rounded bg-slate-200" />
-                                        <div className="h-11 w-11 rounded-xl bg-slate-200" />
-                                    </div>
-                                </div>
-                            )
-                        )}
-                    </div>
-                </div>
-            </section>
-        );
-    }
 
     return (
         <>
@@ -319,13 +274,13 @@ function Rooms() {
                         transition={{
                             duration: 0.25,
                         }}
-                        className="max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-t-[30px] border border-white/70 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.18)] sm:max-h-[90vh] sm:rounded-[30px]"
+                        className="rooms-modal max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-t-[30px] border border-white/70 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.18)] sm:max-h-[90vh] sm:rounded-[30px]"
                     >
                         {/* Modal Header */}
 
-                        <div className="flex items-center justify-between border-b border-slate-100 bg-white/95 px-6 py-5 backdrop-blur sm:px-7">
+                        <div className="rooms-modal-header flex items-center justify-between border-b border-slate-100 bg-white/95 px-6 py-5 backdrop-blur sm:px-7">
                             <div>
-                                <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-blue-600">
+                                <div className="rooms-modal-badge mb-2 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-blue-600">
                                     <Sparkles size={12} />
                                     Community Studio
                                 </div>
@@ -346,7 +301,7 @@ function Rooms() {
                                         false
                                     )
                                 }
-                                className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition hover:bg-slate-200"
+                                className="rooms-modal-close flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition hover:bg-slate-200"
                             >
                                 <X size={20} />
                             </button>
@@ -374,7 +329,7 @@ function Rooms() {
                                     }
                                     placeholder="Example: Data Science Discussion"
                                     disabled={creatingRoom}
-                                    className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:opacity-60"
+                                    className="rooms-form-control h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:opacity-60"
                                 />
                             </div>
 
@@ -396,7 +351,7 @@ function Rooms() {
                                     placeholder="Describe what students can discuss here..."
                                     rows={4}
                                     disabled={creatingRoom}
-                                    className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:opacity-60"
+                                    className="rooms-form-control w-full resize-none rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:opacity-60"
                                 />
                             </div>
 
@@ -421,7 +376,7 @@ function Rooms() {
                                         }
                                         placeholder="Example: Academic"
                                         disabled={creatingRoom}
-                                        className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:opacity-60"
+                                        className="rooms-form-control h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:opacity-60"
                                     />
                                 </div>
 
@@ -445,7 +400,7 @@ function Rooms() {
                                         }
                                         placeholder="Example: CSE"
                                         disabled={creatingRoom}
-                                        className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:opacity-60"
+                                        className="rooms-form-control h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:opacity-60"
                                     />
                                 </div>
                             </div>
@@ -468,7 +423,7 @@ function Rooms() {
                                         })
                                     }
                                     disabled={creatingRoom}
-                                    className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:opacity-60"
+                                    className="rooms-form-control h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:opacity-60"
                                 >
                                     <option value="">
                                         No Parent Room
@@ -495,7 +450,7 @@ function Rooms() {
                                 </p>
                             </div>
 
-                            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
+                            <div className="rooms-modal-actions flex flex-col-reverse gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
                                 <button
                                     type="button"
                                     onClick={() =>
@@ -503,7 +458,7 @@ function Rooms() {
                                             false
                                         )
                                     }
-                                    className="rounded-xl bg-slate-100 px-5 py-3 font-bold text-slate-600 transition hover:bg-slate-200"
+                                    className="rooms-modal-cancel rounded-xl bg-slate-100 px-5 py-3 font-bold text-slate-600 transition hover:bg-slate-200"
                                 >
                                     Cancel
                                 </button>
@@ -557,19 +512,9 @@ function Rooms() {
                     HEADER
                 ================================================== */}
 
-                <motion.div
-                    initial={{
-                        opacity: 0,
-                        y: 16,
-                    }}
-                    animate={{
-                        opacity: 1,
-                        y: 0,
-                    }}
-                    transition={{
-                        duration: 0.5,
-                    }}
-                    className="mb-9 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"
+                <div
+                    
+                    className="rooms-page-header mb-9 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"
                 >
                     <div className="max-w-3xl">
                         <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-700">
@@ -586,12 +531,12 @@ function Rooms() {
                         </p>
 
                         <div className="mt-5 flex flex-wrap gap-3">
-                            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-500 shadow-sm">
+                            <div className="rooms-header-stat inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-500 shadow-sm">
                                 <Users size={14} />
                                 {rooms.length} Community Spaces
                             </div>
 
-                            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-500 shadow-sm">
+                            <div className="rooms-header-stat inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-500 shadow-sm">
                                 <ShieldCheck size={14} />
                                 Student-led discussions
                             </div>
@@ -617,7 +562,7 @@ function Rooms() {
                             className="transition-transform duration-300 group-hover:translate-x-1"
                         />
                     </motion.button>
-                </motion.div>
+                </div>
 
                 {/* =================================================
                     SEARCH
@@ -636,7 +581,7 @@ function Rooms() {
                         duration: 0.45,
                         delay: 0.08,
                     }}
-                    className="mb-10 rounded-[26px] border border-slate-200/80 bg-white/85 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.045)] backdrop-blur-sm sm:p-5"
+                    className="rooms-search-panel mb-10 rounded-[26px] border border-slate-200/80 bg-white/85 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.045)] backdrop-blur-sm sm:p-5"
                 >
                     <div className="relative">
                         <Search
@@ -653,7 +598,7 @@ function Rooms() {
                                     e.target.value
                                 )
                             }
-                            className="h-14 w-full rounded-2xl border border-slate-200 bg-slate-50/80 pl-12 pr-5 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                            className="rooms-search-input h-14 w-full rounded-2xl border border-slate-200 bg-slate-50/80 pl-12 pr-5 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
                         />
                     </div>
                 </motion.div>
@@ -673,7 +618,7 @@ function Rooms() {
                         </h2>
                     </div>
 
-                    <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-500 shadow-sm">
+                    <div className="rooms-result-count rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-500 shadow-sm">
                         {filteredRooms.length} Rooms
                     </div>
                 </div>
@@ -692,9 +637,9 @@ function Rooms() {
                             opacity: 1,
                             y: 0,
                         }}
-                        className="rounded-[30px] border border-slate-200/80 bg-white p-10 text-center shadow-[0_15px_40px_rgba(15,23,42,0.05)] sm:p-16"
+                        className="rooms-empty-state rounded-[30px] border border-slate-200/80 bg-white p-10 text-center shadow-[0_15px_40px_rgba(15,23,42,0.05)] sm:p-16"
                     >
-                        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-50 to-cyan-50 text-blue-600">
+                        <div className="rooms-empty-icon mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-50 to-cyan-50 text-blue-600">
                             <MessageSquare size={36} />
                         </div>
 
@@ -734,31 +679,9 @@ function Rooms() {
                                     );
 
                                 return (
-                                    <motion.div
+                                    <div
                                         key={room.id}
-                                        initial={{
-                                            opacity: 0,
-                                            y: 18,
-                                        }}
-                                        whileInView={{
-                                            opacity: 1,
-                                            y: 0,
-                                        }}
-                                        viewport={{
-                                            once: true,
-                                            amount: 0.12,
-                                        }}
-                                        transition={{
-                                            duration: 0.45,
-                                            delay:
-                                                (index %
-                                                    3) *
-                                                0.05,
-                                        }}
-                                        whileHover={{
-                                            y: -7,
-                                        }}
-                                        className="group relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.045)] transition-shadow duration-300 hover:shadow-[0_25px_55px_rgba(15,23,42,0.10)]"
+                                        className="rooms-card group relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.045)] transition-shadow duration-300 hover:shadow-[0_25px_55px_rgba(15,23,42,0.10)]"
                                     >
                                         <div
                                             className={`h-1.5 bg-gradient-to-r ${style.color}`}
@@ -811,7 +734,7 @@ function Rooms() {
                                                 </span>
                                             </div>
 
-                                            <div className="mt-7 flex items-center justify-between border-t border-slate-100 pt-5">
+                                            <div className="rooms-card-footer mt-7 flex items-center justify-between border-t border-slate-100 pt-5">
                                                 <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
                                                     <Clock size={14} />
                                                     Active discussion
@@ -823,14 +746,14 @@ function Rooms() {
                                                             `/rooms/${room.id}`
                                                         )
                                                     }
-                                                    className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-all duration-300 group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-500/20"
+                                                    className="rooms-open-button flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-all duration-300 group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-500/20"
                                                     title="Open room"
                                                 >
                                                     <ArrowRight size={19} />
                                                 </button>
                                             </div>
                                         </div>
-                                    </motion.div>
+                                    </div>
                                 );
                             }
                         )}
@@ -854,7 +777,7 @@ function Rooms() {
                         once: true,
                         amount: 0.12,
                     }}
-                    className="relative mt-12 overflow-hidden rounded-[30px] bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 p-7 text-white shadow-[0_20px_55px_rgba(15,23,42,0.12)] sm:p-9"
+                    className="rooms-community-info relative mt-12 overflow-hidden rounded-[30px] bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 p-7 text-white shadow-[0_20px_55px_rgba(15,23,42,0.12)] sm:p-9"
                 >
                     <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
 
@@ -875,7 +798,7 @@ function Rooms() {
                             </p>
                         </div>
 
-                        <div className="inline-flex shrink-0 items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 backdrop-blur-sm">
+                        <div className="rooms-page-badge inline-flex shrink-0 items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-5 py-3 backdrop-blur-sm">
                             <Users size={20} />
 
                             <span className="font-semibold">

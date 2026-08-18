@@ -205,7 +205,7 @@ function BlogDetails() {
         );
     }
 
-    if (error || !blog) {
+    if (error) {
         return (
             <div className="min-h-[70vh] px-6 flex items-center justify-center">
                 <motion.div
@@ -246,6 +246,11 @@ function BlogDetails() {
         );
     }
 
+
+    if (!blog) {
+        return null;
+    }
+
     return (
         <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
 
@@ -269,6 +274,7 @@ function BlogDetails() {
                     navigate("/blogs")
                 }
                 className="
+                    blog-details-back
                     group
                     inline-flex
                     items-center
@@ -314,6 +320,7 @@ function BlogDetails() {
                     ease: "easeOut",
                 }}
                 className="
+                    blog-details-card
                     mt-7
                     overflow-hidden
                     rounded-[34px]
@@ -418,7 +425,7 @@ function BlogDetails() {
                     {/* Meta */}
 
                     <div className="mt-7 flex flex-wrap gap-3">
-                        <div className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                        <div className="blog-details-meta inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
                             <User
                                 size={17}
                                 className="text-blue-600"
@@ -473,6 +480,7 @@ function BlogDetails() {
                             y: -2,
                         }}
                         className="
+                            blog-details-author
                             mt-9
                             flex
                             flex-col
@@ -566,6 +574,7 @@ function BlogDetails() {
                         </div>
 
                         <div className="
+                            blog-details-content
                             mt-5
                             rounded-[26px]
                             border
@@ -632,6 +641,7 @@ function BlogDetails() {
                             }}
                             onClick={handleCopyLink}
                             className="
+                                blog-details-copy
                                 inline-flex
                                 items-center
                                 justify-center
@@ -685,6 +695,7 @@ function BlogDetails() {
                                 once: true,
                             }}
                             className="
+                                blog-details-owner
                                 mt-8
                                 rounded-[26px]
                                 border
@@ -780,6 +791,7 @@ function BlogDetails() {
                     ================================================== */}
 
                     <div className="
+                        blog-details-footer
                         mt-10
                         flex
                         flex-col

@@ -224,19 +224,8 @@ function Hero() {
             "
         >
 
-            <motion.div
-                initial={{
-                    opacity: 0,
-                    y: 22,
-                }}
-                animate={{
-                    opacity: 1,
-                    y: 0,
-                }}
-                transition={{
-                    duration: 0.65,
-                    ease: "easeOut",
-                }}
+            <div
+                
                 className="
                     relative
                     overflow-hidden
@@ -252,17 +241,8 @@ function Hero() {
                     BACKGROUND GLOWS
                 ========================================== */}
 
-                <motion.div
-                    animate={{
-                        x: [0, 35, 0],
-                        y: [0, -25, 0],
-                        scale: [1, 1.08, 1],
-                    }}
-                    transition={{
-                        duration: 10,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                    }}
+                <div
+                    
                     className="
                         absolute
                         -right-28
@@ -275,17 +255,8 @@ function Hero() {
                     "
                 />
 
-                <motion.div
-                    animate={{
-                        x: [0, -30, 0],
-                        y: [0, 30, 0],
-                        scale: [1, 1.12, 1],
-                    }}
-                    transition={{
-                        duration: 12,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                    }}
+                <div
+                    
                     className="
                         absolute
                         -bottom-40
@@ -339,7 +310,7 @@ function Hero() {
                         "
                     >
 
-                        <motion.div
+                        <div
                             initial={{
                                 opacity: 0,
                                 y: 12,
@@ -378,10 +349,10 @@ function Hero() {
 
                             Academic Resource Platform
 
-                        </motion.div>
+                        </div>
 
 
-                        <motion.h1
+                        <h1
                             initial={{
                                 opacity: 0,
                                 y: 18,
@@ -423,10 +394,10 @@ function Hero() {
                                 Grow Together.
                             </span>
 
-                        </motion.h1>
+                        </h1>
 
 
-                        <motion.p
+                        <p
                             initial={{
                                 opacity: 0,
                                 y: 15,
@@ -455,14 +426,14 @@ function Hero() {
                             learning resources in one modern student
                             platform.
 
-                        </motion.p>
+                        </p>
 
 
                         {/* ==========================================
                             ACTIONS
                         ========================================== */}
 
-                        <motion.div
+                        <div
                             initial={{
                                 opacity: 0,
                                 y: 14,
@@ -547,14 +518,14 @@ function Hero() {
 
                             </Link>
 
-                        </motion.div>
+                        </div>
 
 
                         {/* ==========================================
                             TRUST LINE
                         ========================================== */}
 
-                        <motion.div
+                        <div
                             initial={{
                                 opacity: 0,
                             }}
@@ -602,7 +573,7 @@ function Hero() {
                                 Student focused
                             </span>
 
-                        </motion.div>
+                        </div>
 
                     </div>
 
@@ -636,20 +607,6 @@ function Hero() {
 
                                     <motion.div
                                         key={item.label}
-                                        initial={{
-                                            opacity: 0,
-                                            y: 18,
-                                        }}
-                                        animate={{
-                                            opacity: 1,
-                                            y: 0,
-                                        }}
-                                        transition={{
-                                            delay:
-                                                0.22 +
-                                                index * 0.08,
-                                            duration: 0.5,
-                                        }}
                                         whileHover={{
                                             y: -5,
                                             scale: 1.015,
@@ -747,7 +704,7 @@ function Hero() {
 
                 </div>
 
-            </motion.div>
+            </div>
 
         </section>
 

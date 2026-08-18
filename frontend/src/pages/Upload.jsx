@@ -163,20 +163,10 @@ function Upload() {
     return (
         <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
 
-            <motion.div
-                initial={{
-                    opacity: 0,
-                    y: 16,
-                }}
-                animate={{
-                    opacity: 1,
-                    y: 0,
-                }}
-                transition={{
-                    duration: 0.5,
-                    ease: "easeOut",
-                }}
+            <div
+                
                 className="
+                    upload-page-card
                     overflow-hidden
                     rounded-[34px]
                     border
@@ -305,6 +295,7 @@ function Upload() {
                                 y: 0,
                             }}
                             className="
+                                upload-error
                                 flex
                                 items-start
                                 gap-3
@@ -368,6 +359,7 @@ function Upload() {
                                     placeholder="Operating System Mid Note"
                                     disabled={uploading}
                                     className="
+                                        upload-form-control
                                         mt-3
                                         h-14
                                         w-full
@@ -410,6 +402,7 @@ function Upload() {
                                     }
                                     disabled={uploading}
                                     className="
+                                        upload-form-control
                                         mt-3
                                         h-14
                                         w-full
@@ -443,6 +436,7 @@ function Upload() {
 
                             <div
                                 className="
+                                    upload-resource-info
                                     flex
                                     items-center
                                     gap-3
@@ -453,7 +447,7 @@ function Upload() {
                                     px-4
                                 "
                             >
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
+                                <div className="upload-resource-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
                                     <FileText size={18} />
                                 </div>
 
@@ -508,6 +502,7 @@ function Upload() {
                             placeholder="Write a short description of what this note contains..."
                             disabled={uploading}
                             className="
+                                upload-form-control
                                 mt-3
                                 w-full
                                 resize-none
@@ -554,6 +549,7 @@ function Upload() {
                         {!file ? (
                             <label
                                 className="
+                                    upload-file-dropzone
                                     group
                                     relative
                                     flex
@@ -618,7 +614,7 @@ function Upload() {
                                     Maximum file size: 10 MB
                                 </p>
 
-                                <div className="relative mt-5 rounded-full bg-white px-4 py-2 text-xs font-bold text-blue-600 shadow-sm">
+                                <div className="upload-browse-badge relative mt-5 rounded-full bg-white px-4 py-2 text-xs font-bold text-blue-600 shadow-sm">
                                     Click to browse files
                                 </div>
 
@@ -641,6 +637,7 @@ function Upload() {
                                     scale: 1,
                                 }}
                                 className="
+                                    upload-selected-file
                                     rounded-[28px]
                                     border
                                     border-blue-100
@@ -679,6 +676,7 @@ function Upload() {
                                         onClick={removeFile}
                                         disabled={uploading}
                                         className="
+                                            upload-remove-file
                                             flex
                                             h-10
                                             w-10
@@ -714,7 +712,7 @@ function Upload() {
                         SUBMIT
                     ====================================================== */}
 
-                    <div className="border-t border-slate-100 pt-7">
+                    <div className="upload-submit-area border-t border-slate-100 pt-7">
 
                         <div className="mb-5 flex items-center gap-2 text-xs font-semibold text-slate-400">
                             <ShieldCheck
@@ -781,7 +779,7 @@ function Upload() {
                         </motion.button>
                     </div>
                 </form>
-            </motion.div>
+            </div>
         </section>
     );
 }

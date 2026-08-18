@@ -106,22 +106,8 @@ function Home() {
                 DASHBOARD STATS
             ====================================================== */}
 
-            <motion.section
-                initial={{
-                    opacity: 0,
-                    y: 24,
-                }}
-                whileInView={{
-                    opacity: 1,
-                    y: 0,
-                }}
-                viewport={{
-                    once: true,
-                    amount: 0.15,
-                }}
-                transition={{
-                    duration: 0.55,
-                }}
+            <section
+                
                 className="
                     mx-auto
                     mt-8
@@ -135,29 +121,15 @@ function Home() {
                     stats={stats}
                 />
 
-            </motion.section>
+            </section>
 
 
             {/* =====================================================
                 QUICK ACTIONS
             ====================================================== */}
 
-            <motion.section
-                initial={{
-                    opacity: 0,
-                    y: 24,
-                }}
-                whileInView={{
-                    opacity: 1,
-                    y: 0,
-                }}
-                viewport={{
-                    once: true,
-                    amount: 0.12,
-                }}
-                transition={{
-                    duration: 0.6,
-                }}
+            <section
+            
                 className="
                     mx-auto
                     mt-12
@@ -169,7 +141,7 @@ function Home() {
 
                 <QuickActions />
 
-            </motion.section>
+            </section>
 
 
             {/* =====================================================

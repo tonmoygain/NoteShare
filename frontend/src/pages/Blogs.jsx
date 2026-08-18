@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { useNavigate } from "react-router-dom";
+import {
+    useNavigate,
+    useSearchParams,
+} from "react-router-dom";
 
 import {
     Search,
@@ -16,12 +19,16 @@ import {
 import API from "../services/api";
 
 function Blogs() {
+
+    const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
     const isLoggedIn = !!localStorage.getItem("access");
 
     const [blogs, setBlogs] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState(
+        searchParams.get("search") || ""
+    );
 
     useEffect(() => {
         API.get("blogs/")
@@ -35,6 +42,20 @@ function Blogs() {
                 setLoading(false);
             });
     }, []);
+
+    // =========================================
+    // READ SEARCH FROM URL
+    // =========================================
+
+    useEffect(() => {
+
+        const query =
+            searchParams.get("search") || "";
+
+        setSearch(query);
+
+    }, [searchParams]);
+    
 
     const filteredBlogs = blogs.filter((blog) => {
         const keyword = search.toLowerCase().trim();
@@ -62,62 +83,6 @@ function Blogs() {
         }
     };
 
-    if (loading) {
-        return (
-            <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
-                <div className="animate-pulse">
-
-                    {/* Hero skeleton */}
-                    <div className="overflow-hidden rounded-[34px] border border-slate-200/60 bg-gradient-to-br from-slate-300 via-slate-200 to-slate-300 p-8 sm:p-10">
-                        <div className="h-8 w-44 rounded-full bg-white/60" />
-
-                        <div className="mt-6 h-12 w-72 max-w-full rounded-2xl bg-white/60" />
-
-                        <div className="mt-4 h-5 w-full max-w-2xl rounded bg-white/50" />
-                        <div className="mt-3 h-5 w-3/4 max-w-xl rounded bg-white/50" />
-
-                        <div className="mt-7 h-12 w-40 rounded-2xl bg-white/60" />
-                    </div>
-
-                    {/* Search skeleton */}
-                    <div className="mt-8 rounded-[26px] border border-slate-200 bg-white p-5">
-                        <div className="h-14 rounded-2xl bg-slate-100" />
-                    </div>
-
-                    {/* Cards skeleton */}
-                    <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                        {[1, 2, 3, 4, 5, 6].map((item) => (
-                            <div
-                                key={item}
-                                className="overflow-hidden rounded-[28px] border border-slate-200/70 bg-white p-6"
-                            >
-                                <div className="h-1.5 rounded-full bg-slate-200" />
-
-                                <div className="mt-6 flex items-center justify-between">
-                                    <div className="h-14 w-14 rounded-2xl bg-slate-200" />
-                                    <div className="h-7 w-20 rounded-full bg-slate-200" />
-                                </div>
-
-                                <div className="mt-6 h-7 rounded bg-slate-200" />
-                                <div className="mt-4 h-4 rounded bg-slate-200" />
-                                <div className="mt-3 h-4 w-4/5 rounded bg-slate-200" />
-
-                                <div className="mt-7 flex items-center gap-3 border-t border-slate-100 pt-5">
-                                    <div className="h-10 w-10 rounded-full bg-slate-200" />
-                                    <div className="flex-1">
-                                        <div className="h-3 w-20 rounded bg-slate-200" />
-                                        <div className="mt-2 h-4 w-28 rounded bg-slate-200" />
-                                    </div>
-                                </div>
-
-                                <div className="mt-6 h-12 rounded-xl bg-slate-200" />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-        );
-    }
 
     return (
         <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
@@ -279,6 +244,7 @@ function Blogs() {
                     delay: 0.1,
                 }}
                 className="
+                    blogs-search-panel
                     mb-10
                     rounded-[26px]
                     border
@@ -353,7 +319,7 @@ function Blogs() {
                     </h2>
                 </div>
 
-                <div className="hidden rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-400 shadow-sm md:block">
+                <div className="blogs-result-count hidden rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-400 shadow-sm md:block">
                     {filteredBlogs.length} result
                     {filteredBlogs.length !== 1 ? "s" : ""}
                 </div>
@@ -374,6 +340,7 @@ function Blogs() {
                         y: 0,
                     }}
                     className="
+                        blogs-empty-state
                         rounded-[30px]
                         border
                         border-slate-200/80
@@ -461,6 +428,7 @@ function Blogs() {
                                 y: -7,
                             }}
                             className="
+                                blogs-card
                                 group
                                 relative
                                 overflow-hidden
@@ -479,7 +447,7 @@ function Blogs() {
 
                             {/* Image */}
                             {blog.image && (
-                                <div className="relative h-52 overflow-hidden bg-slate-100">
+                                <div className="blogs-card-image relative h-52 overflow-hidden bg-slate-100">
                                     <img
                                         src={blog.image}
                                         alt={blog.title}
@@ -510,6 +478,7 @@ function Blogs() {
                                             scale: 1.04,
                                         }}
                                         className="
+                                            blogs-card-icon
                                             flex
                                             h-14
                                             w-14
@@ -528,7 +497,7 @@ function Blogs() {
                                         <BookOpen size={25} />
                                     </motion.div>
 
-                                    <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">
+                                    <span className="blogs-card-badge rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">
                                         Article
                                     </span>
                                 </div>
@@ -548,7 +517,7 @@ function Blogs() {
 
                                 {/* Author */}
 
-                                <div className="mt-7 flex items-center gap-3 border-t border-slate-100 pt-5">
+                                <div className="blogs-card-author mt-7 flex items-center gap-3 border-t border-slate-100 pt-5">
 
                                     <div className="
                                         flex
