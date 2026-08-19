@@ -351,7 +351,7 @@ function Header({ search, setSearch }) {
                             sm:text-3xl
                         "
                     >
-                        Welcome back{username ? `, ${username}` : ""}
+                        Welcome{username ? `, ${username}` : ""}
                     </h1>
 
                     <div
