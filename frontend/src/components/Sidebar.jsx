@@ -194,6 +194,7 @@ function Sidebar() {
                     backdrop-blur-xl
                     transition-transform
                     duration-300
+                    -translate-x-full
                     lg:translate-x-0
                 "
                 style={{
