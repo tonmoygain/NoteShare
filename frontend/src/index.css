@@ -2827,3 +2827,14 @@ html.dark .ai-tutor-selected-difficulty-value {
     color: #bfdbfe !important;
 }
 
+
+
+@media (max-width: 1023px) {
+    aside[data-mobile-open="true"] {
+        transform: translateX(0);
+    }
+
+    aside[data-mobile-open="false"] {
+        transform: translateX(-100%);
+    }
+}

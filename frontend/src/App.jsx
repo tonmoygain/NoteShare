@@ -1,4 +1,7 @@
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "motion/react";
+import { CheckCircle2, X } from "lucide-react";
 
 import MainLayout from "./layouts/MainLayout";
 import AIAssistant from "./components/AIAssistant";
@@ -32,6 +35,37 @@ function AppContent() {
     const isLandingPage =
         location.pathname === "/";
 
+    const [successMessage, setSuccessMessage] =
+        useState("");
+
+    useEffect(() => {
+
+        const message =
+            sessionStorage.getItem("noteshare_success");
+
+        if (!message) {
+            return;
+        }
+
+        sessionStorage.removeItem("noteshare_success");
+
+        setSuccessMessage(message);
+
+        const timer = window.setTimeout(() => {
+            setSuccessMessage("");
+        }, 2800);
+
+        return () => {
+            window.clearTimeout(timer);
+        };
+
+    }, [location.pathname]);
+
+
+    const closeSuccessToast = () => {
+        setSuccessMessage("");
+    };
+
 
     return (
         <>
@@ -39,7 +73,6 @@ function AppContent() {
 
                 {/* =====================================================
                     PUBLIC LANDING PAGE
-                    Completely separate from the application shell
                 ====================================================== */}
 
                 <Route
@@ -50,12 +83,10 @@ function AppContent() {
 
                 {/* =====================================================
                     NOTE SHARE APPLICATION
-                    Everything below uses the existing MainLayout
                 ====================================================== */}
 
                 <Route element={<MainLayout />}>
 
-                    {/* Existing NoteShare Home / Dashboard */}
                     <Route
                         path="/dashboard"
                         element={<Home />}
@@ -159,7 +190,6 @@ function AppContent() {
 
                 {/* =====================================================
                     AUTHENTICATION
-                    No MainLayout
                 ====================================================== */}
 
                 <Route
@@ -181,9 +211,146 @@ function AppContent() {
 
 
             {/* =========================================================
+                GLOBAL SUCCESS TOAST
+            ========================================================== */}
+
+            <AnimatePresence>
+
+                {successMessage && (
+
+                    <motion.div
+                        initial={{
+                            opacity: 0,
+                            y: -18,
+                            scale: 0.96,
+                        }}
+                        animate={{
+                            opacity: 1,
+                            y: 0,
+                            scale: 1,
+                        }}
+                        exit={{
+                            opacity: 0,
+                            y: -12,
+                            scale: 0.97,
+                        }}
+                        transition={{
+                            duration: 0.25,
+                            ease: "easeOut",
+                        }}
+                        className="
+                            fixed
+                            left-1/2
+                            top-5
+                            z-[9999]
+                            w-[calc(100vw-32px)]
+                            max-w-md
+                            -translate-x-1/2
+                        "
+                    >
+
+                        <div
+                            className="
+                                flex
+                                items-center
+                                gap-3
+                                rounded-2xl
+                                border
+                                border-emerald-200
+                                bg-white/95
+                                px-4
+                                py-3.5
+                                shadow-[0_20px_50px_rgba(15,23,42,0.16)]
+                                backdrop-blur-xl
+                                dark:border-emerald-500/20
+                                dark:bg-slate-900/95
+                            "
+                        >
+
+                            <div
+                                className="
+                                    flex
+                                    h-10
+                                    w-10
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-xl
+                                    bg-emerald-50
+                                    text-emerald-600
+                                    dark:bg-emerald-500/10
+                                    dark:text-emerald-400
+                                "
+                            >
+                                <CheckCircle2 size={20} />
+                            </div>
+
+
+                            <div className="min-w-0 flex-1">
+
+                                <p
+                                    className="
+                                        text-xs
+                                        font-black
+                                        uppercase
+                                        tracking-[0.12em]
+                                        text-emerald-600
+                                        dark:text-emerald-400
+                                    "
+                                >
+                                    Success
+                                </p>
+
+                                <p
+                                    className="
+                                        mt-0.5
+                                        truncate
+                                        text-sm
+                                        font-bold
+                                        text-slate-700
+                                        dark:text-slate-200
+                                    "
+                                >
+                                    {successMessage}
+                                </p>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                onClick={closeSuccessToast}
+                                className="
+                                    flex
+                                    h-8
+                                    w-8
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                    text-slate-400
+                                    transition
+                                    hover:bg-slate-100
+                                    hover:text-slate-700
+                                    dark:hover:bg-slate-800
+                                    dark:hover:text-slate-200
+                                "
+                                aria-label="Close"
+                            >
+                                <X size={16} />
+                            </button>
+
+                        </div>
+
+                    </motion.div>
+
+                )}
+
+            </AnimatePresence>
+
+
+            {/* =========================================================
                 AI ASSISTANT
-                Do not show it on the public landing page.
-                Keep it everywhere inside the actual application.
             ========================================================== */}
 
             {!isLandingPage && <AIAssistant />}

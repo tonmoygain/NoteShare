@@ -97,7 +97,7 @@ function Upload() {
         const token = localStorage.getItem("access");
 
         if (!token) {
-            alert("Please login first to upload a note.");
+            setError("Please login first to upload a note.");
             navigate("/login");
             return;
         }
@@ -126,6 +126,12 @@ function Upload() {
                 }
             );
 
+            sessionStorage.setItem(
+                "noteshare_success",
+                "Note uploaded successfully!"
+            );
+
+
             alert("Note uploaded successfully!");
 
             if (response.data?.id) {
@@ -137,7 +143,7 @@ function Upload() {
             console.error("Upload Note Error:", err);
 
             if (err.response?.status === 401) {
-                alert("Please login first.");
+                setError("Please login first.");
                 navigate("/login");
             } else if (err.response?.status === 400) {
                 setError(

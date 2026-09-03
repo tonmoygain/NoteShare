@@ -80,6 +80,11 @@ function Login() {
 
             localStorage.setItem("username", username);
 
+            sessionStorage.setItem(
+                "noteshare_success",
+                "Login successful. Welcome back!"
+            );
+
             navigate("/dashboard", { replace: true });
         } catch (error) {
             console.error("Login Error:", error);

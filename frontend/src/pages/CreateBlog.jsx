@@ -65,7 +65,10 @@ function CreateBlog() {
                 }
             );
 
-            alert("Blog Published Successfully!");
+            sessionStorage.setItem(
+                "noteshare_success",
+                "Blog published successfully!"
+            );
 
             navigate("/blogs");
         } catch (err) {
