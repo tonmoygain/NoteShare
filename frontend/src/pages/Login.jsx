@@ -80,9 +80,7 @@ function Login() {
 
             localStorage.setItem("username", username);
 
-            navigate("/");
-
-            window.location.reload();
+            navigate("/dashboard", { replace: true });
         } catch (error) {
             console.error("Login Error:", error);
 

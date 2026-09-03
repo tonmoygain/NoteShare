@@ -306,3 +306,73 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.recipient.username} - {self.title}"
+
+
+    
+# Add this model class to the existing core/models.py:
+class Notification(models.Model):
+    NOTIFICATION_TYPES = [
+        ("note_created", "Note Created"),
+        ("new_note", "New Note"),
+        ("note_updated", "Note Updated"),
+        ("note_deleted", "Note Deleted"),
+        ("blog_created", "Blog Created"),
+        ("new_blog", "New Blog"),
+        ("blog_updated", "Blog Updated"),
+        ("blog_deleted", "Blog Deleted"),
+        ("room_created", "Room Created"),
+        ("new_room", "New Room"),
+        ("room_joined", "Room Joined"),
+        ("room_left", "Room Left"),
+        ("room_message", "Room Message"),
+        ("system", "System"),
+    ]
+
+    recipient = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+    )
+
+    actor = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="triggered_notifications",
+    )
+
+    notification_type = models.CharField(
+        max_length=40,
+        choices=NOTIFICATION_TYPES,
+    )
+
+    title = models.CharField(max_length=180)
+    message = models.TextField()
+    link = models.CharField(max_length=300, blank=True, default="")
+
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(
+                fields=["recipient", "is_read", "-created_at"]
+            ),
+            models.Index(
+                fields=["recipient", "-created_at"]
+            ),
+        ]
+
+    def mark_as_read(self):
+        if not self.is_read:
+            from django.utils import timezone
+
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save(update_fields=["is_read", "read_at"])
+
+    def __str__(self):
+        return f"{self.recipient.username} - {self.title}"

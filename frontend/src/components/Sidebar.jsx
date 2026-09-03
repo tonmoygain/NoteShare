@@ -1,19 +1,20 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Link, useLocation } from "react-router-dom";
+import {
+    Link,
+    useLocation,
+} from "react-router-dom";
 
 import {
     Home,
     BookOpen,
-    Upload,
     MessageSquare,
-    User,
     GraduationCap,
     FileText,
     ChevronRight,
-    Sparkles,
     Menu,
     X,
+    BrainCircuit,
 } from "lucide-react";
 
 function Sidebar() {
@@ -23,10 +24,15 @@ function Sidebar() {
         useState(false);
 
     const username =
-        localStorage.getItem("username") || "Student";
+        localStorage.getItem("username") ||
+        "Student";
 
     const firstLetter =
         username.charAt(0).toUpperCase();
+
+    /* =========================================================
+       MAIN NAVIGATION
+    ========================================================= */
 
     const menus = [
         {
@@ -45,21 +51,25 @@ function Sidebar() {
             path: "/blogs",
         },
         {
-            title: "Upload",
-            icon: Upload,
-            path: "/upload",
-        },
-        {
             title: "Discussion",
             icon: MessageSquare,
             path: "/rooms",
         },
         {
-            title: "Profile",
-            icon: User,
-            path: "/profile",
+            title: "AI Tutor",
+            icon: BrainCircuit,
+            path: "/ai-tutor",
+        },
+        {
+            title: "Learning Intelligence",
+            icon: BrainCircuit,
+            path: "/learning-intelligence",
         },
     ];
+
+    /* =========================================================
+       ACTIVE STATE
+    ========================================================= */
 
     const isActive = (path) => {
         if (path === "/") {
@@ -68,9 +78,15 @@ function Sidebar() {
 
         return (
             location.pathname === path ||
-            location.pathname.startsWith(`${path}/`)
+            location.pathname.startsWith(
+                `${path}/`
+            )
         );
     };
+
+    /* =========================================================
+       MOBILE
+    ========================================================= */
 
     const closeMobileMenu = () => {
         setMobileOpen(false);
@@ -143,13 +159,15 @@ function Sidebar() {
                         exit={{
                             opacity: 0,
                         }}
-                        onClick={closeMobileMenu}
+                        onClick={
+                            closeMobileMenu
+                        }
                         className="
                             fixed
                             inset-0
-                            z-[55]
-                            bg-slate-950/35
-                            backdrop-blur-[2px]
+                            z-[60]
+                            bg-slate-950/40
+                            backdrop-blur-sm
                             lg:hidden
                         "
                     />
@@ -161,287 +179,134 @@ function Sidebar() {
             ====================================================== */}
 
             <aside
-                className={`
+                className="
                     fixed
+                    inset-y-0
                     left-0
-                    top-0
-                    z-[60]
+                    z-[65]
                     flex
-                    h-screen
                     w-72
                     flex-col
-                    overflow-hidden
                     border-r
-                    border-slate-200/70
+                    border-slate-200/80
                     bg-white/95
-                    shadow-[12px_0_45px_rgba(15,23,42,0.06)]
-                    backdrop-blur-2xl
+                    shadow-[10px_0_40px_rgba(15,23,42,0.06)]
+                    backdrop-blur-xl
                     transition-transform
                     duration-300
-                    ease-out
-                    ${
-                        mobileOpen
-                            ? "translate-x-0"
-                            : "-translate-x-full"
-                    }
                     lg:translate-x-0
-                `}
+                "
+                style={{
+                    transform:
+                        mobileOpen
+                            ? "translateX(0)"
+                            : undefined,
+                }}
             >
-                {/* Decorative ambient glow */}
-
-                <div className="
-                    pointer-events-none
-                    absolute
-                    -right-24
-                    -top-24
-                    h-64
-                    w-64
-                    rounded-full
-                    bg-blue-400/10
-                    blur-3xl
-                " />
-
-                <div className="
-                    pointer-events-none
-                    absolute
-                    -bottom-28
-                    -left-20
-                    h-64
-                    w-64
-                    rounded-full
-                    bg-cyan-300/10
-                    blur-3xl
-                " />
-
-                {/* =================================================
-                    MOBILE CLOSE
-                ================================================== */}
-
-                <div className="
-                    absolute
-                    right-4
-                    top-4
-                    z-20
-                    lg:hidden
-                ">
-                    <button
-                        type="button"
-                        onClick={
-                            closeMobileMenu
-                        }
-                        className="
-                            flex
-                            h-9
-                            w-9
-                            items-center
-                            justify-center
-                            rounded-xl
-                            bg-slate-100
-                            text-slate-500
-                            transition
-                            hover:bg-slate-200
-                            hover:text-slate-800
-                        "
-                        aria-label="Close navigation menu"
-                    >
-                        <X size={18} />
-                    </button>
-                </div>
-
                 {/* =================================================
                     BRAND
                 ================================================== */}
 
-                <div className="relative px-5 pt-6">
+                <div className="
+                    px-4
+                    pt-5
+                ">
+                    <div className="
+                        flex
+                        items-center
+                        justify-between
+                        gap-3
+                    ">
 
-                <Link
-                    to="/"
-                    onClick={closeMobileMenu}
-                    className="
-                        group
-                        block
-                        rounded-2xl
-                        outline-none
-                        focus-visible:ring-4
-                        focus-visible:ring-blue-100
-                    "
-                    aria-label="Go to NoteShare home"
-                >
-
-                    <motion.div
-                        initial={{
-                            opacity: 0,
-                            y: -10,
-                        }}
-                        animate={{
-                            opacity: 1,
-                            y: 0,
-                        }}
-                        whileHover={{
-                            y: -2,
-                        }}
-                        whileTap={{
-                            scale: 0.99,
-                        }}
-                        transition={{
-                            duration: 0.35,
-                            ease: "easeOut",
-                        }}
-                        className="
-                            group
-                            relative
-                            overflow-hidden
-                            rounded-2xl
-                            border
-                            border-slate-200/80
-                            bg-white
-                            px-4
-                            py-4
-                            shadow-[0_10px_30px_rgba(15,23,42,0.055)]
-                            transition-all
-                            duration-300
-                            group-hover:border-blue-200
-                            group-hover:shadow-[0_15px_35px_rgba(37,99,235,0.10)]
-                        "
-                    >
-
-                        {/* Hover Glow */}
-
-                        <div
+                        <Link
+                            to="/"
+                            onClick={
+                                closeMobileMenu
+                            }
                             className="
-                                pointer-events-none
-                                absolute
-                                -right-8
-                                -top-8
-                                h-20
-                                w-20
-                                rounded-full
-                                bg-blue-100/60
-                                blur-2xl
-                                opacity-60
-                                transition-all
-                                duration-500
-                                group-hover:scale-125
-                                group-hover:opacity-100
+                                group
+                                flex
+                                min-w-0
+                                items-center
+                                gap-3
                             "
-                        />
-
-                        <div className="relative flex items-center gap-3">
-
-                            {/* Logo */}
-
-                            <motion.div
-                                whileHover={{
-                                    rotate: -4,
-                                    scale: 1.04,
-                                }}
-                                transition={{
-                                    type: "spring",
-                                    stiffness: 300,
-                                    damping: 18,
-                                }}
-                                className="
-                                    flex
-                                    h-12
-                                    w-12
-                                    shrink-0
-                                    items-center
-                                    justify-center
-                                    rounded-2xl
-                                    bg-gradient-to-br
-                                    from-blue-600
-                                    via-blue-500
-                                    to-cyan-400
-                                    shadow-lg
-                                    shadow-blue-500/25
-                                "
-                            >
+                        >
+                            <div className="
+                                flex
+                                h-11
+                                w-11
+                                shrink-0
+                                items-center
+                                justify-center
+                                rounded-2xl
+                                bg-gradient-to-br
+                                from-blue-600
+                                via-blue-500
+                                to-cyan-400
+                                text-white
+                                shadow-lg
+                                shadow-blue-500/20
+                                transition
+                                group-hover:scale-105
+                            ">
                                 <GraduationCap
-                                    className="text-white"
-                                    size={25}
+                                    size={23}
                                     strokeWidth={2.2}
                                 />
-                            </motion.div>
-
-                            {/* Brand Text */}
-
-                            <div className="min-w-0 flex-1">
-
-                                <h1
-                                    className="
-                                        truncate
-                                        text-xl
-                                        font-extrabold
-                                        tracking-tight
-                                        text-slate-900
-                                    "
-                                >
-                                    NoteShare
-                                </h1>
-
-                                <div className="mt-1 flex items-center gap-1.5">
-
-                                    <Sparkles
-                                        size={11}
-                                        className="text-blue-500"
-                                        strokeWidth={2.5}
-                                    />
-
-                                    <p
-                                        className="
-                                            text-[10px]
-                                            font-bold
-                                            uppercase
-                                            tracking-[0.16em]
-                                            text-slate-400
-                                        "
-                                    >
-                                        Student platform
-                                    </p>
-
-                                </div>
-
                             </div>
 
-                            {/* Home Arrow */}
+                            <div className="
+                                min-w-0
+                            ">
+                                <p className="
+                                    truncate
+                                    text-lg
+                                    font-black
+                                    tracking-tight
+                                    text-slate-900
+                                ">
+                                    NoteShare
+                                </p>
 
-                            <motion.div
-                                animate={{
-                                    x: [0, 2, 0],
-                                }}
-                                transition={{
-                                    duration: 2,
-                                    repeat: Infinity,
-                                    ease: "easeInOut",
-                                }}
-                                className="
-                                    flex
-                                    h-8
-                                    w-8
-                                    shrink-0
-                                    items-center
-                                    justify-center
-                                    rounded-lg
-                                    bg-slate-50
-                                    text-slate-300
-                                    transition-all
-                                    duration-300
-                                    group-hover:bg-blue-50
-                                    group-hover:text-blue-600
-                                "
-                            >
-                                <ChevronRight
-                                    size={15}
-                                />
-                            </motion.div>
+                                <p className="
+                                    truncate
+                                    text-[9px]
+                                    font-black
+                                    uppercase
+                                    tracking-[0.18em]
+                                    text-slate-400
+                                ">
+                                    Learn · Share · Grow
+                                </p>
+                            </div>
+                        </Link>
 
-                        </div>
-
-                    </motion.div>
-
-                </Link>
-
-            </div>
+                        <button
+                            type="button"
+                            onClick={
+                                closeMobileMenu
+                            }
+                            className="
+                                flex
+                                h-9
+                                w-9
+                                shrink-0
+                                items-center
+                                justify-center
+                                rounded-xl
+                                bg-slate-100
+                                text-slate-500
+                                transition
+                                hover:bg-slate-200
+                                hover:text-slate-800
+                                lg:hidden
+                            "
+                            aria-label="Close navigation menu"
+                        >
+                            <X size={18} />
+                        </button>
+                    </div>
+                </div>
 
                 {/* =================================================
                     NAVIGATION
@@ -466,9 +331,14 @@ function Sidebar() {
                         Navigation
                     </p>
 
-                    <nav className="space-y-1.5">
+                    <nav className="
+                        space-y-1.5
+                    ">
                         {menus.map(
-                            (menu, index) => {
+                            (
+                                menu,
+                                index
+                            ) => {
                                 const active =
                                     isActive(
                                         menu.path
@@ -593,8 +463,12 @@ function Sidebar() {
                                                 `}
                                             >
                                                 <Icon
-                                                    size={19}
-                                                    strokeWidth={2.2}
+                                                    size={
+                                                        19
+                                                    }
+                                                    strokeWidth={
+                                                        2.2
+                                                    }
                                                 />
                                             </motion.span>
 
@@ -603,7 +477,9 @@ function Sidebar() {
                                                 z-10
                                                 flex-1
                                             ">
-                                                {menu.title}
+                                                {
+                                                    menu.title
+                                                }
                                             </span>
 
                                             <motion.span
@@ -626,7 +502,9 @@ function Sidebar() {
                                                 "
                                             >
                                                 <ChevronRight
-                                                    size={16}
+                                                    size={
+                                                        16
+                                                    }
                                                     strokeWidth={
                                                         2.3
                                                     }
@@ -710,7 +588,12 @@ function Sidebar() {
                             blur-2xl
                         " />
 
-                        <div className="relative flex items-center gap-3">
+                        <div className="
+                            relative
+                            flex
+                            items-center
+                            gap-3
+                        ">
                             <div
                                 className="
                                     relative
@@ -749,22 +632,29 @@ function Sidebar() {
                                 />
                             </div>
 
-                            <div className="min-w-0 flex-1">
-                                <p className="
-                                    truncate
-                                    text-sm
-                                    font-bold
-                                    text-slate-800
-                                ">
+                            <div className="
+                                min-w-0
+                                flex-1
+                            ">
+                                <p
+                                    className="
+                                        truncate
+                                        text-sm
+                                        font-bold
+                                        text-slate-800
+                                    "
+                                >
                                     {username}
                                 </p>
 
-                                <p className="
-                                    mt-0.5
-                                    text-xs
-                                    font-medium
-                                    text-slate-400
-                                ">
+                                <p
+                                    className="
+                                        mt-0.5
+                                        text-xs
+                                        font-medium
+                                        text-slate-400
+                                    "
+                                >
                                     NoteShare member
                                 </p>
                             </div>

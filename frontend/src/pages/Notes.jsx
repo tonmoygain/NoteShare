@@ -11,9 +11,9 @@ import {
     Upload,
     X,
     Layers3,
-    GraduationCap,
     ArrowUpRight,
     Filter,
+    FileText,
 } from "lucide-react";
 
 import {
@@ -25,29 +25,36 @@ import API from "../services/api";
 import NoteCard from "../components/NoteCard";
 
 function Notes() {
+    const [searchParams, setSearchParams] =
+        useSearchParams();
 
-    const [searchParams, setSearchParams] = useSearchParams();
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
+
     const [search, setSearch] = useState(
         searchParams.get("search") || ""
     );
-    const [department, setDepartment] = useState("All");
+
+    const [department, setDepartment] =
+        useState("All");
+
     const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    const [totalPages, setTotalPages] =
+        useState(1);
 
     const departmentOptions = [
         "All",
         "CSE",
         "EEE",
+        "CE",
         "BBA",
         "English",
         "Law",
     ];
 
-    // =========================================================
-    // LOAD NOTES
-    // =========================================================
+    /* =========================================================
+       LOAD NOTES
+    ========================================================= */
 
     useEffect(() => {
         let mounted = true;
@@ -59,211 +66,238 @@ function Notes() {
                 const searchQuery =
                     searchParams.get("search") || "";
 
-                // =====================================================
-                // NORMAL MODE
-                // Keep existing pagination
-                // =====================================================
+                /* =================================================
+                   NORMAL MODE
+                ================================================= */
 
                 if (!searchQuery.trim()) {
-                    const response = await API.get(
-                        `notes/?page=${page}`
-                    );
+                    const response =
+                        await API.get(
+                            `notes/?page=${page}`
+                        );
 
-                if (!mounted) return;
-
-                const data = response?.data || {};
-
-                setNotes(
-                    Array.isArray(data.notes)
-                        ? data.notes
-                        : []
-                );
-
-                setTotalPages(
-                    Number(data.total_pages) || 1
-                );
-
-                return;
-            }
-
-            // =====================================================
-            // SEARCH MODE
-            // Load all pages so search can find every note
-            // =====================================================
-
-            const firstResponse =
-                await API.get(
-                    "notes/?page=1"
-                );
-
-            if (!mounted) return;
-
-            const firstData =
-                firstResponse?.data || {};
-
-            const totalPagesFromAPI =
-                Number(
-                    firstData.total_pages
-                ) || 1;
-
-            let allNotes = Array.isArray(
-                firstData.notes
-            )
-                ? firstData.notes
-                : [];
-
-            // Fetch remaining pages
-            if (totalPagesFromAPI > 1) {
-
-                const pageRequests =
-                    Array.from(
-                        {
-                            length:
-                                totalPagesFromAPI - 1,
-                        },
-                        (_, index) =>
-                            API.get(
-                                `notes/?page=${index + 2}`
-                            )
-                    );
-
-                const responses =
-                    await Promise.all(
-                        pageRequests
-                    );
-
-                if (!mounted) return;
-
-                responses.forEach(
-                    (response) => {
-
-                        const data =
-                            response?.data || {};
-
-                        if (
-                            Array.isArray(
-                                data.notes
-                            )
-                        ) {
-                            allNotes =
-                                [
-                                    ...allNotes,
-                                    ...data.notes,
-                                ];
-                        }
+                    if (!mounted) {
+                        return;
                     }
-                );
-            }
 
-            if (!mounted) return;
+                    const data =
+                        response?.data || {};
 
-            setNotes(allNotes);
+                    const receivedNotes =
+                        Array.isArray(data.notes)
+                            ? data.notes
+                            : [];
 
-            // Search results are shown together
-            // so pagination doesn't hide matches.
-            setTotalPages(1);
+                    setNotes(
+                        receivedNotes
+                    );
 
-        } catch (error) {
-            console.error(
-                "Notes API Error:",
-                error
-            );
+                    setTotalPages(
+                        Number(
+                            data.total_pages
+                        ) || 1
+                    );
 
-            if (mounted) {
-                setNotes([]);
+                    return;
+                }
+
+                /* =================================================
+                   SEARCH MODE
+                   Load all pages so search can find
+                   every available note.
+                ================================================= */
+
+                const firstResponse =
+                    await API.get(
+                        "notes/?page=1"
+                    );
+
+                if (!mounted) {
+                    return;
+                }
+
+                const firstData =
+                    firstResponse?.data || {};
+
+                const totalPagesFromAPI =
+                    Number(
+                        firstData.total_pages
+                    ) || 1;
+
+                let allNotes =
+                    Array.isArray(
+                        firstData.notes
+                    )
+                        ? firstData.notes
+                        : [];
+
+                if (
+                    totalPagesFromAPI > 1
+                ) {
+                    const pageRequests =
+                        Array.from(
+                            {
+                                length:
+                                    totalPagesFromAPI -
+                                    1,
+                            },
+                            (_, index) =>
+                                API.get(
+                                    `notes/?page=${
+                                        index + 2
+                                    }`
+                                )
+                        );
+
+                    const responses =
+                        await Promise.all(
+                            pageRequests
+                        );
+
+                    if (!mounted) {
+                        return;
+                    }
+
+                    responses.forEach(
+                        (response) => {
+                            const data =
+                                response?.data ||
+                                {};
+
+                            if (
+                                Array.isArray(
+                                    data.notes
+                                )
+                            ) {
+                                allNotes =
+                                    [
+                                        ...allNotes,
+                                        ...data.notes,
+                                    ];
+                            }
+                        }
+                    );
+                }
+
+                if (!mounted) {
+                    return;
+                }
+
+                setNotes(allNotes);
+
+                /*
+                 * Search results are shown together,
+                 * therefore pagination is disabled
+                 * during search.
+                 */
                 setTotalPages(1);
+            } catch (error) {
+                console.error(
+                    "Notes API Error:",
+                    error
+                );
+
+                if (mounted) {
+                    setNotes([]);
+                    setTotalPages(1);
+                }
+            } finally {
+                if (mounted) {
+                    setLoading(false);
+                }
             }
-        } finally {
-            if (mounted) {
-                setLoading(false);
-            }
-        }
-    };
+        };
 
-    loadNotes();
+        loadNotes();
 
-    return () => {
-        mounted = false;
-    };
-}, [page, searchParams]);
+        return () => {
+            mounted = false;
+        };
+    }, [page, searchParams]);
 
-
-    // =========================================
-    // READ SEARCH FROM URL
-    // =========================================
+    /* =========================================================
+       SYNC SEARCH WITH URL
+    ========================================================= */
 
     useEffect(() => {
-
         const query =
             searchParams.get("search") || "";
 
         setSearch(query);
         setPage(1);
-
     }, [searchParams]);
 
+    /* =========================================================
+       FILTER NOTES
+    ========================================================= */
 
-    // =========================================================
-    // FILTER
-    // =========================================================
+    const filteredNotes =
+        notes.filter((note) => {
+            const keyword =
+                search
+                    .toLowerCase()
+                    .trim();
 
-    const filteredNotes = notes.filter((note) => {
-        const keyword = search
-            .toLowerCase()
-            .trim();
+            const title =
+                (
+                    note?.title || ""
+                ).toLowerCase();
 
-        const title = (
-            note?.title || ""
-        ).toLowerCase();
+            const description =
+                (
+                    note?.description || ""
+                ).toLowerCase();
 
-        const description = (
-            note?.description || ""
-        ).toLowerCase();
+            const dept =
+                (
+                    note?.department || ""
+                ).toLowerCase();
 
-        const dept = (
-            note?.department || ""
-        ).toLowerCase();
+            const uploader =
+                (
+                    note?.uploader_name ||
+                    ""
+                ).toLowerCase();
 
-        const uploader = (
-            note?.uploader_name || ""
-        ).toLowerCase();
+            const searchMatch =
+                !keyword ||
+                title.includes(keyword) ||
+                description.includes(keyword) ||
+                dept.includes(keyword) ||
+                uploader.includes(keyword);
 
-        const searchMatch =
-            !keyword ||
-            title.includes(keyword) ||
-            description.includes(keyword) ||
-            dept.includes(keyword) ||
-            uploader.includes(keyword);
+            const departmentMatch =
+                department === "All" ||
+                note?.department ===
+                    department;
 
-        const departmentMatch =
-            department === "All" ||
-            note?.department === department;
+            return (
+                searchMatch &&
+                departmentMatch
+            );
+        });
 
-        return (
-            searchMatch &&
-            departmentMatch
-        );
-    });
-
-    // =========================================================
-    // CLEAR FILTERS
-    // =========================================================
+    /* =========================================================
+       CLEAR FILTERS
+    ========================================================= */
 
     const clearFilters = () => {
         setSearch("");
         setDepartment("All");
         setPage(1);
-
         setSearchParams({});
     };
 
-    // =========================================================
-    // PAGINATION
-    // =========================================================
+    /* =========================================================
+       PAGINATION
+    ========================================================= */
 
     const previousPage = () => {
         setPage((current) =>
-            Math.max(current - 1, 1)
+            Math.max(
+                current - 1,
+                1
+            )
         );
 
         window.scrollTo({
@@ -286,137 +320,122 @@ function Notes() {
         });
     };
 
-    // =========================================================
-    // LOADING UI
-    // =========================================================
+    /* =========================================================
+       RENDER
+    ========================================================= */
 
-    
     return (
-        <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:py-12">
+        <section className="
+            mx-auto
+            max-w-7xl
+            px-4
+            py-6
+            sm:px-6
+            sm:py-10
+        ">
 
             {/* =====================================================
                 HERO
+                Same visual structure as Blogs
             ====================================================== */}
 
             <motion.div
                 initial={{
                     opacity: 0,
-                    y: 20,
+                    y: 18,
                 }}
                 animate={{
                     opacity: 1,
                     y: 0,
                 }}
                 transition={{
-                    duration: 0.6,
+                    duration: 0.55,
                     ease: "easeOut",
                 }}
                 className="
                     relative
+                    mb-9
                     overflow-hidden
                     rounded-[34px]
                     border
-                    border-slate-800/30
-                    bg-slate-950
+                    border-slate-200/50
+                    bg-gradient-to-br
+                    from-slate-950
+                    via-blue-950
+                    to-cyan-900
+                    p-7
                     text-white
-                    shadow-[0_30px_80px_rgba(15,23,42,0.16)]
+                    shadow-[0_25px_70px_rgba(15,23,42,0.13)]
+                    sm:p-9
+                    lg:p-12
                 "
             >
                 {/* Ambient glows */}
 
-                <motion.div
-                    animate={{
-                        x: [0, 25, 0],
-                        y: [0, -20, 0],
-                        scale: [1, 1.08, 1],
-                    }}
-                    transition={{
-                        duration: 10,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                    }}
-                    className="
-                        pointer-events-none
-                        absolute
-                        -right-24
-                        -top-24
-                        h-96
-                        w-96
-                        rounded-full
-                        bg-blue-500/20
-                        blur-3xl
-                    "
-                />
+                <div className="
+                    pointer-events-none
+                    absolute
+                    -right-24
+                    -top-24
+                    h-96
+                    w-96
+                    rounded-full
+                    bg-cyan-400/15
+                    blur-3xl
+                " />
 
-                <motion.div
-                    animate={{
-                        x: [0, -20, 0],
-                        y: [0, 20, 0],
-                        scale: [1, 1.08, 1],
-                    }}
-                    transition={{
-                        duration: 12,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                    }}
-                    className="
-                        pointer-events-none
-                        absolute
-                        -bottom-28
-                        -left-24
-                        h-96
-                        w-96
-                        rounded-full
-                        bg-cyan-400/15
-                        blur-3xl
-                    "
-                />
+                <div className="
+                    pointer-events-none
+                    absolute
+                    -bottom-32
+                    -left-24
+                    h-96
+                    w-96
+                    rounded-full
+                    bg-blue-500/15
+                    blur-3xl
+                " />
 
-                {/* Grid texture */}
+                <div className="
+                    pointer-events-none
+                    absolute
+                    right-1/3
+                    top-1/3
+                    h-48
+                    w-48
+                    rounded-full
+                    bg-indigo-400/10
+                    blur-3xl
+                " />
 
-                <div
-                    className="
-                        pointer-events-none
-                        absolute
-                        inset-0
-                        opacity-20
-                        [background-image:linear-gradient(rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.07)_1px,transparent_1px)]
-                        [background-size:36px_36px]
-                        [mask-image:linear-gradient(to_bottom,black,transparent)]
-                    "
-                />
+                <div className="
+                    relative
+                    flex
+                    flex-col
+                    gap-8
+                    lg:flex-row
+                    lg:items-end
+                    lg:justify-between
+                ">
 
-                <div
-                    className="
-                        relative
-                        z-10
-                        grid
-                        gap-10
-                        px-7
-                        py-10
-                        sm:px-10
-                        sm:py-12
-                        lg:grid-cols-[1.15fr_0.85fr]
-                        lg:px-14
-                        lg:py-14
-                    "
-                >
+                    {/* =================================================
+                        LEFT
+                    ================================================== */}
 
-                    {/* Left */}
+                    <div className="max-w-3xl">
 
-                    <div>
                         <motion.div
                             initial={{
                                 opacity: 0,
-                                y: 10,
+                                y: 8,
                             }}
                             animate={{
                                 opacity: 1,
                                 y: 0,
                             }}
                             transition={{
-                                delay: 0.08,
                                 duration: 0.4,
+                                delay: 0.08,
                             }}
                             className="
                                 inline-flex
@@ -428,337 +447,151 @@ function Notes() {
                                 bg-white/10
                                 px-4
                                 py-2
-                                text-[11px]
-                                font-extrabold
-                                uppercase
-                                tracking-[0.18em]
+                                text-xs
+                                font-bold
                                 text-cyan-200
-                                backdrop-blur-xl
+                                backdrop-blur-sm
                             "
                         >
-                            <Sparkles size={14} />
-                            Study Resources
+                            <Sparkles
+                                size={14}
+                            />
+
+                            NoteShare Knowledge Hub
                         </motion.div>
 
-                        <motion.h1
-                            initial={{
-                                opacity: 0,
-                                y: 15,
-                            }}
-                            animate={{
-                                opacity: 1,
-                                y: 0,
-                            }}
-                            transition={{
-                                delay: 0.16,
-                                duration: 0.55,
-                            }}
-                            className="
-                                mt-6
-                                max-w-3xl
-                                text-4xl
-                                font-black
-                                leading-[1.02]
-                                tracking-[-0.04em]
-                                sm:text-5xl
-                                lg:text-6xl
-                            "
-                        >
-                            Explore knowledge.
-                            <br />
+                        <h1 className="
+                            mt-6
+                            text-4xl
+                            font-black
+                            tracking-tight
+                            sm:text-5xl
+                            lg:text-6xl
+                        ">
+                            Study Notes
+                        </h1>
 
-                            <span
-                                className="
-                                    bg-gradient-to-r
-                                    from-cyan-300
-                                    via-sky-300
-                                    to-blue-300
-                                    bg-clip-text
-                                    text-transparent
-                                "
-                            >
-                                One note at a time.
-                            </span>
-                        </motion.h1>
+                        <p className="
+                            mt-4
+                            max-w-2xl
+                            text-base
+                            leading-7
+                            text-slate-300
+                            sm:text-lg
+                            sm:leading-8
+                        ">
+                            Explore, share and discover
+                            useful academic notes from
+                            the NoteShare community.
+                        </p>
 
-                        <motion.p
-                            initial={{
-                                opacity: 0,
-                                y: 12,
-                            }}
-                            animate={{
-                                opacity: 1,
-                                y: 0,
-                            }}
-                            transition={{
-                                delay: 0.26,
-                                duration: 0.5,
-                            }}
-                            className="
-                                mt-6
-                                max-w-2xl
-                                text-base
-                                leading-7
-                                text-slate-300
-                                sm:text-lg
-                                sm:leading-8
-                            "
-                        >
-                            Discover lecture notes, study
-                            materials, academic resources,
-                            and shared knowledge from the
-                            NoteShare community.
-                        </motion.p>
-
-                        <motion.div
-                            initial={{
-                                opacity: 0,
-                                y: 12,
-                            }}
-                            animate={{
-                                opacity: 1,
-                                y: 0,
-                            }}
-                            transition={{
-                                delay: 0.36,
-                                duration: 0.5,
-                            }}
-                            className="mt-8 flex flex-wrap gap-3"
-                        >
-                            <div className="
-                                inline-flex
-                                items-center
-                                gap-2
-                                rounded-xl
-                                border
-                                border-white/10
-                                bg-white/10
-                                px-4
-                                py-2.5
-                                text-sm
-                                font-semibold
-                                text-slate-200
-                                backdrop-blur-xl
-                            ">
-                                <BookOpen size={16} />
-                                Multiple subjects
-                            </div>
+                        <div className="
+                            mt-7
+                            flex
+                            flex-wrap
+                            gap-3
+                        ">
 
                             <div className="
                                 inline-flex
                                 items-center
                                 gap-2
-                                rounded-xl
-                                border
-                                border-white/10
-                                bg-white/10
-                                px-4
-                                py-2.5
-                                text-sm
-                                font-semibold
-                                text-slate-200
-                                backdrop-blur-xl
-                            ">
-                                <GraduationCap
-                                    size={16}
-                                />
-                                Student powered
-                            </div>
-                        </motion.div>
-                    </div>
-
-                    {/* Right visual */}
-
-                    <div className="flex items-center justify-center lg:justify-end">
-                        <motion.div
-                            initial={{
-                                opacity: 0,
-                                scale: 0.92,
-                                y: 18,
-                            }}
-                            animate={{
-                                opacity: 1,
-                                scale: 1,
-                                y: 0,
-                            }}
-                            transition={{
-                                delay: 0.25,
-                                duration: 0.65,
-                            }}
-                            className="relative w-full max-w-sm"
-                        >
-                            <motion.div
-                                animate={{
-                                    y: [0, -8, 0],
-                                }}
-                                transition={{
-                                    duration: 4,
-                                    repeat: Infinity,
-                                    ease: "easeInOut",
-                                }}
-                                className="
-                                    relative
-                                    overflow-hidden
-                                    rounded-[28px]
-                                    border
-                                    border-white/10
-                                    bg-white/[0.08]
-                                    p-5
-                                    shadow-2xl
-                                    backdrop-blur-2xl
-                                "
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="
-                                            flex
-                                            h-11
-                                            w-11
-                                            items-center
-                                            justify-center
-                                            rounded-xl
-                                            bg-gradient-to-br
-                                            from-blue-500
-                                            to-cyan-400
-                                        ">
-                                            <BookOpen size={21} />
-                                        </div>
-
-                                        <div>
-                                            <p className="text-sm font-bold text-white">
-                                                NoteShare Library
-                                            </p>
-
-                                            <p className="text-xs text-slate-400">
-                                                Learn. Share. Grow.
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="
-                                        h-2.5
-                                        w-2.5
-                                        rounded-full
-                                        bg-emerald-400
-                                        shadow-[0_0_15px_rgba(52,211,153,0.8)]
-                                    " />
-                                </div>
-
-                                <div className="mt-6 space-y-3">
-                                    {[
-                                        {
-                                            title: "Lecture Notes",
-                                            label: "CSE",
-                                        },
-                                        {
-                                            title: "IDP Proposal",
-                                            label: "Project",
-                                        },
-                                        {
-                                            title: "Study Material",
-                                            label: "Academic",
-                                        },
-                                    ].map(
-                                        (
-                                            item,
-                                            index
-                                        ) => (
-                                            <motion.div
-                                                key={
-                                                    item.title
-                                                }
-                                                initial={{
-                                                    opacity: 0,
-                                                    x: 15,
-                                                }}
-                                                animate={{
-                                                    opacity: 1,
-                                                    x: 0,
-                                                }}
-                                                transition={{
-                                                    delay:
-                                                        0.5 +
-                                                        index *
-                                                            0.12,
-                                                }}
-                                                className="
-                                                    flex
-                                                    items-center
-                                                    justify-between
-                                                    rounded-xl
-                                                    border
-                                                    border-white/10
-                                                    bg-white/5
-                                                    px-4
-                                                    py-3
-                                                "
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="h-2 w-2 rounded-full bg-cyan-300" />
-
-                                                    <span className="text-sm font-semibold text-slate-200">
-                                                        {
-                                                            item.title
-                                                        }
-                                                    </span>
-                                                </div>
-
-                                                <span className="
-                                                    rounded-full
-                                                    bg-white/10
-                                                    px-2.5
-                                                    py-1
-                                                    text-[10px]
-                                                    font-bold
-                                                    text-slate-300
-                                                ">
-                                                    {
-                                                        item.label
-                                                    }
-                                                </span>
-                                            </motion.div>
-                                        )
-                                    )}
-                                </div>
-
-                                <div className="
-                                    mt-5
-                                    flex
-                                    items-center
-                                    justify-between
-                                    rounded-xl
-                                    bg-gradient-to-r
-                                    from-blue-600/30
-                                    to-cyan-500/20
-                                    px-4
-                                    py-3
-                                ">
-                                    <span className="text-xs font-semibold text-slate-300">
-                                        Always growing
-                                    </span>
-
-                                    <Sparkles
-                                        size={16}
-                                        className="text-cyan-300"
-                                    />
-                                </div>
-                            </motion.div>
-
-                            <div className="
-                                pointer-events-none
-                                absolute
-                                -bottom-5
-                                -left-5
-                                h-20
-                                w-20
-                                rounded-2xl
+                                rounded-full
                                 border
                                 border-white/10
                                 bg-white/5
-                                backdrop-blur-xl
-                            " />
-                        </motion.div>
+                                px-4
+                                py-2.5
+                                text-sm
+                                font-semibold
+                                text-slate-300
+                                backdrop-blur-sm
+                            ">
+                                <BookOpen
+                                    size={16}
+                                />
+
+                                {loading
+                                    ? "Loading..."
+                                    : `${notes.length} Study Notes`}
+                            </div>
+
+                            <div className="
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-full
+                                border
+                                border-white/10
+                                bg-white/5
+                                px-4
+                                py-2.5
+                                text-sm
+                                font-semibold
+                                text-slate-300
+                                backdrop-blur-sm
+                            ">
+                                <FileText
+                                    size={16}
+                                />
+
+                                Academic Resources
+                            </div>
+                        </div>
                     </div>
+
+                    {/* =================================================
+                        UPLOAD BUTTON
+                    ================================================== */}
+
+                    <motion.div
+                        whileHover={{
+                            y: -2,
+                        }}
+                        whileTap={{
+                            scale: 0.98,
+                        }}
+                    >
+                        <Link
+                            to="/upload"
+                            className="
+                                group
+                                inline-flex
+                                w-full
+                                items-center
+                                justify-center
+                                gap-3
+                                rounded-2xl
+                                bg-white
+                                px-7
+                                py-4
+                                font-bold
+                                text-slate-900
+                                shadow-xl
+                                transition
+                                hover:bg-cyan-400
+                                hover:text-white
+                                sm:w-auto
+                            "
+                        >
+                            <Upload
+                                size={19}
+                            />
+
+                            Upload Note
+
+                            <ArrowUpRight
+                                size={18}
+                                className="
+                                    transition-transform
+                                    duration-300
+                                    group-hover:translate-x-0.5
+                                    group-hover:-translate-y-0.5
+                                "
+                            />
+                        </Link>
+                    </motion.div>
+
                 </div>
             </motion.div>
 
@@ -792,8 +625,18 @@ function Notes() {
                     sm:p-5
                 "
             >
-                <div className="mb-4 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
+                <div className="
+                    mb-4
+                    flex
+                    items-center
+                    justify-between
+                    gap-3
+                ">
+                    <div className="
+                        flex
+                        items-center
+                        gap-2.5
+                    ">
                         <div className="
                             flex
                             h-9
@@ -804,15 +647,26 @@ function Notes() {
                             bg-blue-50
                             text-blue-600
                         ">
-                            <Search size={17} />
+                            <Search
+                                size={17}
+                            />
                         </div>
 
                         <div>
-                            <p className="text-sm font-extrabold text-slate-800">
+                            <p className="
+                                text-sm
+                                font-extrabold
+                                text-slate-800
+                            ">
                                 Find a note
                             </p>
 
-                            <p className="hidden text-xs text-slate-400 sm:block">
+                            <p className="
+                                hidden
+                                text-xs
+                                text-slate-400
+                                sm:block
+                            ">
                                 Search by title, subject,
                                 department or uploader
                             </p>
@@ -820,9 +674,12 @@ function Notes() {
                     </div>
 
                     {(search ||
-                        department !== "All") && (
+                        department !==
+                            "All") && (
                         <button
-                            onClick={clearFilters}
+                            onClick={
+                                clearFilters
+                            }
                             className="
                                 rounded-lg
                                 px-3
@@ -839,11 +696,17 @@ function Notes() {
                     )}
                 </div>
 
-                <div className="grid gap-3 lg:grid-cols-[1fr_220px]">
+                <div className="
+                    grid
+                    gap-3
+                    lg:grid-cols-[1fr_220px]
+                ">
 
                     {/* Search */}
 
-                    <div className="relative">
+                    <div className="
+                        relative
+                    ">
                         <Search
                             size={19}
                             className="
@@ -859,10 +722,15 @@ function Notes() {
                         <input
                             type="text"
                             value={search}
-                            onChange={(event) => {
+                            onChange={(
+                                event
+                            ) => {
                                 setSearch(
-                                    event.target.value
+                                    event
+                                        .target
+                                        .value
                                 );
+
                                 setPage(1);
                             }}
                             placeholder="Search notes..."
@@ -920,7 +788,9 @@ function Notes() {
 
                     {/* Department */}
 
-                    <div className="relative">
+                    <div className="
+                        relative
+                    ">
                         <SlidersHorizontal
                             size={17}
                             className="
@@ -934,11 +804,18 @@ function Notes() {
                         />
 
                         <select
-                            value={department}
-                            onChange={(event) => {
+                            value={
+                                department
+                            }
+                            onChange={(
+                                event
+                            ) => {
                                 setDepartment(
-                                    event.target.value
+                                    event
+                                        .target
+                                        .value
                                 );
+
                                 setPage(1);
                             }}
                             className="
@@ -983,7 +860,8 @@ function Notes() {
                 {/* Active filters */}
 
                 {(search ||
-                    department !== "All") && (
+                    department !==
+                        "All") && (
                     <div
                         className="
                             mt-4
@@ -1028,9 +906,14 @@ function Notes() {
                                 "
                             >
                                 Search:
-                                <span className="max-w-[180px] truncate">
+
+                                <span className="
+                                    max-w-[180px]
+                                    truncate
+                                ">
                                     {search}
                                 </span>
+
                                 <X size={12} />
                             </button>
                         )}
@@ -1059,6 +942,7 @@ function Notes() {
                                 "
                             >
                                 {department}
+
                                 <X size={12} />
                             </button>
                         )}
@@ -1166,10 +1050,34 @@ function Notes() {
             </motion.div>
 
             {/* =====================================================
-                NOTES GRID
+                NOTES
             ====================================================== */}
 
-            {filteredNotes.length === 0 ? (
+            {loading ? (
+                <div className="
+                    mt-8
+                    grid
+                    gap-6
+                    md:grid-cols-2
+                ">
+                    {[1, 2, 3, 4].map(
+                        (item) => (
+                            <div
+                                key={item}
+                                className="
+                                    h-64
+                                    animate-pulse
+                                    rounded-[28px]
+                                    border
+                                    border-slate-200
+                                    bg-slate-100
+                                "
+                            />
+                        )
+                    )}
+                </div>
+            ) : filteredNotes.length ===
+              0 ? (
                 <motion.div
                     initial={{
                         opacity: 0,
@@ -1210,7 +1118,9 @@ function Notes() {
                         text-blue-600
                         shadow-sm
                     ">
-                        <BookOpen size={34} />
+                        <BookOpen
+                            size={34}
+                        />
                     </div>
 
                     <h3 className="
@@ -1236,7 +1146,8 @@ function Notes() {
                     </p>
 
                     {(search ||
-                        department !== "All") && (
+                        department !==
+                            "All") && (
                         <motion.button
                             whileHover={{
                                 y: -2,
@@ -1267,9 +1178,17 @@ function Notes() {
                     )}
                 </motion.div>
             ) : (
-                <div className="mt-8 grid gap-6 md:grid-cols-2">
+                <div className="
+                    mt-8
+                    grid
+                    gap-6
+                    md:grid-cols-2
+                ">
                     {filteredNotes.map(
-                        (note, index) => (
+                        (
+                            note,
+                            index
+                        ) => (
                             <motion.div
                                 key={note.id}
                                 initial={{
@@ -1283,7 +1202,8 @@ function Notes() {
                                 transition={{
                                     duration: 0.45,
                                     delay:
-                                        (index % 4) *
+                                        (index %
+                                            4) *
                                         0.06,
                                     ease: "easeOut",
                                 }}
@@ -1304,285 +1224,155 @@ function Notes() {
                 PAGINATION
             ====================================================== */}
 
-            {totalPages > 1 && (
-                <motion.div
-                    initial={{
-                        opacity: 0,
-                        y: 15,
-                    }}
-                    animate={{
-                        opacity: 1,
-                        y: 0,
-                    }}
-                    transition={{
-                        duration: 0.45,
-                        delay: 0.15,
-                    }}
-                    className="
-                        notes-pagination
-                        mt-10
-                        flex
-                        items-center
-                        justify-center
-                        gap-3
-                    "
-                >
-                    <motion.button
-                        whileHover={
-                            page > 1
-                                ? { y: -2 }
-                                : {}
-                        }
-                        whileTap={
-                            page > 1
-                                ? { scale: 0.96 }
-                                : {}
-                        }
-                        onClick={
-                            previousPage
-                        }
-                        disabled={
-                            page === 1
-                        }
-                        className="
-                            flex
-                            h-11
-                            w-11
-                            items-center
-                            justify-center
-                            rounded-xl
-                            border
-                            border-slate-200
-                            bg-white
-                            text-slate-700
-                            shadow-sm
-                            transition
-                            hover:border-blue-200
-                            hover:bg-blue-50
-                            hover:text-blue-600
-                            disabled:cursor-not-allowed
-                            disabled:opacity-35
-                        "
-                        title="Previous page"
-                    >
-                        <ChevronLeft size={19} />
-                    </motion.button>
-
-                    <div
-                        className="
-                            flex
-                            h-11
-                            items-center
-                            gap-2
-                            rounded-xl
-                            border
-                            border-slate-200
-                            bg-slate-50
-                            px-5
-                            text-sm
-                            font-bold
-                            text-slate-600
-                        "
-                    >
-                        <span className="text-blue-600">
-                            {page}
-                        </span>
-
-                        <span>/</span>
-
-                        <span>
-                            {totalPages}
-                        </span>
-                    </div>
-
-                    <motion.button
-                        whileHover={
-                            page < totalPages
-                                ? { y: -2 }
-                                : {}
-                        }
-                        whileTap={
-                            page < totalPages
-                                ? { scale: 0.96 }
-                                : {}
-                        }
-                        onClick={nextPage}
-                        disabled={
-                            page === totalPages
-                        }
-                        className="
-                            flex
-                            h-11
-                            w-11
-                            items-center
-                            justify-center
-                            rounded-xl
-                            bg-blue-600
-                            text-white
-                            shadow-lg
-                            shadow-blue-500/20
-                            transition
-                            hover:bg-blue-700
-                            disabled:cursor-not-allowed
-                            disabled:opacity-35
-                        "
-                        title="Next page"
-                    >
-                        <ChevronRight size={19} />
-                    </motion.button>
-                </motion.div>
-            )}
-
-            {/* =====================================================
-                UPLOAD CTA
-            ====================================================== */}
-
-            <motion.section
-                initial={{
-                    opacity: 0,
-                    y: 24,
-                }}
-                whileInView={{
-                    opacity: 1,
-                    y: 0,
-                }}
-                viewport={{
-                    once: true,
-                    amount: 0.15,
-                }}
-                transition={{
-                    duration: 0.6,
-                }}
-                className="mt-16"
-            >
-                <div
-                    className="
-                        notes-upload-cta
-                        relative
-                        overflow-hidden
-                        rounded-[30px]
-                        bg-gradient-to-r
-                        from-blue-600
-                        via-blue-700
-                        to-cyan-600
-                        p-7
-                        text-white
-                        shadow-[0_25px_60px_rgba(37,99,235,0.20)]
-                        sm:p-9
-                        lg:p-10
-                    "
-                >
+            {!loading &&
+                totalPages > 1 && (
                     <motion.div
+                        initial={{
+                            opacity: 0,
+                            y: 15,
+                        }}
                         animate={{
-                            x: [0, 25, 0],
-                            y: [0, -15, 0],
-                            scale: [1, 1.08, 1],
+                            opacity: 1,
+                            y: 0,
                         }}
                         transition={{
-                            duration: 8,
-                            repeat: Infinity,
-                            ease: "easeInOut",
+                            duration: 0.45,
+                            delay: 0.15,
                         }}
                         className="
-                            pointer-events-none
-                            absolute
-                            -right-16
-                            -top-16
-                            h-56
-                            w-56
-                            rounded-full
-                            bg-white/10
-                            blur-3xl
+                            notes-pagination
+                            mt-10
+                            flex
+                            items-center
+                            justify-center
+                            gap-3
                         "
-                    />
-
-                    <div className="
-                        relative
-                        flex
-                        flex-col
-                        gap-7
-                        sm:flex-row
-                        sm:items-center
-                        sm:justify-between
-                    ">
-                        <div>
-                            <div className="
-                                inline-flex
-                                items-center
-                                gap-2
-                                text-xs
-                                font-bold
-                                uppercase
-                                tracking-[0.16em]
-                                text-blue-100
-                            ">
-                                <Sparkles size={14} />
-                                Keep sharing
-                            </div>
-
-                            <h3 className="
-                                mt-3
-                                text-2xl
-                                font-black
-                                tracking-tight
-                                sm:text-3xl
-                            ">
-                                Have useful notes?
-                            </h3>
-
-                            <p className="
-                                mt-2
-                                max-w-2xl
-                                text-sm
-                                leading-6
-                                text-blue-100
-                                sm:text-base
-                            ">
-                                Share your study resources
-                                and help another student learn
-                                a little faster.
-                            </p>
-                        </div>
-
-                        <Link
-                            to="/upload"
+                    >
+                        <motion.button
+                            whileHover={
+                                page > 1
+                                    ? {
+                                          y: -2,
+                                      }
+                                    : {}
+                            }
+                            whileTap={
+                                page > 1
+                                    ? {
+                                          scale: 0.96,
+                                      }
+                                    : {}
+                            }
+                            onClick={
+                                previousPage
+                            }
+                            disabled={
+                                page === 1
+                            }
                             className="
-                                group
-                                inline-flex
-                                shrink-0
+                                flex
+                                h-11
+                                w-11
                                 items-center
                                 justify-center
-                                gap-2.5
-                                rounded-2xl
+                                rounded-xl
+                                border
+                                border-slate-200
                                 bg-white
-                                px-6
-                                py-3.5
+                                text-slate-700
+                                shadow-sm
+                                transition
+                                hover:border-blue-200
+                                hover:bg-blue-50
+                                hover:text-blue-600
+                                disabled:cursor-not-allowed
+                                disabled:opacity-35
+                            "
+                            title="Previous page"
+                        >
+                            <ChevronLeft
+                                size={19}
+                            />
+                        </motion.button>
+
+                        <div
+                            className="
+                                flex
+                                h-11
+                                items-center
+                                gap-2
+                                rounded-xl
+                                border
+                                border-slate-200
+                                bg-slate-50
+                                px-5
                                 text-sm
-                                font-extrabold
-                                text-blue-700
-                                shadow-xl
-                                transition-all
-                                duration-300
-                                hover:-translate-y-1
-                                hover:shadow-2xl
+                                font-bold
+                                text-slate-600
                             "
                         >
-                            <Upload size={18} />
-                            Upload a Note
+                            <span className="
+                                text-blue-600
+                            ">
+                                {page}
+                            </span>
 
-                            <ArrowUpRight
-                                size={17}
-                                className="
-                                    transition-transform
-                                    duration-300
-                                    group-hover:translate-x-0.5
-                                    group-hover:-translate-y-0.5
-                                "
+                            <span>/</span>
+
+                            <span>
+                                {totalPages}
+                            </span>
+                        </div>
+
+                        <motion.button
+                            whileHover={
+                                page <
+                                totalPages
+                                    ? {
+                                          y: -2,
+                                      }
+                                    : {}
+                            }
+                            whileTap={
+                                page <
+                                totalPages
+                                    ? {
+                                          scale: 0.96,
+                                      }
+                                    : {}
+                            }
+                            onClick={
+                                nextPage
+                            }
+                            disabled={
+                                page ===
+                                totalPages
+                            }
+                            className="
+                                flex
+                                h-11
+                                w-11
+                                items-center
+                                justify-center
+                                rounded-xl
+                                bg-blue-600
+                                text-white
+                                shadow-lg
+                                shadow-blue-500/20
+                                transition
+                                hover:bg-blue-700
+                                disabled:cursor-not-allowed
+                                disabled:opacity-35
+                            "
+                            title="Next page"
+                        >
+                            <ChevronRight
+                                size={19}
                             />
-                        </Link>
-                    </div>
-                </div>
-            </motion.section>
+                        </motion.button>
+                    </motion.div>
+                )}
+
         </section>
     );
 }

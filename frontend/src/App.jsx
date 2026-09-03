@@ -1,8 +1,9 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import MainLayout from "./layouts/MainLayout";
 import AIAssistant from "./components/AIAssistant";
 
+import LandingPage from "./pages/LandingPage";
 import Home from "./pages/Home";
 import Notes from "./pages/Notes";
 import Blogs from "./pages/Blogs";
@@ -18,26 +19,62 @@ import CreateBlog from "./pages/CreateBlog";
 import EditBlog from "./pages/EditBlog";
 import BlogDetails from "./pages/BlogDetails";
 import SocialCallback from "./pages/SocialCallback";
+import AITutor from "./pages/AITutor";
+import LearningInsights from "./pages/LearningInsights";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
-function App() {
+
+function AppContent() {
+
+    const location = useLocation();
+
+    const isLandingPage =
+        location.pathname === "/";
+
 
     return (
-
-        <BrowserRouter>
-
+        <>
             <Routes>
+
+                {/* =====================================================
+                    PUBLIC LANDING PAGE
+                    Completely separate from the application shell
+                ====================================================== */}
+
+                <Route
+                    path="/"
+                    element={<LandingPage />}
+                />
+
+
+                {/* =====================================================
+                    NOTE SHARE APPLICATION
+                    Everything below uses the existing MainLayout
+                ====================================================== */}
 
                 <Route element={<MainLayout />}>
 
-                    <Route path="/" element={<Home />} />
+                    {/* Existing NoteShare Home / Dashboard */}
+                    <Route
+                        path="/dashboard"
+                        element={<Home />}
+                    />
 
-                    <Route path="/notes" element={<Notes />} />
+                    <Route
+                        path="/notes"
+                        element={<Notes />}
+                    />
 
-                    <Route path="/blogs" element={<Blogs />} />
+                    <Route
+                        path="/blogs"
+                        element={<Blogs />}
+                    />
 
-                    <Route path="/blog/:id" element={<BlogDetails />} />
+                    <Route
+                        path="/blog/:id"
+                        element={<BlogDetails />}
+                    />
 
                     <Route
                         path="/create-blog"
@@ -45,12 +82,11 @@ function App() {
                             <ProtectedRoute>
                                 <CreateBlog />
                             </ProtectedRoute>
-
                         }
                     />
 
                     <Route
-                        path="/edit-blog/:id" 
+                        path="/edit-blog/:id"
                         element={
                             <ProtectedRoute>
                                 <EditBlog />
@@ -58,17 +94,44 @@ function App() {
                         }
                     />
 
-                    <Route path="/rooms" element={<Rooms />} />
+                    <Route
+                        path="/rooms"
+                        element={<Rooms />}
+                    />
 
-                    <Route path="/rooms/:id" element={<RoomDetails />} />
+                    <Route
+                        path="/rooms/:id"
+                        element={<RoomDetails />}
+                    />
 
-                    <Route path="/note/:id" element={<NoteDetails />} />
+                    <Route
+                        path="/note/:id"
+                        element={<NoteDetails />}
+                    />
 
                     <Route
                         path="/upload"
                         element={
                             <ProtectedRoute>
                                 <Upload />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/ai-tutor"
+                        element={
+                            <ProtectedRoute>
+                                <AITutor />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/learning-intelligence"
+                        element={
+                            <ProtectedRoute>
+                                <LearningInsights />
                             </ProtectedRoute>
                         }
                     />
@@ -93,12 +156,18 @@ function App() {
 
                 </Route>
 
-                <Route 
-                    path="/login" 
+
+                {/* =====================================================
+                    AUTHENTICATION
+                    No MainLayout
+                ====================================================== */}
+
+                <Route
+                    path="/login"
                     element={<Login />}
                 />
 
-                <Route 
+                <Route
                     path="/register"
                     element={<Register />}
                 />
@@ -110,12 +179,29 @@ function App() {
 
             </Routes>
 
-            <AIAssistant />
 
+            {/* =========================================================
+                AI ASSISTANT
+                Do not show it on the public landing page.
+                Keep it everywhere inside the actual application.
+            ========================================================== */}
+
+            {!isLandingPage && <AIAssistant />}
+
+        </>
+    );
+}
+
+
+function App() {
+
+    return (
+        <BrowserRouter>
+            <AppContent />
         </BrowserRouter>
-
     );
 
 }
+
 
 export default App;

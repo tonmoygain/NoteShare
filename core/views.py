@@ -33,6 +33,7 @@ from django.core.cache import cache
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from django.db.models import Sum
+from django.utils import timezone
 
 from .models import (
     Note,
@@ -50,6 +51,32 @@ from .serializers import (
     DiscussionMessageSerializer,
     UserProfileSerializer,
 )
+
+
+# ==========================
+# Notifications
+# ==========================
+
+def create_notification(
+    recipient,
+    title,
+    message,
+    notification_type,
+    link="",
+    actor=None,
+):
+    """Create one persistent in-app notification for a user."""
+    if not recipient:
+        return None
+
+    return Notification.objects.create(
+        recipient=recipient,
+        actor=actor,
+        notification_type=notification_type,
+        title=(title or "NoteShare notification").strip(),
+        message=(message or "").strip(),
+        link=(link or "").strip(),
+    )
 
 
 def home(request):
@@ -181,7 +208,28 @@ def create_note(request):
 
     if serializer.is_valid():
 
-        serializer.save(uploader=request.user)
+        note = serializer.save(uploader=request.user)
+
+        create_notification(
+            recipient=request.user,
+            actor=request.user,
+            notification_type="note_created",
+            title="Note Published",
+            message=f'Your note "{note.title}" was published successfully.',
+            link=f"/note/{note.id}",
+        )
+
+        Notification.objects.bulk_create([
+            Notification(
+                recipient=user,
+                actor=request.user,
+                notification_type="new_note",
+                title="New Note Available",
+                message=f'{request.user.username} published a new note: "{note.title}".',
+                link=f"/note/{note.id}",
+            )
+            for user in User.objects.exclude(id=request.user.id)
+        ])
 
         return Response(
             serializer.data,
@@ -208,6 +256,14 @@ def delete_note(request, pk):
             },
             status=status.HTTP_403_FORBIDDEN
         )
+
+    create_notification(
+        recipient=request.user,
+        actor=request.user,
+        notification_type="note_deleted",
+        title="Note Deleted",
+        message=f'Your note "{note.title}" was deleted.',
+    )
 
     note.delete()
 
@@ -265,6 +321,15 @@ def update_note(request, id):
     if serializer.is_valid():
 
         serializer.save()
+
+        create_notification(
+            recipient=request.user,
+            actor=request.user,
+            notification_type="note_updated",
+            title="Note Updated",
+            message=f'Your note "{note.title}" was updated successfully.',
+            link=f"/note/{note.id}",
+        )
 
         return Response(serializer.data)
     
@@ -568,7 +633,28 @@ def create_blog(request):
 
     if serializer.is_valid():
 
-        serializer.save(author=request.user)
+        blog = serializer.save(author=request.user)
+
+        create_notification(
+            recipient=request.user,
+            actor=request.user,
+            notification_type="blog_created",
+            title="Blog Published",
+            message=f'Your blog "{blog.title}" was published successfully.',
+            link=f"/blog/{blog.id}",
+        )
+
+        Notification.objects.bulk_create([
+            Notification(
+                recipient=user,
+                actor=request.user,
+                notification_type="new_blog",
+                title="New Blog Published",
+                message=f'{request.user.username} published a new blog: "{blog.title}".',
+                link=f"/blog/{blog.id}",
+            )
+            for user in User.objects.exclude(id=request.user.id)
+        ])
 
         return Response(
             serializer.data,
@@ -630,6 +716,14 @@ def delete_blog(request, id):
             status=status.HTTP_403_FORBIDDEN
         )
 
+    create_notification(
+        recipient=request.user,
+        actor=request.user,
+        notification_type="blog_deleted",
+        title="Blog Deleted",
+        message=f'Your blog "{blog.title}" was deleted.',
+    )
+
     blog.delete()
 
     return Response({
@@ -678,6 +772,15 @@ def update_blog(request, id):
 
         serializer.save()
 
+        create_notification(
+            recipient=request.user,
+            actor=request.user,
+            notification_type="blog_updated",
+            title="Blog Updated",
+            message=f'Your blog "{blog.title}" was updated successfully.',
+            link=f"/blog/{blog.id}",
+        )
+
         return Response(serializer.data)
 
     return Response(
@@ -724,6 +827,27 @@ def create_discussion_room(request):
         )
 
         room.members.add(request.user)
+
+        create_notification(
+            recipient=request.user,
+            actor=request.user,
+            notification_type="room_created",
+            title="Discussion Room Created",
+            message=f'Your discussion room "{room.name}" was created successfully.',
+            link=f"/rooms/{room.id}",
+        )
+
+        Notification.objects.bulk_create([
+            Notification(
+                recipient=user,
+                actor=request.user,
+                notification_type="new_room",
+                title="New Discussion Room",
+                message=f'{request.user.username} created a new discussion room: "{room.name}".',
+                link=f"/rooms/{room.id}",
+            )
+            for user in User.objects.exclude(id=request.user.id)
+        ])
 
         return Response(
             DiscussionRoomSerializer(room).data,
@@ -793,7 +917,19 @@ def join_discussion_room(request, id):
         id=id
     )
 
+    already_member = room.members.filter(id=request.user.id).exists()
+
     room.members.add(request.user)
+
+    if not already_member and room.created_by != request.user:
+        create_notification(
+            recipient=room.created_by,
+            actor=request.user,
+            notification_type="room_joined",
+            title="New Room Member",
+            message=f'{request.user.username} joined your discussion room "{room.name}".',
+            link=f"/rooms/{room.id}",
+        )
 
     return Response({
         "message": "Joined room successfully",
@@ -810,7 +946,19 @@ def leave_discussion_room(request, id):
         id=id
     )
 
+    was_member = room.members.filter(id=request.user.id).exists()
+
     room.members.remove(request.user)
+
+    if was_member and room.created_by != request.user:
+        create_notification(
+            recipient=room.created_by,
+            actor=request.user,
+            notification_type="room_left",
+            title="Room Member Left",
+            message=f'{request.user.username} left your discussion room "{room.name}".',
+            link=f"/rooms/{room.id}",
+        )
 
     return Response({
         "message": "Left room successfully",
@@ -873,6 +1021,18 @@ def create_discussion_message(request, room_id):
     serializer = DiscussionMessageSerializer(
         message
     )
+
+    Notification.objects.bulk_create([
+        Notification(
+            recipient=user,
+            actor=request.user,
+            notification_type="room_message",
+            title=f"New Message in {room.name}",
+            message=f'{request.user.username} sent a new message in "{room.name}".',
+            link=f"/rooms/{room.id}",
+        )
+        for user in room.members.exclude(id=request.user.id)
+    ])
 
     return Response(
         serializer.data,
@@ -2033,42 +2193,69 @@ Use the following NoteShare materials to answer.
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def notification_list(request):
+    try:
+        limit = min(max(int(request.GET.get("limit", 20)), 1), 50)
+    except (TypeError, ValueError):
+        limit = 20
+
     notifications = Notification.objects.filter(
         recipient=request.user
-    ).order_by("-created_at")[:20]
-
-    data = []
-
-    for item in notifications:
-        data.append({
-            "id": item.id,
-            "notification_type": item.notification_type,
-            "title": item.title,
-            "message": item.message,
-            "link": item.link,
-            "is_read": item.is_read,
-            "created_at": item.created_at,
-        })
-
-    unread_count = Notification.objects.filter(
-        recipient=request.user,
-        is_read=False
-    ).count()
+    ).select_related("actor").order_by("-created_at")[:limit]
 
     return Response({
-        "notifications": data,
-        "unread_count": unread_count,
+        "notifications": [
+            {
+                "id": item.id,
+                "type": item.notification_type,
+                "title": item.title,
+                "message": item.message,
+                "link": item.link,
+                "is_read": item.is_read,
+                "created_at": item.created_at,
+                "read_at": item.read_at,
+                "actor": item.actor.username if item.actor else None,
+                "actor_id": item.actor.id if item.actor else None,
+            }
+            for item in notifications
+        ],
+        "unread_count": Notification.objects.filter(
+            recipient=request.user,
+            is_read=False
+        ).count(),
+    })
+
+
+@api_view(["POST", "PATCH"])
+@permission_classes([IsAuthenticated])
+def mark_notification_read(request, id):
+    notification = get_object_or_404(
+        Notification,
+        id=id,
+        recipient=request.user,
+    )
+
+    if not notification.is_read:
+        notification.is_read = True
+        notification.read_at = timezone.now()
+        notification.save(update_fields=["is_read", "read_at"])
+
+    return Response({
+        "message": "Notification marked as read."
     })
 
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def mark_notifications_read(request):
-    Notification.objects.filter(
+    updated = Notification.objects.filter(
         recipient=request.user,
         is_read=False
-    ).update(is_read=True)
+    ).update(
+        is_read=True,
+        read_at=timezone.now(),
+    )
 
     return Response({
-        "message": "Notifications marked as read."
+        "message": "All notifications marked as read.",
+        "updated": updated,
     })

@@ -2419,3 +2419,411 @@ html.dark .ai-assistant-messages::-webkit-scrollbar-thumb {
 html.dark .ai-assistant-messages::-webkit-scrollbar-thumb:hover {
     background: #475569;
 }
+
+
+
+/* =========================================
+   AI TUTOR - COMPLETE DARK MODE
+   ========================================= */
+
+html.dark .ai-tutor-page {
+    color: #e2e8f0;
+}
+
+
+/* Main cards */
+
+html.dark .ai-tutor-note-panel,
+html.dark .ai-tutor-mode-card,
+html.dark .ai-tutor-session-card,
+html.dark .ai-tutor-session-header,
+html.dark .ai-tutor-chat-panel,
+html.dark .ai-tutor-info-card {
+    background: #111827 !important;
+    border-color: #263247 !important;
+}
+
+
+/* Hero */
+
+html.dark .ai-tutor-hero {
+    box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.32) !important;
+}
+
+
+/* Page headings */
+
+html.dark .ai-tutor-page h2,
+html.dark .ai-tutor-page h3,
+html.dark .ai-tutor-page h4 {
+    color: #f1f5f9 !important;
+}
+
+
+/* Normal text */
+
+html.dark .ai-tutor-page p {
+    color: #94a3b8;
+}
+
+
+/* Note options */
+
+html.dark .ai-tutor-note-option {
+    background: #0f172a !important;
+    border-color: #263247 !important;
+}
+
+html.dark .ai-tutor-note-option:hover {
+    background: #172033 !important;
+    border-color: #334155 !important;
+}
+
+html.dark .ai-tutor-note-option[class*="border-blue-300"] {
+    background: rgba(37, 99, 235, 0.12) !important;
+    border-color: #3b82f6 !important;
+}
+
+html.dark .ai-tutor-note-option .text-slate-800 {
+    color: #e5e7eb !important;
+}
+
+html.dark .ai-tutor-note-option .text-slate-400 {
+    color: #64748b !important;
+}
+
+
+/* Learning mode cards */
+
+html.dark .ai-tutor-mode-card {
+    background: #111827 !important;
+}
+
+html.dark .ai-tutor-mode-card:hover {
+    background: #141e31 !important;
+    border-color: #334155 !important;
+}
+
+html.dark .ai-tutor-mode-card[class*="border-blue-300"] {
+    background: #111c31 !important;
+    border-color: #3b82f6 !important;
+}
+
+html.dark .ai-tutor-mode-card .bg-slate-100 {
+    background: #1e293b !important;
+    color: #94a3b8 !important;
+}
+
+html.dark .ai-tutor-mode-card .text-slate-800 {
+    color: #f1f5f9 !important;
+}
+
+html.dark .ai-tutor-mode-card .text-slate-500 {
+    color: #94a3b8 !important;
+}
+
+
+/* Difficulty cards */
+
+html.dark .ai-tutor-difficulty-card {
+    background: #111827 !important;
+    border-color: #263247 !important;
+}
+
+html.dark .ai-tutor-difficulty-card:hover {
+    background: #172033 !important;
+    border-color: #334155 !important;
+}
+
+html.dark .ai-tutor-difficulty-card[class*="border-blue-400"] {
+    background: #111c31 !important;
+    border-color: #3b82f6 !important;
+}
+
+html.dark .ai-tutor-difficulty-card .bg-slate-100 {
+    background: #1e293b !important;
+    color: #94a3b8 !important;
+}
+
+html.dark .ai-tutor-difficulty-card .text-slate-800 {
+    color: #f1f5f9 !important;
+}
+
+html.dark .ai-tutor-difficulty-card .text-slate-500 {
+    color: #94a3b8 !important;
+}
+
+
+/* Session metric cards */
+
+html.dark .ai-tutor-metric-interactions {
+    background: #172033 !important;
+    border-color: #263247 !important;
+}
+
+html.dark .ai-tutor-metric-interactions .text-slate-400 {
+    color: #64748b !important;
+}
+
+html.dark .ai-tutor-metric-interactions .text-slate-800 {
+    color: #f1f5f9 !important;
+}
+
+
+html.dark .ai-tutor-metric-correct {
+    background: rgba(16, 185, 129, 0.10) !important;
+    border-color: rgba(52, 211, 153, 0.22) !important;
+}
+
+html.dark .ai-tutor-metric-correct .text-emerald-600 {
+    color: #6ee7b7 !important;
+}
+
+html.dark .ai-tutor-metric-correct .text-emerald-700 {
+    color: #a7f3d0 !important;
+}
+
+
+html.dark .ai-tutor-metric-focus {
+    background: rgba(245, 158, 11, 0.10) !important;
+    border-color: rgba(245, 158, 11, 0.22) !important;
+}
+
+html.dark .ai-tutor-metric-focus .text-amber-600 {
+    color: #fbbf24 !important;
+}
+
+html.dark .ai-tutor-metric-focus .text-amber-700 {
+    color: #fde68a !important;
+}
+
+
+html.dark .ai-tutor-metric-difficulty {
+    background: rgba(37, 99, 235, 0.12) !important;
+    border-color: rgba(59, 130, 246, 0.24) !important;
+}
+
+html.dark .ai-tutor-metric-difficulty .text-blue-600 {
+    color: #60a5fa !important;
+}
+
+html.dark .ai-tutor-metric-difficulty .text-blue-700 {
+    color: #93c5fd !important;
+}
+
+
+/* Selection status cards */
+
+html.dark .ai-tutor-page .bg-emerald-50\/60 {
+    background: rgba(16, 185, 129, 0.10) !important;
+    border-color: rgba(52, 211, 153, 0.20) !important;
+}
+
+html.dark .ai-tutor-page .bg-violet-50\/60 {
+    background: rgba(139, 92, 246, 0.10) !important;
+    border-color: rgba(167, 139, 250, 0.20) !important;
+}
+
+html.dark .ai-tutor-page .bg-blue-50\/60 {
+    background: rgba(37, 99, 235, 0.12) !important;
+    border-color: rgba(59, 130, 246, 0.24) !important;
+}
+
+html.dark .ai-tutor-page .bg-slate-50\/70 {
+    background: #172033 !important;
+    border-color: #263247 !important;
+}
+
+
+/* Active session */
+
+html.dark .ai-tutor-session-header {
+    background: #111827 !important;
+    border-color: #263247 !important;
+}
+
+html.dark .ai-tutor-session-header .bg-blue-50 {
+    background: rgba(37, 99, 235, 0.12) !important;
+}
+
+html.dark .ai-tutor-session-header .bg-cyan-50 {
+    background: rgba(6, 182, 212, 0.10) !important;
+}
+
+
+/* Chat */
+
+html.dark .ai-tutor-chat-panel {
+    background: #111827 !important;
+    border-color: #263247 !important;
+}
+
+html.dark .ai-tutor-chat-panel > div:first-child {
+    border-bottom-color: #263247 !important;
+}
+
+html.dark .ai-tutor-messages {
+    background: #0f172a !important;
+}
+
+html.dark .ai-tutor-chat-panel .bg-white {
+    background: #111827 !important;
+}
+
+html.dark .ai-tutor-chat-panel .text-slate-700 {
+    color: #d1d5db !important;
+}
+
+html.dark .ai-tutor-chat-panel .text-slate-400 {
+    color: #64748b !important;
+}
+
+
+/* Chat source cards */
+
+html.dark .ai-tutor-chat-panel .bg-blue-50 {
+    background: rgba(37, 99, 235, 0.12) !important;
+    border-color: rgba(59, 130, 246, 0.20) !important;
+}
+
+html.dark .ai-tutor-chat-panel .text-blue-700 {
+    color: #93c5fd !important;
+}
+
+
+/* Composer */
+
+html.dark .ai-tutor-chat-panel textarea {
+    color: #e5e7eb !important;
+}
+
+html.dark .ai-tutor-chat-panel textarea::placeholder {
+    color: #64748b !important;
+}
+
+html.dark .ai-tutor-chat-panel textarea:focus {
+    background: transparent !important;
+}
+
+
+/* Info cards */
+
+html.dark .ai-tutor-info-card .text-slate-800 {
+    color: #f1f5f9 !important;
+}
+
+html.dark .ai-tutor-info-card .text-slate-500 {
+    color: #94a3b8 !important;
+}
+
+
+/* Focus areas */
+
+html.dark .ai-tutor-info-card.bg-amber-50\/60 {
+    background: rgba(245, 158, 11, 0.09) !important;
+    border-color: rgba(245, 158, 11, 0.22) !important;
+}
+
+html.dark .ai-tutor-info-card .border-amber-100 {
+    border-color: rgba(245, 158, 11, 0.18) !important;
+}
+
+html.dark .ai-tutor-info-card .bg-white {
+    background: #172033 !important;
+}
+
+
+/* Reinforced topics */
+
+html.dark .ai-tutor-info-card.bg-emerald-50\/60 {
+    background: rgba(16, 185, 129, 0.09) !important;
+    border-color: rgba(52, 211, 153, 0.20) !important;
+}
+
+html.dark .ai-tutor-info-card .border-emerald-100 {
+    border-color: rgba(52, 211, 153, 0.18) !important;
+}
+
+
+/* Error */
+
+html.dark .ai-tutor-page .bg-red-50 {
+    background: rgba(127, 29, 29, 0.18) !important;
+    border-color: rgba(248, 113, 113, 0.20) !important;
+    color: #fca5a5 !important;
+}
+
+
+/* Empty state */
+
+html.dark .ai-tutor-note-panel .bg-slate-50 {
+    background: #172033 !important;
+}
+
+html.dark .ai-tutor-note-panel .border-dashed {
+    border-color: #334155 !important;
+}
+
+
+/* =========================================
+   AI TUTOR - LEARNING STRATEGY CARD
+========================================= */
+
+html.dark .ai-tutor-info-card .bg-blue-50 {
+    background: rgba(37, 99, 235, 0.12) !important;
+    border-color: rgba(59, 130, 246, 0.22) !important;
+}
+
+html.dark .ai-tutor-info-card .text-blue-600 {
+    color: #60a5fa !important;
+}
+
+html.dark .ai-tutor-info-card .text-blue-700 {
+    color: #93c5fd !important;
+}
+
+html.dark .ai-tutor-info-card .text-slate-800 {
+    color: #f1f5f9 !important;
+}
+
+html.dark .ai-tutor-info-card .text-slate-500 {
+    color: #94a3b8 !important;
+}
+
+
+/* =========================================
+   AI TUTOR - SELECTED DIFFICULTY
+========================================= */
+
+/* Light mode */
+
+.ai-tutor-selected-difficulty {
+    background: rgba(239, 246, 255, 0.72);
+    border-color: #dbeafe;
+}
+
+.ai-tutor-selected-difficulty-label {
+    color: #2563eb;
+}
+
+.ai-tutor-selected-difficulty-value {
+    color: #1d4ed8;
+}
+
+
+/* Dark mode */
+
+html.dark .ai-tutor-selected-difficulty {
+    background: rgba(30, 58, 138, 0.22) !important;
+    border-color: rgba(96, 165, 250, 0.28) !important;
+}
+
+html.dark .ai-tutor-selected-difficulty-label {
+    color: #60a5fa !important;
+}
+
+html.dark .ai-tutor-selected-difficulty-value {
+    color: #bfdbfe !important;
+}
+

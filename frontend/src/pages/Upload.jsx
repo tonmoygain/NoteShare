@@ -424,10 +424,9 @@ function Upload() {
                                 >
                                     <option value="CSE">CSE</option>
                                     <option value="EEE">EEE</option>
+                                    <option value="BBA">CE</option>
                                     <option value="BBA">BBA</option>
-                                    <option value="English">
-                                        English
-                                    </option>
+                                    <option value="English">English</option>
                                     <option value="Law">Law</option>
                                 </select>
                             </div>
