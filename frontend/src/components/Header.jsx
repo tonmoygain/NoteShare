@@ -1001,7 +1001,7 @@ function Header({ search, setSearch }) {
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: -10, scale: 0.98 }}
                                     transition={{ duration: 0.2, ease: "easeOut" }}
-                                    className="absolute right-0 top-14 z-50 w-[390px] max-w-[calc(100vw-32px)] overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.18)] dark:border-slate-700 dark:bg-slate-900"
+                                    className="fixed left-3 right-3 top-[80px] z-50 w-auto max-w-none overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.18)] dark:border-slate-700 dark:bg-slate-900 sm:absolute sm:left-auto sm:right-0 sm:top-14 sm:w-[390px] sm:max-w-[calc(100vw-32px)]"
                                 >
                                     <div className="border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-cyan-50 px-5 py-4 dark:border-slate-800 dark:from-slate-900 dark:via-slate-900 dark:to-blue-950/30">
                                         <div className="flex items-start justify-between gap-4">
@@ -1030,7 +1030,7 @@ function Header({ search, setSearch }) {
                                         </div>
                                     </div>
 
-                                    <div className="max-h-[430px] overflow-y-auto p-2">
+                                    <div className="max-h-[calc(100vh-180px)] overflow-y-auto p-2">
                                         {notificationLoading && notifications.length === 0 ? (
                                             <div className="px-5 py-12 text-center">
                                                 <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-blue-100 border-t-blue-600 dark:border-slate-700 dark:border-t-blue-400" />
