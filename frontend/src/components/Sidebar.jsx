@@ -179,6 +179,7 @@ function Sidebar() {
             ====================================================== */}
 
             <aside
+                data-mobile-open={mobileOpen ? "true" : "false"}
                 className="
                     fixed
                     inset-y-0

@@ -498,6 +498,138 @@ export default function LandingPage() {
                 </div>
             </section>
 
+
+            {/* ================= HOW IT WORKS ================= */}
+            <section id="how" className="bg-slate-50 py-24 sm:py-32">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+                    <Reveal className="max-w-3xl">
+                        <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-blue-600 shadow-sm ring-1 ring-slate-200">
+                            How it works
+                        </span>
+
+                        <h2 className="mt-6 text-4xl font-black leading-[1.04] tracking-[-.04em] text-slate-950 sm:text-5xl">
+                            A simple path from
+                            <span className="block text-slate-400">
+                            resource to progress.
+                            </span>
+                        </h2>
+
+                        <p className="mt-5 max-w-2xl text-base leading-8 text-slate-500 sm:text-lg">
+                            NoteShare brings the essential parts of studying into one
+                            connected flow, so you can find resources, learn from them,
+                            practise what you know and keep moving forward.
+                        </p>
+                    </Reveal>
+
+                    <div className="mt-14 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+
+                        {/* Step 01 */}
+                        <Reveal delay={0.04}>
+                            <div className="group h-full rounded-[28px] border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:shadow-[0_20px_55px_rgba(15,23,42,.07)]">
+
+                                <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-black tracking-[.18em] text-blue-600">
+                                        01
+                                    </span>
+
+                                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                                        <BookOpen size={19} />
+                                    </div>
+                                </div>
+
+                                <h3 className="mt-7 text-xl font-black tracking-tight text-slate-950">
+                                    Find what you need.
+                                </h3>
+
+                                <p className="mt-3 text-sm leading-7 text-slate-500">
+                                    Explore notes, blogs and shared academic resources
+                                    without searching across disconnected places.
+                                </p>
+                            </div>
+                        </Reveal>
+
+                        {/* Step 02 */}
+                        <Reveal delay={0.08}>
+                            <div className="group h-full rounded-[28px] border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:shadow-[0_20px_55px_rgba(15,23,42,.07)]">
+
+                                <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-black tracking-[.18em] text-blue-600">
+                                        02
+                                    </span>
+
+                                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                                        <WandSparkles size={19} />
+                                    </div>
+                                </div>
+
+                                <h3 className="mt-7 text-xl font-black tracking-tight text-slate-950">
+                                    Learn with guidance.
+                                </h3>
+
+                                <p className="mt-3 text-sm leading-7 text-slate-500">
+                                    Use NoteShare's intelligent learning tools to understand
+                                    concepts and get contextual academic support.
+                                </p>
+                            </div>
+                        </Reveal>
+
+                        {/* Step 03 */}
+                        <Reveal delay={0.12}>
+                            <div className="group h-full rounded-[28px] border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:shadow-[0_20px_55px_rgba(15,23,42,.07)]">
+
+                                <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-black tracking-[.18em] text-blue-600">
+                                        03
+                                    </span>
+
+                                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                                        <BrainCircuit size={19} />
+                                    </div>
+                                </div>
+
+                                <h3 className="mt-7 text-xl font-black tracking-tight text-slate-950">
+                                    Practice actively.
+                                </h3>
+
+                                <p className="mt-3 text-sm leading-7 text-slate-500">
+                                    Turn passive reading into active learning through
+                                    quizzes, challenges and guided practice.
+                                </p>
+                            </div>
+                        </Reveal>
+
+                        {/* Step 04 */}
+                        <Reveal delay={0.16}>
+                            <div className="group h-full rounded-[28px] border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:shadow-[0_20px_55px_rgba(15,23,42,.07)]">
+
+                                <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-black tracking-[.18em] text-blue-600">
+                                        04
+                                    </span>
+
+                                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                                        <LineChart size={19} />
+                                    </div>
+                                </div>
+
+                                <h3 className="mt-7 text-xl font-black tracking-tight text-slate-950">
+                                    See your progress.
+                                </h3>
+
+                                <p className="mt-3 text-sm leading-7 text-slate-500">
+                                    Use learning insights to reflect on your activity and
+                                    understand where to focus next.
+                                </p>
+                            </div>
+                        </Reveal>
+
+                    </div>
+                </div>
+            </section>
+
+
+
             {/* ================= FINAL CTA ================= */}
             <section className="relative overflow-hidden bg-slate-950 py-28 sm:py-36">
                 <div className="absolute left-1/2 top-[-200px] h-[500px] w-[650px] -translate-x-1/2 rounded-full bg-blue-600/15 blur-[130px]" />
