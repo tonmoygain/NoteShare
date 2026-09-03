@@ -194,15 +194,14 @@ function Sidebar() {
                     backdrop-blur-xl
                     transition-transform
                     duration-300
-                    -translate-x-full
                     lg:translate-x-0
                 "
                 style={{
-                    transform:
-                        mobileOpen
-                            ? "translateX(0)"
-                            : undefined,
+                    transform: mobileOpen
+                        ? "translateX(0)"
+                        : "translateX(-100%)",
                 }}
+                
             >
                 {/* =================================================
                     BRAND
