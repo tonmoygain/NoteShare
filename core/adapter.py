@@ -8,3 +8,8 @@ class NoteShareAccountAdapter(DefaultAccountAdapter):
         return (
             f"{settings.BACKEND_URL}/api/social-login/complete/"
         )
+
+    def get_signup_redirect_url(self, request):
+        return (
+            f"{settings.BACKEND_URL}/api/social-login/complete/"
+        )
