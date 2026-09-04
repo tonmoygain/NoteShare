@@ -270,6 +270,16 @@ SOCIALACCOUNT_QUERY_EMAIL = True
 
 SOCIALACCOUNT_AUTO_SIGNUP = True
 
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID", ""),
+            "secret": os.getenv("GOOGLE_CLIENT_SECRET", ""),
+            "key": "",
+        }
+    }
+}
+
 
 HEADLESS_TOKEN_STRATEGY = (
     "allauth.headless.tokens.strategies.jwt.JWTTokenStrategy"

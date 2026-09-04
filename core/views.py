@@ -1048,7 +1048,7 @@ def create_discussion_message(request, room_id):
     )
 
 # =====================================================
-# GOOGLE SOCIAL LOGIN → SIMPLE JWT
+# SOCIAL LOGIN → SIMPLE JWT
 # =====================================================
 
 @login_required
@@ -1076,7 +1076,7 @@ def social_login_complete(request):
     )
 
     frontend_url = (
-        "http://localhost:5173/social-callback"
+        "https://noteshare-frontend.onrender.com/social-callback"
         f"?code={code}"
     )
 
