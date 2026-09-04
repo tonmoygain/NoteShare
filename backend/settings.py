@@ -335,6 +335,10 @@ CSRF_TRUSTED_ORIGINS = [
 
 SOCIALACCOUNT_LOGIN_ON_GET = True 
 
+LOGIN_REDIRECT_URL = (
+    f"{BACKEND_URL}/api/social-login/complete/"
+)
+
 LOGOUT_REDIRECT_URL = (
     f"{FRONTEND_URL}/"
 )
