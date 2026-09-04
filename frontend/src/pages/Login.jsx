@@ -595,7 +595,7 @@ function Login() {
                                     type="button"
                                     onClick={() =>
                                         (window.location.href =
-                                            "https://noteshare-uy4z.onrender.com/accounts/google/login/?next=%2Fapi%2Fsocial-login%2Fcomplete%2F")
+                                            "https://noteshare-uy4z.onrender.com/accounts/facebook/login/")
                                     }
                                     className="
                                         flex
