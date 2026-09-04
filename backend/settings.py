@@ -260,7 +260,6 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-ACCOUNT_ADAPTER = "core.adapter.NoteShareAccountAdapter"
 
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 
