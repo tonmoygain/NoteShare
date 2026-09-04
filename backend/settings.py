@@ -260,6 +260,8 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
+ACCOUNT_ADAPTER = "core.adapter.NoteShareAccountAdapter"
+
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 
 ACCOUNT_EMAIL_VERIFICATION = "none"
@@ -333,10 +335,6 @@ CSRF_TRUSTED_ORIGINS = [
 
 
 SOCIALACCOUNT_LOGIN_ON_GET = True 
-
-LOGIN_REDIRECT_URL = (
-    f"{BACKEND_URL}/api/social-login/complete/"
-)
 
 LOGOUT_REDIRECT_URL = (
     f"{FRONTEND_URL}/"
