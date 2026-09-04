@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../services/api";
 
@@ -28,6 +28,8 @@ function BlogDetails() {
     const [deleting, setDeleting] = useState(false);
     const [copied, setCopied] = useState(false);
     const [error, setError] = useState("");
+
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -80,11 +82,11 @@ function BlogDetails() {
     const handleDelete = async () => {
         if (!blog || deleting) return;
 
-        const confirmed = window.confirm(
-            "Are you sure you want to delete this blog?"
-        );
+        setShowDeleteConfirm(true);
+    };
 
-        if (!confirmed) return;
+    const confirmDeleteBlog = async () => {
+        if (!blog || deleting) return;
 
         try {
             setDeleting(true);
@@ -101,6 +103,8 @@ function BlogDetails() {
             window.dispatchEvent(
                 new Event("noteshare:success")
             );
+
+            setShowDeleteConfirm(false);
 
             navigate("/blogs");
         } catch (err) {
@@ -851,6 +855,273 @@ function BlogDetails() {
                     </div>
                 </div>
             </motion.article>
+
+            <AnimatePresence>
+                {showDeleteConfirm && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="
+                            fixed
+                            inset-0
+                            z-[9998]
+                            flex
+                            items-center
+                            justify-center
+                            bg-slate-950/50
+                            px-4
+                            backdrop-blur-sm
+                        "
+                        onClick={() =>
+                            !deleting &&
+                            setShowDeleteConfirm(false)
+                        }
+                    >
+                        <motion.div
+                            initial={{
+                                opacity: 0,
+                                y: 18,
+                                scale: 0.94,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                                scale: 1,
+                            }}
+                            exit={{
+                                opacity: 0,
+                                y: 10,
+                                scale: 0.97,
+                            }}
+                            transition={{
+                                duration: 0.28,
+                                ease: [0.16, 1, 0.3, 1],
+                            }}
+                            onClick={(event) =>
+                                event.stopPropagation()
+                            }
+                            className="
+                                relative
+                                w-full
+                                max-w-md
+                                overflow-hidden
+                                rounded-[30px]
+                                border
+                                border-slate-200/80
+                                bg-white
+                                shadow-[0_30px_100px_rgba(15,23,42,0.24)]
+                                dark:border-slate-700
+                                dark:bg-slate-900
+                            "
+                        >
+                            <div
+                                className="
+                                    pointer-events-none
+                                    absolute
+                                    -right-20
+                                    -top-20
+                                    h-44
+                                    w-44
+                                    rounded-full
+                                    bg-red-500/10
+                                    blur-3xl
+                                "
+                            />
+
+                            <div className="relative p-7 sm:p-8">
+
+                                <div
+                                    className="
+                                        flex
+                                        h-14
+                                        w-14
+                                        items-center
+                                        justify-center
+                                        rounded-2xl
+                                        bg-gradient-to-br
+                                        from-red-500
+                                        to-rose-600
+                                        text-white
+                                        shadow-lg
+                                        shadow-red-500/20
+                                    "
+                                >
+                                    <Trash2 size={23} />
+                                </div>
+
+                                <p
+                                    className="
+                                        mt-6
+                                        text-[10px]
+                                        font-black
+                                        uppercase
+                                        tracking-[0.18em]
+                                        text-red-500
+                                        dark:text-red-400
+                                    "
+                                >
+                                    Permanent action
+                                </p>
+
+                                <h3
+                                    className="
+                                        mt-2
+                                        text-2xl
+                                        font-black
+                                        tracking-tight
+                                        text-slate-900
+                                        dark:text-white
+                                    "
+                                >
+                                    Delete this blog?
+                                </h3>
+
+                                <p
+                                    className="
+                                        mt-3
+                                        text-sm
+                                        leading-6
+                                        text-slate-500
+                                        dark:text-slate-400
+                                    "
+                                >
+                                    You are about to permanently remove
+                                    this article from the NoteShare community.
+                                </p>
+
+                                <div
+                                    className="
+                                        mt-5
+                                        rounded-2xl
+                                        border
+                                        border-red-100
+                                        bg-red-50/70
+                                        p-4
+                                        dark:border-red-500/15
+                                        dark:bg-red-500/5
+                                    "
+                                >
+                                    <p
+                                        className="
+                                            text-[10px]
+                                            font-black
+                                            uppercase
+                                            tracking-[0.14em]
+                                            text-red-500
+                                            dark:text-red-400
+                                        "
+                                    >
+                                        Blog
+                                    </p>
+
+                                    <p
+                                        className="
+                                            mt-1
+                                            truncate
+                                            text-sm
+                                            font-bold
+                                            text-slate-700
+                                            dark:text-slate-200
+                                        "
+                                    >
+                                        {blog.title}
+                                    </p>
+                                </div>
+
+                                <div className="mt-7 grid grid-cols-2 gap-3">
+
+                                    <button
+                                        type="button"
+                                        disabled={deleting}
+                                        onClick={() =>
+                                            setShowDeleteConfirm(false)
+                                        }
+                                        className="
+                                            rounded-2xl
+                                            border
+                                            border-slate-200
+                                            bg-white
+                                            px-4
+                                            py-3.5
+                                            text-sm
+                                            font-bold
+                                            text-slate-600
+                                            transition
+                                            hover:-translate-y-0.5
+                                            hover:bg-slate-50
+                                            dark:border-slate-700
+                                            dark:bg-slate-800
+                                            dark:text-slate-300
+                                            dark:hover:bg-slate-700
+                                        "
+                                    >
+                                        Keep Blog
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        disabled={deleting}
+                                        onClick={confirmDeleteBlog}
+                                        className="
+                                            inline-flex
+                                            items-center
+                                            justify-center
+                                            gap-2
+                                            rounded-2xl
+                                            bg-gradient-to-r
+                                            from-red-600
+                                            to-rose-500
+                                            px-4
+                                            py-3.5
+                                            text-sm
+                                            font-black
+                                            text-white
+                                            shadow-lg
+                                            shadow-red-500/20
+                                            transition
+                                            hover:-translate-y-0.5
+                                            hover:shadow-xl
+                                            disabled:cursor-not-allowed
+                                            disabled:opacity-60
+                                        "
+                                    >
+                                        {deleting ? (
+                                            <>
+                                                <Loader2
+                                                    size={17}
+                                                    className="animate-spin"
+                                                />
+                                                Deleting...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Trash2 size={17} />
+                                                Delete Blog
+                                            </>
+                                        )}
+                                    </button>
+
+                                </div>
+
+                                <p
+                                    className="
+                                        mt-4
+                                        text-center
+                                        text-[10px]
+                                        font-semibold
+                                        text-slate-400
+                                    "
+                                > 
+                                    This action cannot be undone.
+                                </p>
+
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            
         </section>
     );
 }
