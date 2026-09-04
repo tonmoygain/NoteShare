@@ -119,8 +119,13 @@ function EditBlog() {
                 }
             );
 
-            alert(
-                "Blog updated successfully."
+            sessionStorage.setItem(
+                "noteshare_success",
+                "Blog updated successfully!"
+            );
+
+            window.dispatchEvent(
+                new Event("noteshare:success")
             );
 
             navigate(`/blog/${id}`);

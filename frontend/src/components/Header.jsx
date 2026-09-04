@@ -65,6 +65,9 @@ function Header({ search, setSearch }) {
     const [showProfileMenu, setShowProfileMenu] =
         useState(false);
 
+    const [showLogoutConfirm, setShowLogoutConfirm] =
+        useState(false);
+
     const [notifications, setNotifications] = useState([]);
     const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
     const [notificationLoading, setNotificationLoading] = useState(false);
@@ -423,25 +426,9 @@ function Header({ search, setSearch }) {
 
     const logout = () => {
 
-        const confirmed = window.confirm(
-            "Are you sure you want to logout?"
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
-        localStorage.removeItem(
-            "access"
-        );
-
-        localStorage.removeItem(
-            "refresh"
-        );
-
-        localStorage.removeItem(
-            "username"
-        );
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
+        localStorage.removeItem("username");
 
         setIsLoggedIn(false);
         setUsername("");
@@ -450,6 +437,7 @@ function Header({ search, setSearch }) {
         setUnreadNotificationCount(0);
         setShowProfileMenu(false);
         setShowNotifications(false);
+        setShowLogoutConfirm(false);
 
         navigate("/");
 
@@ -1441,7 +1429,10 @@ function Header({ search, setSearch }) {
                                         />
 
                                         <button
-                                            onClick={logout}
+                                            onClick={() => {
+                                                setShowProfileMenu(false);
+                                                setShowLogoutConfirm(true);
+                                            }}
                                             className="
                                                 flex
                                                 w-full
@@ -1620,6 +1611,362 @@ function Header({ search, setSearch }) {
                 </div>
 
             </div>
+
+            {/* ==========================================
+                LOGOUT CONFIRMATION MODAL
+            ========================================== */}
+
+            <AnimatePresence>
+                {showLogoutConfirm && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="
+                            fixed
+                            inset-0
+                            z-[9998]
+                            flex
+                            items-center
+                            justify-center
+                            bg-slate-950/40
+                            px-4
+                            backdrop-blur-sm
+                        "
+                        onClick={() =>
+                            setShowLogoutConfirm(false)
+                        }
+                    >
+
+                        <motion.div
+                            initial={{
+                                opacity: 0,
+                                y: 18,
+                                scale: 0.94,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                y: 0,
+                                scale: 1,
+                            }}
+                            exit={{
+                                opacity: 0,
+                                y: 12,
+                                scale: 0.96,
+                            }}
+                            transition={{
+                                duration: 0.28,
+                                ease: [0.16, 1, 0.3, 1],
+                            }}
+                            onClick={(event) =>
+                                event.stopPropagation()
+                            }
+                            className="
+                                relative
+                                w-full
+                                max-w-sm
+                                overflow-hidden
+                                rounded-[30px]
+                                border
+                                border-slate-200/80
+                                bg-white
+                                shadow-[0_30px_100px_rgba(15,23,42,0.22)]
+                                dark:border-slate-700
+                                dark:bg-slate-900
+                            "
+                        >
+
+                            {/* Ambient glow */}
+
+                            <div
+                                className="
+                                    pointer-events-none
+                                    absolute
+                                    -right-20
+                                    -top-20
+                                    h-44
+                                    w-44
+                                    rounded-full
+                                    bg-red-500/10
+                                    blur-3xl
+                                    dark:bg-red-500/10
+                                "
+                            />
+
+                            <div
+                                className="
+                                    pointer-events-none
+                                    absolute
+                                    -bottom-24
+                                    -left-16
+                                    h-40
+                                    w-40
+                                    rounded-full
+                                    bg-blue-500/5
+                                    blur-3xl
+                                    dark:bg-blue-500/10
+                                "
+                            />
+
+
+                            <div className="relative p-7 sm:p-8">
+
+                                {/* Icon */}
+
+                                <motion.div
+                                    initial={{
+                                        opacity: 0,
+                                        scale: 0.8,
+                                        rotate: -8,
+                                    }}
+                                    animate={{
+                                    opacity: 1,
+                                    scale: 1,
+                                    rotate: 0,
+                                    }}
+                                    transition={{
+                                    delay: 0.05,
+                                    duration: 0.28,
+                                    }}
+                                    className="
+                                        flex
+                                        h-14
+                                        w-14
+                                        items-center
+                                        justify-center
+                                        rounded-2xl
+                                        bg-gradient-to-br
+                                        from-red-500
+                                        to-rose-600
+                                        text-white
+                                        shadow-lg
+                                        shadow-red-500/20
+                                    "
+                                >
+                                    <LogOut size={22} strokeWidth={2.2} />
+                                </motion.div>
+
+
+                                {/* Heading */}
+
+                               <div className="mt-6">
+
+                                    <p
+                                        className="
+                                            text-[10px]
+                                            font-black
+                                            uppercase
+                                            tracking-[0.18em]
+                                            text-red-500
+                                            dark:text-red-400
+                                        "
+                                    >
+                                        Sign out
+                                    </p>
+
+                                    <h3
+                                        className="
+                                            mt-2
+                                            text-2xl
+                                            font-black
+                                            tracking-tight
+                                            text-slate-900
+                                            dark:text-white
+                                        "
+                                    >
+                                        Leaving NoteShare?
+                                    </h3>
+
+                                    <p
+                                        className="
+                                            mt-3
+                                            max-w-sm
+                                            text-sm
+                                            leading-6
+                                            text-slate-500
+                                            dark:text-slate-400
+                                        "
+                                    >
+                                        Your current session will be securely closed.
+                                        You can sign back in anytime to continue learning.
+                                    </p>
+
+                                </div>
+
+
+                                {/* Session info */}
+
+                                <div
+                                    className="
+                                        mt-6
+                                        flex
+                                        items-center
+                                        gap-3
+                                        rounded-2xl
+                                        border
+                                        border-slate-200
+                                        bg-slate-50
+                                        px-4
+                                        py-3
+                                        dark:border-slate-700
+                                        dark:bg-slate-800/70
+                                    "
+                                >
+                                    <div
+                                        className="
+                                            flex
+                                            h-9
+                                            w-9
+                                            shrink-0
+                                            items-center
+                                            justify-center
+                                            rounded-xl
+                                            bg-blue-50
+                                            text-blue-600
+                                            dark:bg-blue-500/10
+                                            dark:text-blue-300
+                                        "
+                                    >
+                                        <User size={16} />
+                                    </div>
+
+                                    <div className="min-w-0">
+
+                                        <p
+                                            className="
+                                                text-[9px]
+                                                font-black
+                                                uppercase
+                                                tracking-[0.14em]
+                                                text-slate-400
+                                            "
+                                        > 
+                                            Current account
+                                        </p>
+
+                                        <p
+                                            className="
+                                                mt-0.5
+                                                truncate
+                                                text-sm
+                                                font-bold
+                                                text-slate-700
+                                                dark:text-slate-200
+                                            "
+                                        >
+                                            {username}
+                                        </p>
+
+                                    </div>
+
+                                    <div className="ml-auto">
+                                        <span
+                                            className="
+                                                inline-flex
+                                                items-center
+                                                gap-1.5
+                                                rounded-full
+                                                bg-emerald-50
+                                                px-2.5
+                                                py-1
+                                                text-[9px]
+                                                font-black
+                                                uppercase
+                                                tracking-wider
+                                                text-emerald-600
+                                                dark:bg-emerald-500/10
+                                                dark:text-emerald-400
+                                            "
+                                        >
+                                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                            Active
+                                        </span>
+                                    </div>
+
+                                </div>
+
+
+                                {/* Actions */}
+
+                                <div className="mt-7 grid grid-cols-2 gap-3">
+
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setShowLogoutConfirm(false)
+                                        }
+                                        className="
+                                            rounded-2xl
+                                            border
+                                            border-slate-200
+                                            bg-white
+                                            px-4
+                                            py-3.5
+                                            text-sm
+                                            font-bold
+                                            text-slate-600
+                                            transition-all
+                                            duration-200
+                                            hover:-translate-y-0.5
+                                            hover:border-slate-300
+                                            hover:bg-slate-50
+                                            hover:shadow-sm
+                                            dark:border-slate-700
+                                            dark:bg-slate-800
+                                            dark:text-slate-300
+                                            dark:hover:border-slate-600
+                                            dark:hover:bg-slate-750
+                                        "
+                                    >
+                                        Stay signed in
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={logout}
+                                        className="
+                                            rounded-2xl
+                                            bg-gradient-to-r
+                                            from-red-600
+                                            to-rose-500
+                                            px-4
+                                            py-3.5
+                                            text-sm
+                                            font-black
+                                            text-white
+                                            shadow-lg
+                                            shadow-red-500/20
+                                            transition-all
+                                            duration-200
+                                            hover:-translate-y-0.5
+                                            hover:shadow-xl
+                                            hover:shadow-red-500/25
+                                        "
+                                    >
+                                        Sign out
+                                    </button>
+
+                                </div>
+
+
+                                <p
+                                    className="
+                                        mt-4
+                                        text-center
+                                        text-[10px]
+                                        font-semibold
+                                        text-slate-400
+                                    "
+                                >
+                                    Your account data remains safely stored.
+                                </p>
+
+                            </div>
+                        </motion.div>
+
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
         </header>
 

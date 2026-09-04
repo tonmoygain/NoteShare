@@ -2838,3 +2838,161 @@ html.dark .ai-tutor-selected-difficulty-value {
         transform: translateX(-100%);
     }
 }
+
+
+
+/* =========================================
+   LANDING PAGE - DARK MODE TEXT ONLY
+   ========================================= */
+
+html.dark .landing-page .text-slate-950 {
+    color: #f8fafc !important;
+}
+
+html.dark .landing-page .text-slate-900 {
+    color: #f1f5f9 !important;
+}
+
+html.dark .landing-page .text-slate-800 {
+    color: #e2e8f0 !important;
+}
+
+html.dark .landing-page .text-slate-700 {
+    color: #cbd5e1 !important;
+}
+
+html.dark .landing-page .text-slate-600 {
+    color: #94a3b8 !important;
+}
+
+html.dark .landing-page .text-slate-500 {
+    color: #94a3b8 !important;
+}
+
+html.dark .landing-page .text-slate-400 {
+    color: #94a3b8 !important;
+}
+
+html.dark .landing-page .text-slate-300 {
+    color: #cbd5e1 !important;
+}
+
+
+
+/* =========================================
+   LEARNING INTELLIGENCE - DARK MODE
+   ========================================= */
+
+html.dark .learning-insights-page {
+    color: #e2e8f0;
+}
+
+/* Main white cards */
+html.dark .learning-insights-page .bg-white {
+    background: #0f172a !important;
+}
+
+/* Soft slate backgrounds */
+html.dark .learning-insights-page .bg-slate-50 {
+    background: #111827 !important;
+}
+
+html.dark .learning-insights-page .bg-slate-50\/70 {
+    background: rgba(17, 24, 39, 0.72) !important;
+}
+
+/* Borders */
+html.dark .learning-insights-page .border-slate-200 {
+    border-color: #263247 !important;
+}
+
+html.dark .learning-insights-page .border-slate-200\/80 {
+    border-color: #263247 !important;
+}
+
+html.dark .learning-insights-page .border-slate-100 {
+    border-color: #1e293b !important;
+}
+
+/* Main dark text */
+html.dark .learning-insights-page .text-slate-800 {
+    color: #e5e7eb !important;
+}
+
+html.dark .learning-insights-page .text-slate-700 {
+    color: #cbd5e1 !important;
+}
+
+html.dark .learning-insights-page .text-slate-600 {
+    color: #94a3b8 !important;
+}
+
+html.dark .learning-insights-page .text-slate-500 {
+    color: #94a3b8 !important;
+}
+
+html.dark .learning-insights-page .text-slate-400 {
+    color: #64748b !important;
+}
+
+/* Amber section */
+html.dark .learning-insights-page .bg-amber-50\/70 {
+    background: rgba(120, 53, 15, 0.18) !important;
+}
+
+html.dark .learning-insights-page .border-amber-200\/80 {
+    border-color: rgba(245, 158, 11, 0.28) !important;
+}
+
+html.dark .learning-insights-page .border-amber-100 {
+    border-color: rgba(245, 158, 11, 0.18) !important;
+}
+
+html.dark .learning-insights-page .bg-amber-100 {
+    background: rgba(245, 158, 11, 0.14) !important;
+}
+
+/* Emerald section */
+html.dark .learning-insights-page .bg-emerald-50\/60 {
+    background: rgba(6, 78, 59, 0.20) !important;
+}
+
+html.dark .learning-insights-page .border-emerald-200\/80 {
+    border-color: rgba(16, 185, 129, 0.28) !important;
+}
+
+html.dark .learning-insights-page .border-emerald-100 {
+    border-color: rgba(16, 185, 129, 0.18) !important;
+}
+
+html.dark .learning-insights-page .bg-emerald-100 {
+    background: rgba(16, 185, 129, 0.14) !important;
+}
+
+html.dark .learning-insights-page .bg-emerald-100 .text-emerald-700 {
+    color: #6ee7b7 !important;
+}
+
+/* Progress backgrounds */
+html.dark .learning-insights-page .bg-slate-100 {
+    background: #1e293b !important;
+}
+
+html.dark .learning-insights-page .bg-emerald-100 {
+    background: rgba(16, 185, 129, 0.16) !important;
+}
+
+/* Recent activity */
+html.dark .learning-insights-page .bg-slate-50\/70 {
+    background: rgba(30, 41, 59, 0.55) !important;
+}
+
+/* Keep the hero and recommendation gradient sections unchanged */
+html.dark .learning-insights-page .bg-gradient-to-br {
+    color: inherit;
+}
+
+/* Footer disclaimer text */
+html.dark .learning-insights-page > p.text-slate-400 {
+    color: #64748b !important;
+}

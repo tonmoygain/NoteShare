@@ -206,10 +206,16 @@ def create_note(request):
 
     serializer = NoteSerializer(data=request.data)
 
-    if serializer.is_valid():
+    if not serializer.is_valid():
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-        note = serializer.save(uploader=request.user)
+    note = serializer.save(uploader=request.user)
 
+    # Notification must never break note creation
+    try:
         create_notification(
             recipient=request.user,
             actor=request.user,
@@ -231,14 +237,12 @@ def create_note(request):
             for user in User.objects.exclude(id=request.user.id)
         ])
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
-        )
+    except Exception as error:
+        print("NOTE NOTIFICATION ERROR:", repr(error))
 
     return Response(
-        serializer.errors,
-        status=status.HTTP_400_BAD_REQUEST
+        NoteSerializer(note).data,
+        status=status.HTTP_201_CREATED
     )
 
 
@@ -631,10 +635,16 @@ def create_blog(request):
 
     serializer = BlogSerializer(data=request.data)
 
-    if serializer.is_valid():
+    if not serializer.is_valid():
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-        blog = serializer.save(author=request.user)
+    blog = serializer.save(author=request.user)
 
+    # Notification must never break blog publishing
+    try:
         create_notification(
             recipient=request.user,
             actor=request.user,
@@ -656,14 +666,12 @@ def create_blog(request):
             for user in User.objects.exclude(id=request.user.id)
         ])
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
-        )
+    except Exception as error:
+        print("BLOG NOTIFICATION ERROR:", repr(error))
 
     return Response(
-        serializer.errors,
-        status=status.HTTP_400_BAD_REQUEST
+        BlogSerializer(blog).data,
+        status=status.HTTP_201_CREATED
     )
 
 @api_view(["GET"])

@@ -102,7 +102,14 @@ function NoteDetails() {
                 `notes/delete/${note.id}/`
             );
 
-            alert("Note deleted successfully.");
+            sessionStorage.setItem(
+                "noteshare_success",
+                "Note deleted successfully!"
+            );
+
+            window.dispatchEvent(
+                new Event("noteshare:success")
+            );
 
             navigate("/notes");
         } catch (err) {

@@ -133,9 +133,15 @@ function EditNote() {
                 }
             );
 
-            alert(
-                "Note updated successfully."
+            sessionStorage.setItem(
+                "noteshare_success",
+                "Note updated successfully!"
             );
+
+            window.dispatchEvent(
+                new Event("noteshare:success")
+            );
+
 
             navigate(`/note/${id}`);
         } catch (err) {

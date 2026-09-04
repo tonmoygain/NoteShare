@@ -102,7 +102,7 @@ export default function LandingPage() {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen overflow-x-hidden bg-white text-slate-900">
+        <div className="landing-page min-h-screen overflow-x-hidden bg-white text-slate-900">
 
             {/* ================= NAVBAR ================= */}
             <header className="fixed inset-x-0 top-0 z-50">

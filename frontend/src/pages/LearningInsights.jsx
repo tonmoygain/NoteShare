@@ -63,7 +63,7 @@ function LearningInsights() {
     };
 
     return (
-        <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
+        <section className="learning-insights-page mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
             <motion.section
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}

@@ -131,8 +131,10 @@ function Upload() {
                 "Note uploaded successfully!"
             );
 
+            window.dispatchEvent(
+                new Event("noteshare:success")
+            );
 
-            alert("Note uploaded successfully!");
 
             if (response.data?.id) {
                 navigate(`/note/${response.data.id}`);

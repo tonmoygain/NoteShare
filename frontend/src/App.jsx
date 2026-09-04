@@ -39,27 +39,47 @@ function AppContent() {
         useState("");
 
     useEffect(() => {
+        const showSuccess = () => {
+            const message =
+                sessionStorage.getItem("noteshare_success");
 
-        const message =
-            sessionStorage.getItem("noteshare_success");
+            if (!message) {
+                return;
+            }
 
-        if (!message) {
+            sessionStorage.removeItem("noteshare_success");
+            setSuccessMessage(message);
+        };
+
+        showSuccess();
+
+        window.addEventListener(
+            "noteshare:success",
+            showSuccess
+        );
+
+        return () => {
+            window.removeEventListener(
+                "noteshare:success",
+                showSuccess
+            );
+        };
+    }, []);
+
+
+    useEffect(() => {
+        if (!successMessage) {
             return;
         }
 
-        sessionStorage.removeItem("noteshare_success");
-
-        setSuccessMessage(message);
-
         const timer = window.setTimeout(() => {
             setSuccessMessage("");
-        }, 2800);
+        }, 3000);
 
         return () => {
             window.clearTimeout(timer);
         };
-
-    }, [location.pathname]);
+    }, [successMessage]);
 
 
     const closeSuccessToast = () => {

@@ -70,6 +70,10 @@ function CreateBlog() {
                 "Blog published successfully!"
             );
 
+            window.dispatchEvent(
+                new Event("noteshare:success")
+            );
+
             navigate("/blogs");
         } catch (err) {
             console.log(err);

@@ -139,6 +139,29 @@ path(
 
 
 # ==========================
+# Notifications API
+# ==========================
+
+path(
+    "api/notifications/",
+    views.notification_list,
+    name="notification-list"
+),
+
+path(
+    "api/notifications/<int:id>/read/",
+    views.mark_notification_read,
+    name="notification-read"
+),
+
+path(
+    "api/notifications/read-all/",
+    views.mark_notifications_read,
+    name="notifications-read-all"
+),
+
+
+# ==========================
 # Social Login
 # ==========================
 
@@ -156,3 +179,4 @@ path(
 ),
 
 ]
+

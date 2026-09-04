@@ -93,7 +93,14 @@ function BlogDetails() {
                 `blogs/delete/${blog.id}/`
             );
 
-            alert("Blog deleted successfully.");
+            sessionStorage.setItem(
+                "noteshare_success",
+                "Blog deleted successfully!"
+            );
+
+            window.dispatchEvent(
+                new Event("noteshare:success")
+            );
 
             navigate("/blogs");
         } catch (err) {
