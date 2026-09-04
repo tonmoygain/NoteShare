@@ -53,9 +53,8 @@ function Register() {
     };
 
     const handleFacebookLogin = () => {
-        alert(
-            "Facebook login is not configured yet."
-        );
+        window.location.href =
+            "https://noteshare-uy4z.onrender.com/accounts/facebook/login/";
     };
 
     const handleSubmit = async (e) => {
@@ -772,22 +771,24 @@ function Register() {
 
                                 <button
                                     type="button"
-                                    onClick={
-                                        handleFacebookLogin
-                                    }
+                                    onClick={handleFacebookLogin}
                                     className="
                                         flex
                                         h-12
-                                        cursor-not-allowed
                                         items-center
                                         justify-center
                                         gap-2
                                         rounded-xl
                                         border
                                         border-slate-200
-                                        bg-slate-100
+                                        bg-white
                                         font-bold
-                                        text-slate-400
+                                        text-slate-700
+                                        transition
+                                        hover:-translate-y-0.5
+                                        hover:border-slate-300
+                                        hover:bg-slate-50
+                                        hover:shadow-sm
                                     "
                                 >
                                     <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-lg font-black text-blue-600">
