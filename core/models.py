@@ -98,8 +98,44 @@ class Note(models.Model):
         max_length=200
     )
 
+    education_level = models.CharField(
+        max_length=30,
+        default="university"
+    )
+
     department = models.CharField(
-        max_length=100
+        max_length=100,
+        blank=True
+    )
+
+    class_level = models.CharField(
+        max_length=50,
+        blank=True
+    )
+
+    subject = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    chapter = models.CharField(
+        max_length=150,
+        blank=True
+    )
+
+    board = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    semester = models.CharField(
+        max_length=50,
+        blank=True
+    )
+
+    course = models.CharField(
+        max_length=150,
+        blank=True
     )
 
     description = models.TextField(

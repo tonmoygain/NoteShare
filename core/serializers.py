@@ -30,6 +30,100 @@ class NoteSerializer(serializers.ModelSerializer):
             "uploader",
         )
 
+        extra_kwargs = {
+            "department": {
+                "required": False,
+                "allow_blank": True,
+            },
+            "class_level": {
+                "required": False,
+                "allow_blank": True,
+            },
+            "subject": {
+                "required": False,
+                "allow_blank": True,
+            },
+            "chapter": {
+                "required": False,
+                "allow_blank": True,
+            },
+            "board": {
+                "required": False,
+                "allow_blank": True,
+            },
+            "semester": {
+                "required": False,
+                "allow_blank": True,
+            },
+            "course": {
+                "required": False,
+                "allow_blank": True,
+            },
+        }
+
+    def validate(self, attrs):
+
+        education_level = attrs.get(
+            "education_level",
+            getattr(
+                self.instance,
+                "education_level",
+                "university"
+
+            )
+        )
+
+        department = attrs.get(
+            "department",
+            getattr(
+                self.instance,
+                "department",
+                ""
+            )
+        ) or ""
+
+        class_level = attrs.get(
+            "class_level",
+            getattr(
+                self.instance,
+                "class_level",
+                ""
+            )
+        ) or ""
+
+        subject = attrs.get(
+            "subject",
+            getattr(
+                self.instance,
+                "subject",
+                ""
+            )
+        ) or ""
+
+        if (
+            education_level == "university"
+            and not department.strip()
+        ):
+            raise serializers.ValidationError({
+                "department":
+                    "Department is required for university resources."
+            })
+
+        if education_level == "school":
+
+            if not class_level.strip():
+                raise serializers.ValidationError({
+                    "class_level":
+                        "Class is required for school resources."
+                })
+
+            if not subject.strip():
+                raise serializers.ValidationError({
+                    "subject":
+                        "Subject is required for school resources."
+                })
+
+        return attrs
 
 class BlogSerializer(serializers.ModelSerializer):
 
