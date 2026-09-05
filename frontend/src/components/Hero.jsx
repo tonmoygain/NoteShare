@@ -29,133 +29,121 @@ function Hero() {
 
 
     useEffect(() => {
-    const loadStats = async () => {
-        try {
-            // ==========================================
-            // FETCH FIRST NOTES PAGE
-            // ==========================================
+        const loadStats = async () => {
+            try {
+                const [
+                    firstNotesResponse,
+                    blogsResponse,
+                    dashboardResponse,
+                ] = await Promise.all([
+                    API.get("notes/?page=1"),
+                    API.get("blogs/"),
+                    API.get("dashboard/"),
+                ]);
 
-            const firstNotesResponse = await API.get(
-                "notes/?page=1"
-            );
+                // ==========================================
+                // NOTES
+                // ==========================================
 
-            const firstNotesData =
-                firstNotesResponse?.data || {};
+                const firstNotesData =
+                    firstNotesResponse?.data || {};
 
-            const firstNotes =
-                Array.isArray(firstNotesData.notes)
-                    ? firstNotesData.notes
-                    : [];
+                const firstNotes =
+                    Array.isArray(firstNotesData.notes)
+                        ? firstNotesData.notes
+                        : [];
 
-            const totalPages =
-                Number(firstNotesData.total_pages) || 1;
+                const totalPages =
+                    Number(firstNotesData.total_pages) || 1;
 
-            // ==========================================
-            // FETCH REMAINING NOTE PAGES
-            // ==========================================
+                let allNotes = [...firstNotes];
 
-            let allNotes = [...firstNotes];
+                if (totalPages > 1) {
+                    const remainingPages = await Promise.all(
+                        Array.from(
+                            { length: totalPages - 1 },
+                            (_, index) =>
+                                API.get(
+                                    `notes/?page=${index + 2}`
+                                )
+                        )
+                    );
 
-            if (totalPages > 1) {
-                const remainingPages = await Promise.all(
-                    Array.from(
-                        { length: totalPages - 1 },
-                        (_, index) =>
-                            API.get(
-                                `notes/?page=${index + 2}`
-                            )
-                    )
-                );
+                    remainingPages.forEach((response) => {
+                        const pageData =
+                            response?.data || {};
 
-                remainingPages.forEach((response) => {
-                    const pageData =
-                        response?.data || {};
+                        if (Array.isArray(pageData.notes)) {
+                            allNotes.push(
+                                ...pageData.notes
+                            );
+                        }
+                    });
+                }
 
-                    if (Array.isArray(pageData.notes)) {
-                        allNotes.push(
-                            ...pageData.notes
-                        );
-                    }
+                // ==========================================
+                // BLOGS
+                // ==========================================
+
+                const blogsData =
+                    blogsResponse?.data;
+
+                const allBlogs =
+                    Array.isArray(blogsData)
+                        ? blogsData
+                        : Array.isArray(blogsData?.blogs)
+                            ? blogsData.blogs
+                            : Array.isArray(blogsData?.results)
+                                ? blogsData.results
+                                : [];
+
+                // ==========================================
+                // DASHBOARD / REGISTERED USERS
+                // ==========================================
+
+                const dashboardData =
+                    dashboardResponse?.data || {};
+
+                const students =
+                    Number(
+                        dashboardData.total_users
+                    ) || 0;
+
+                // ==========================================
+                // FIXED PLATFORM DEPARTMENTS
+                // ==========================================
+
+                const departments = 6;
+
+                // ==========================================
+                // FINAL STATS
+                // ==========================================
+
+                console.log("DASHBOARD DATA:", dashboardData);
+                console.log("REGISTERED STUDENTS:", students);
+
+                setStats({
+                    notes: allNotes.length,
+
+                    students: students,
+
+                    departments: departments,
+
+                    blogs: allBlogs.length,
                 });
+
+            } catch (error) {
+                console.error(
+                    "Failed to load Hero statistics:",
+                    error
+                );
+            } finally {
+                setLoading(false);
             }
+        };
 
-            // ==========================================
-            // FETCH BLOGS
-            // ==========================================
-
-            const blogsResponse =
-                await API.get("blogs/");
-
-            const blogsData =
-                blogsResponse?.data;
-
-            const allBlogs =
-                Array.isArray(blogsData)
-                    ? blogsData
-                    : Array.isArray(blogsData?.blogs)
-                        ? blogsData.blogs
-                        : Array.isArray(blogsData?.results)
-                            ? blogsData.results
-                            : [];
-
-            // ==========================================
-            // UNIQUE STUDENTS / UPLOADERS
-            // ==========================================
-
-            const students = new Set();
-
-            allNotes.forEach((note) => {
-                if (note?.uploader) {
-                    students.add(
-                        String(note.uploader)
-                    );
-                    return;
-                }
-
-                if (note?.uploader_name) {
-                    students.add(
-                        note.uploader_name
-                    );
-                }
-            });
-
-            // ==========================================
-            // UNIQUE DEPARTMENTS
-            // ==========================================
-
-            const departments = new Set();
-
-            allNotes.forEach((note) => {
-                if (note?.department) {
-                    departments.add(
-                        note.department
-                    );
-                }
-            });
-
-            // ==========================================
-            // FINAL STATS
-            // ==========================================
-
-            setStats({
-                notes: allNotes.length,
-                students: students.size,
-                departments: departments.size,
-                blogs: allBlogs.length,
-            });
-
-        } catch (error) {
-            console.error(
-                "Failed to load Hero statistics:",
-                error
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    loadStats();
-}, []);
+        loadStats();
+    }, []);
 
         
 

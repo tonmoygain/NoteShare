@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -15,6 +16,8 @@ import {
     Users,
     WandSparkles,
 } from "lucide-react";
+
+import API from "../services/api";
 
 const features = [
     {
@@ -100,6 +103,79 @@ function Reveal({ children, delay = 0, className = "" }) {
 
 export default function LandingPage() {
     const navigate = useNavigate();
+    const [profileOpen, setProfileOpen] = useState(false);
+    const [profile, setProfile] = useState(null);
+
+    const isLoggedIn = !!localStorage.getItem("access");
+
+    useEffect(() => {
+        if (!isLoggedIn){
+            setProfile(null);
+            return;
+        }
+
+        const loadProfile = async () => {
+            try {
+                const response = await API.get("profile/");
+                const data = response.data?.user || response.data;
+                setProfile(data);
+            } catch (error) {
+                console.error("Failed to load profile:", error);
+            }
+        };
+
+        loadProfile();
+    }, [isLoggedIn]);
+
+    const displayName =
+        profile?.first_name && profile?.last_name
+            ? `${profile.first_name} ${profile.last_name}`
+            : profile?.name ||
+              profile?.username ||
+              profile?.full_name ||
+              profile?.first_name ||
+              "Student";
+
+    const profileImage =
+        profile?.profile_image ||
+        profile?.profile_picture ||
+        profile?.avatar ||
+        profile?.image ||
+        profile?.photo ||
+        profile?.profile?.profile_image ||
+        profile?.profile?.profile_picture ||
+        profile?.profile?.image ||
+        null;
+
+    const getProfileImageUrl = (image) => {
+        if (!image || typeof image !== "string") {
+            return null;
+        }
+
+        if (
+            image.startsWith("http://") ||
+            image.startsWith("https://")
+        ) {
+            return image;
+        }
+
+        const baseURL = API.defaults.baseURL || window.location.origin;
+
+        return `${baseURL.replace(/\/api\/?$/, "")}${
+            image.startsWith("/") ? image : `/${image}`
+        }`;
+    };
+
+    const profileImageUrl = getProfileImageUrl(profileImage);
+
+    const handleLogout = () => {
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
+        localStorage.removeItem("user");
+        setProfileOpen(false);
+        setProfile(null);
+        navigate("/login");
+    };
 
     return (
         <div className="landing-page min-h-screen overflow-x-hidden bg-white text-slate-900">
@@ -155,20 +231,215 @@ export default function LandingPage() {
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <Link
-                                to="/login"
-                                className="hidden rounded-xl px-4 py-2.5 text-sm font-black text-slate-600 transition hover:bg-slate-50 sm:inline-flex"
-                            >
-                                Log in
-                            </Link>
+                            {isLoggedIn ? (
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setProfileOpen((prev) => !prev)}
+                                        className="group flex items-center gap-2 rounded-2xl border border-slate-200/80 bg-white/90 px-2.5 py-2 shadow-[0_8px_30px_rgba(15,23,42,.06)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-[0_14px_35px_rgba(37,99,235,.12)]"
+                                    >
+                                        <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400 text-xs font-black text-white shadow-md shadow-blue-500/20">
+                                            {profileImageUrl ? (
+                                                <img
+                                                    src={profileImageUrl}
+                                                    alt={displayName}
+                                                    className="h-full w-full object-cover"
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = "none";
+                                                    }}
 
-                            <Link
-                                to="/register"
-                                className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-blue-700"
-                            >
-                                Get started
-                                <ArrowUpRight size={15} />
-                            </Link>
+                                                />
+                                            ) : (
+                                                <span>
+                                                    {String(displayName)
+                                                        .charAt(0)
+                                                        .toUpperCase()}
+                                                </span>
+                                            )}
+
+                                            <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-400" />
+                                        </div>
+                                                
+                                        <div className="hidden text-left sm:block">
+                                            <p className="max-w-[140px] truncate text-xs font-black text-slate-800">
+                                                {displayName}
+                                            </p>
+
+                                            <p className="text-[9px] font-bold uppercase tracking-[.12em] text-slate-400">
+                                                My Account
+                                            </p>
+                                        </div>
+
+                                        <ChevronRight
+                                            size={14}
+                                            className={`mr-1 text-slate-400 transition-transform duration-300 ${
+                                                profileOpen
+                                                    ? "rotate-90 text-blue-500"
+                                                    : ""
+                                            }`}
+                                        />
+                                    </button>
+
+                                    {profileOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="absolute right-0 top-full mt-3 w-64 overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-2 shadow-[0_25px_70px_rgba(15,23,42,.16)] backdrop-blur-2xl"
+                                        >
+                                            <div className="mb-2 rounded-2xl bg-slate-50 p-3">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-400 text-sm font-black text-white shadow-lg shadow-blue-500/20">
+                                                        {profileImageUrl ? (
+                                                            <img
+                                                                src={profileImageUrl}
+                                                                alt={displayName}
+                                                                className="h-full w-full object-cover"
+                                                                onError={(e) => {
+                                                                    e.currentTarget.style.display =
+                                                                        "none";
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <span>
+                                                                {String(displayName)
+                                                                    .charAt(0)
+                                                                    .toUpperCase()}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="min-w-0">
+                                                        <p className="truncate text-sm font-black text-slate-900">
+                                                            {displayName}
+                                                        </p>
+
+                                                        <p className="truncate text-[10px] font-semibold text-slate-400">
+                                                            {profile?.email ||
+                                                                "NoteShare member"}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <Link
+                                                to="/profile"
+                                                onClick={() => setProfileOpen(false)}
+                                                className="group flex items-center gap-3 rounded-2xl px-3 py-3 transition hover:bg-blue-50"
+                                            >
+                                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition group-hover:bg-blue-100 group-hover:text-blue-600">
+                                                    <Users size={16} />
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-xs font-black text-slate-700">
+                                                        My Profile
+                                                    </p>
+
+                                                    <p className="text-[9px] font-semibold text-slate-400">
+                                                        View your profile
+                                                    </p>
+                                                </div>
+
+                                                <ArrowUpRight
+                                                    size={14}
+                                                    className="ml-auto text-slate-300 transition group-hover:text-blue-500"
+                                                />
+                                            </Link>
+
+                                            <Link
+                                                to="/upload"
+                                                onClick={() => setProfileOpen(false)}
+                                                className="group flex items-center gap-3 rounded-2xl px-3 py-3 transition hover:bg-blue-50"
+                                            >
+                                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition group-hover:bg-blue-100 group-hover:text-blue-600">
+                                                    <FileText size={16} />
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-xs font-black text-slate-700">
+                                                        Upload Notes
+                                                    </p>
+
+                                                    <p className="text-[9px] font-semibold text-slate-400">
+                                                        Share academic resources
+                                                    </p>
+                                                </div>
+
+                                                <ArrowUpRight
+                                                    size={14}
+                                                    className="ml-auto text-slate-300 transition group-hover:text-blue-500"
+                                                />
+                                            </Link>
+
+                                            <Link
+                                                to="/create-blog"
+                                                onClick={() => setProfileOpen(false)}
+                                                className="group flex items-center gap-3 rounded-2xl px-3 py-3 transition hover:bg-blue-50"
+                                            >
+                                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition group-hover:bg-blue-100 group-hover:text-blue-600">
+                                                    <BookOpen size={16} />
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-xs font-black text-slate-700">
+                                                        Create Blog
+                                                    </p>
+
+                                                    <p className="text-[9px] font-semibold text-slate-400">
+                                                        Share your academic ideas
+                                                    </p>
+                                                </div>
+
+                                                <ArrowUpRight
+                                                    size={14}
+                                                    className="ml-auto text-slate-300 transition group-hover:text-blue-500"
+                                                />
+                                            </Link>
+
+                                            <div className="my-2 border-t border-slate-100" />
+
+                                            <button
+                                                onClick={handleLogout}
+                                                className="group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition hover:bg-red-50"
+                                            >
+                                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-500 transition group-hover:bg-red-100">
+                                                    <ArrowRight
+                                                        size={16}
+                                                        className="rotate-180"
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-xs font-black text-red-500">
+                                                        Log out
+                                                    </p>
+
+                                                    <p className="text-[9px] font-semibold text-slate-400">
+                                                        Sign out of NoteShare
+                                                    </p>
+                                                </div>
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </div>
+                            ) : (
+                                <>
+                                    <Link
+                                        to="/login"
+                                        className="hidden rounded-xl px-4 py-2.5 text-sm font-black text-slate-600 transition hover:bg-slate-50 sm:inline-flex"
+                                    >
+                                        Log in
+                                    </Link>
+
+                                    <Link
+                                        to="/register"
+                                        className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-blue-700"
+                                    >
+                                        Get started
+                                        <ArrowUpRight size={15} />
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </nav>
                 </div>

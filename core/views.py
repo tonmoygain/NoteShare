@@ -519,6 +519,8 @@ def dashboard_stats(request):
         total=Sum("downloads")
     )["total"] or 0
 
+    total_users = User.objects.count()
+
     featured_notes = Note.objects.filter(
         featured=True
     ).count()
@@ -533,6 +535,8 @@ def dashboard_stats(request):
         "total_views": total_views,
 
         "total_downloads": total_downloads,
+        
+        "total_users": total_users,
 
         "featured_notes": featured_notes,
 

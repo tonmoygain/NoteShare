@@ -4,7 +4,6 @@ import {
     FileText,
     Eye,
     Download,
-    Star,
     TrendingUp,
     ArrowUpRight,
 } from "lucide-react";
@@ -45,10 +44,14 @@ function DashboardCards({ stats = {} }) {
             glow: "bg-emerald-400/10",
         },
         {
-            title: "Featured Notes",
-            value: Number(stats?.featured_notes) || 0,
-            subtitle: "Highlighted resources",
-            icon: Star,
+            title: "Avg. Views / Note",
+            value:
+                Number(stats?.total_notes) > 0
+                    ? Number(stats?.total_views || 0) /
+                    Number(stats?.total_notes)
+                    : 0,
+            subtitle: "Average reach per resource",
+            icon: TrendingUp,
             iconStyle: "from-orange-500 to-amber-400",
             iconBg: "bg-orange-50",
             iconText: "text-orange-600",
