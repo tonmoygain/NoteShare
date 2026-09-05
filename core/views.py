@@ -519,7 +519,11 @@ def dashboard_stats(request):
         total=Sum("downloads")
     )["total"] or 0
 
-    total_users = User.objects.count()
+    total_users = User.objects.filter(
+        is_active=True,
+        is_staff=False,
+        is_superuser=False,
+    ).count()
 
     featured_notes = Note.objects.filter(
         featured=True
@@ -1549,9 +1553,25 @@ def find_relevant_notes(query, max_notes=3):
         # NOTE METADATA
         # ==========================================
 
+        education_level = (
+            note.education_level or ""
+        )
+
+        academic_context = " ".join([
+            education_level,
+            note.department or "",
+            note.class_level or "",
+            note.subject or "",
+            note.chapter or "",
+            note.board or "",
+            note.semester or "",
+            note.course or "",
+        ])
+
+
         metadata_text = " ".join([
             note.title or "",
-            note.department or "",
+            academic_context,
             note.description or "",
         ]).lower()
 
@@ -1895,8 +1915,36 @@ def ai_chat(request):
                 note.title or ""
             ).lower()
 
+            education_level = (
+                note.education_level or ""
+            ).lower()
+
             department = (
                 note.department or ""
+            ).lower()
+
+            class_level = (
+                note.class_level or ""
+            ).lower()
+
+            subject = (
+                note.subject or ""
+            ).lower()
+
+            chapter = (
+                note.chapter or ""
+            ).lower()
+
+            board = (
+                note.board or ""
+            ).lower()
+
+            semester = (
+                note.semester or ""
+            ).lower()
+
+            course = (
+                note.course or ""
             ).lower()
 
             description = (
@@ -1905,7 +1953,14 @@ def ai_chat(request):
 
             metadata_text = (
                 f"{title} "
+                f"{education_level} "
                 f"{department} "
+                f"{class_level} "
+                f"{subject} "
+                f"{chapter} "
+                f"{board} "
+                f"{semester} "
+                f"{course} "
                 f"{description}"
             )
 
@@ -2060,6 +2115,30 @@ Use the following NoteShare materials to answer.
             "title": note.title,
         })
 
+        education_label = (
+            "School / College"
+            if (note.education_level or "").lower() == "school"
+            else "University"
+        )
+
+        academic_metadata = f"""
+--- NOTE ACADEMIC CONTEXT: {note.title} ---
+
+Education Level: {education_label}
+Department: {note.department or "Not specified"}
+Class: {note.class_level or "Not specified"}
+Subject: {note.subject or "Not specified"}
+Chapter / Topic: {note.chapter or "Not specified"}
+Board / Curriculum: {note.board or "Not specified"}
+Semester: {note.semester or "Not specified"}
+Course / Subject: {note.course or "Not specified"}
+Description: {note.description or "Not specified"}
+"""
+
+        contents.append(
+            academic_metadata
+        )
+
         extracted_text = get_note_text(note)
 
         if extracted_text:
@@ -2068,10 +2147,10 @@ Use the following NoteShare materials to answer.
 
             contents.append(
                 f"""
---- NOTE TEXT: {note.title} ---
+        --- NOTE TEXT: {note.title} ---
 
-{extracted_text}
-"""
+        {extracted_text}
+        """
             )
 
             continue
