@@ -13,6 +13,9 @@ import {
     CheckCircle2,
     Loader2,
     ShieldCheck,
+    GraduationCap,
+    School,
+    Layers3,
 } from "lucide-react";
 
 import API from "../services/api";
@@ -21,12 +24,41 @@ function Upload() {
     const navigate = useNavigate();
 
     const [title, setTitle] = useState("");
-    const [department, setDepartment] = useState("CSE");
-    const [description, setDescription] = useState("");
-    const [file, setFile] = useState(null);
+    const [educationLevel, setEducationLevel] =
+        useState("university");
 
-    const [uploading, setUploading] = useState(false);
-    const [error, setError] = useState("");
+    const [department, setDepartment] =
+        useState("CSE");
+
+    const [classLevel, setClassLevel] =
+        useState("");
+
+    const [subject, setSubject] =
+        useState("");
+
+    const [chapter, setChapter] =
+        useState("");
+
+    const [board, setBoard] =
+        useState("");
+
+    const [semester, setSemester] =
+        useState("");
+
+    const [course, setCourse] =
+        useState("");
+
+    const [description, setDescription] =
+        useState("");
+
+    const [file, setFile] =
+        useState(null);
+
+    const [uploading, setUploading] =
+        useState(false);
+
+    const [error, setError] =
+        useState("");
 
     const allowedTypes = [
         "application/pdf",
@@ -38,14 +70,36 @@ function Upload() {
         "image/jpeg",
     ];
 
+    const handleEducationLevelChange = (value) => {
+        setEducationLevel(value);
+        setError("");
+
+        if (value === "school") {
+            setDepartment("");
+            setSemester("");
+            setCourse("");
+        } else {
+            setClassLevel("");
+            setSubject("");
+            setChapter("");
+            setBoard("");
+            setDepartment("CSE");
+        }
+    };
+
     const handleFileChange = (e) => {
-        const selectedFile = e.target.files?.[0];
+        const selectedFile =
+            e.target.files?.[0];
 
         if (!selectedFile) return;
 
         setError("");
 
-        if (!allowedTypes.includes(selectedFile.type)) {
+        if (
+            !allowedTypes.includes(
+                selectedFile.type
+            )
+        ) {
             setError(
                 "Unsupported file type. Please choose PDF, DOC, DOCX, PPT, PPTX, PNG or JPG."
             );
@@ -54,8 +108,14 @@ function Upload() {
             return;
         }
 
-        if (selectedFile.size > 10 * 1024 * 1024) {
-            setError("Maximum file size is 10 MB.");
+        if (
+            selectedFile.size >
+            10 * 1024 * 1024
+        ) {
+            setError(
+                "Maximum file size is 10 MB."
+            );
+
             e.target.value = "";
             return;
         }
@@ -75,29 +135,66 @@ function Upload() {
         setError("");
 
         if (!title.trim()) {
-            setError("Please enter a note title.");
+            setError(
+                "Please enter a note title."
+            );
             return;
         }
 
-        if (!department) {
-            setError("Please select a department.");
+        if (
+            educationLevel ===
+                "university" &&
+            !department
+        ) {
+            setError(
+                "Please select a department."
+            );
             return;
+        }
+
+        if (
+            educationLevel ===
+            "school"
+        ) {
+            if (!classLevel) {
+                setError(
+                    "Please select a class."
+                );
+                return;
+            }
+
+            if (!subject.trim()) {
+                setError(
+                    "Please enter a subject."
+                );
+                return;
+            }
         }
 
         if (!description.trim()) {
-            setError("Please enter a description.");
+            setError(
+                "Please enter a description."
+            );
             return;
         }
 
         if (!file) {
-            setError("Please select a file to upload.");
+            setError(
+                "Please select a file to upload."
+            );
             return;
         }
 
-        const token = localStorage.getItem("access");
+        const token =
+            localStorage.getItem(
+                "access"
+            );
 
         if (!token) {
-            setError("Please login first to upload a note.");
+            setError(
+                "Please login first to upload a note."
+            );
+
             navigate("/login");
             return;
         }
@@ -105,26 +202,82 @@ function Upload() {
         try {
             setUploading(true);
 
-            const formData = new FormData();
+            const formData =
+                new FormData();
 
-            formData.append("title", title.trim());
-            formData.append("department", department);
-            formData.append("description", description.trim());
-            formData.append("file", file);
+            formData.append(
+                "title",
+                title.trim()
+            );
+
+            formData.append(
+                "education_level",
+                educationLevel
+            );
+
+            formData.append(
+                "department",
+                department
+            );
+
+            formData.append(
+                "class_level",
+                classLevel
+            );
+
+            formData.append(
+                "subject",
+                subject.trim()
+            );
+
+            formData.append(
+                "chapter",
+                chapter.trim()
+            );
+
+            formData.append(
+                "board",
+                board.trim()
+            );
+
+            formData.append(
+                "semester",
+                semester
+            );
+
+            formData.append(
+                "course",
+                course.trim()
+            );
+
+            formData.append(
+                "description",
+                description.trim()
+            );
+
+            formData.append(
+                "file",
+                file
+            );
+
             formData.append(
                 "username",
-                localStorage.getItem("username") || ""
+                localStorage.getItem(
+                    "username"
+                ) || ""
             );
 
-            const response = await API.post(
-                "notes/create/",
-                formData,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                }
-            );
+            const response =
+                await API.post(
+                    "notes/create/",
+                    formData,
+                    {
+                        headers: {
+                            "Content-Type":
+                                "multipart/form-data",
+                        },
+                    }
+                );
 
             sessionStorage.setItem(
                 "noteshare_success",
@@ -132,34 +285,54 @@ function Upload() {
             );
 
             window.dispatchEvent(
-                new Event("noteshare:success")
+                new Event(
+                    "noteshare:success"
+                )
             );
 
-
             if (response.data?.id) {
-                navigate(`/note/${response.data.id}`);
+                navigate(
+                    `/note/${response.data.id}`
+                );
             } else {
                 navigate("/notes");
             }
         } catch (err) {
-            console.error("Upload Note Error:", err);
+            console.error(
+                "Upload Note Error:",
+                err
+            );
 
-            if (err.response?.status === 401) {
-                setError("Please login first.");
-                navigate("/login");
-            } else if (err.response?.status === 400) {
+            if (
+                err.response?.status ===
+                401
+            ) {
                 setError(
-                    err.response?.data?.detail ||
-                        err.response?.data?.error ||
+                    "Please login first."
+                );
+
+                navigate("/login");
+            } else if (
+                err.response?.status ===
+                400
+            ) {
+                setError(
+                    err.response?.data
+                        ?.detail ||
+                        err.response?.data
+                            ?.error ||
                         JSON.stringify(
-                            err.response?.data ||
+                            err.response
+                                ?.data ||
                                 "Invalid upload data."
                         )
                 );
             } else {
                 setError(
-                    err.response?.data?.detail ||
-                        err.response?.data?.error ||
+                    err.response?.data
+                        ?.detail ||
+                        err.response?.data
+                            ?.error ||
                         "Upload failed. Please try again."
                 );
             }
@@ -172,7 +345,6 @@ function Upload() {
         <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
 
             <div
-                
                 className="
                     upload-page-card
                     overflow-hidden
@@ -213,7 +385,11 @@ function Upload() {
 
                         <button
                             type="button"
-                            onClick={() => navigate("/notes")}
+                            onClick={() =>
+                                navigate(
+                                    "/notes"
+                                )
+                            }
                             className="
                                 inline-flex
                                 items-center
@@ -265,6 +441,7 @@ function Upload() {
                             </motion.div>
 
                             <div>
+
                                 <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-blue-100 backdrop-blur-sm">
                                     <ShieldCheck size={12} />
                                     Share Knowledge
@@ -277,6 +454,7 @@ function Upload() {
                                 <p className="mt-2 max-w-2xl text-sm leading-6 text-blue-100 sm:text-base">
                                     Share useful academic resources with your student community.
                                 </p>
+
                             </div>
                         </div>
                     </div>
@@ -287,11 +465,14 @@ function Upload() {
                 ====================================================== */}
 
                 <form
-                    onSubmit={handleSubmit}
+                    onSubmit={
+                        handleSubmit
+                    }
                     className="space-y-8 p-6 sm:p-8 lg:p-10"
                 >
 
                     {/* Error */}
+
                     {error && (
                         <motion.div
                             initial={{
@@ -331,6 +512,7 @@ function Upload() {
                     ====================================================== */}
 
                     <div>
+
                         <div className="mb-5">
                             <p className="text-[11px] font-black uppercase tracking-[0.18em] text-blue-600">
                                 Step 01
@@ -350,6 +532,7 @@ function Upload() {
                             {/* Title */}
 
                             <div className="md:col-span-2">
+
                                 <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
                                     <BookOpen
                                         size={17}
@@ -362,7 +545,9 @@ function Upload() {
                                     type="text"
                                     value={title}
                                     onChange={(e) =>
-                                        setTitle(e.target.value)
+                                        setTitle(
+                                            e.target.value
+                                        )
                                     }
                                     placeholder="Operating System Mid Note"
                                     disabled={uploading}
@@ -388,86 +573,643 @@ function Upload() {
                                         disabled:bg-slate-100
                                     "
                                 />
+
                             </div>
 
-                            {/* Department */}
+                            {/* Education Level */}
 
-                            <div>
+                            <div className="md:col-span-2">
+
                                 <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
-                                    <FolderOpen
+                                    <GraduationCap
                                         size={17}
                                         className="text-blue-600"
                                     />
-                                    Department
+                                    Education Level
                                 </label>
 
-                                <select
-                                    value={department}
-                                    onChange={(e) =>
-                                        setDepartment(
-                                            e.target.value
-                                        )
-                                    }
-                                    disabled={uploading}
-                                    className="
-                                        upload-form-control
-                                        mt-3
-                                        h-14
-                                        w-full
-                                        rounded-2xl
-                                        border
-                                        border-slate-200
-                                        bg-slate-50/60
-                                        px-5
-                                        text-slate-700
-                                        outline-none
-                                        transition
-                                        focus:border-blue-500
-                                        focus:bg-white
-                                        focus:ring-4
-                                        focus:ring-blue-100
-                                        disabled:cursor-not-allowed
-                                        disabled:bg-slate-100
-                                    "
-                                >
-                                    <option value="CSE">CSE</option>
-                                    <option value="EEE">EEE</option>
-                                    <option value="BBA">CE</option>
-                                    <option value="BBA">BBA</option>
-                                    <option value="English">English</option>
-                                    <option value="Law">Law</option>
-                                </select>
+                                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+
+                                    <button
+                                        type="button"
+                                        disabled={
+                                            uploading
+                                        }
+                                        onClick={() =>
+                                            handleEducationLevelChange(
+                                                "university"
+                                            )
+                                        }
+                                        className={`group flex items-center gap-4 rounded-2xl border px-5 py-4 text-left transition ${
+                                            educationLevel ===
+                                            "university"
+                                                ? "border-blue-500 bg-blue-50 shadow-sm shadow-blue-500/10"
+                                                : "border-slate-200 bg-slate-50/60 hover:border-blue-200 hover:bg-blue-50/40"
+                                        }`}
+                                    >
+
+                                        <div
+                                            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition ${
+                                                educationLevel ===
+                                                "university"
+                                                    ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                                                    : "bg-white text-blue-600 shadow-sm"
+                                            }`}
+                                        >
+                                            <GraduationCap
+                                                size={22}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <p className="font-black text-slate-800">
+                                                University
+                                            </p>
+
+                                            <p className="mt-1 text-xs font-medium text-slate-400">
+                                                Department, semester & course
+                                            </p>
+                                        </div>
+
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        disabled={
+                                            uploading
+                                        }
+                                        onClick={() =>
+                                            handleEducationLevelChange(
+                                                "school"
+                                            )
+                                        }
+                                        className={`group flex items-center gap-4 rounded-2xl border px-5 py-4 text-left transition ${
+                                            educationLevel ===
+                                            "school"
+                                                ? "border-cyan-500 bg-cyan-50 shadow-sm shadow-cyan-500/10"
+                                                : "border-slate-200 bg-slate-50/60 hover:border-cyan-200 hover:bg-cyan-50/40"
+                                        }`}
+                                    >
+
+                                        <div
+                                            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition ${
+                                                educationLevel ===
+                                                "school"
+                                                    ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/20"
+                                                    : "bg-white text-cyan-600 shadow-sm"
+                                            }`}
+                                        >
+                                            <School
+                                                size={22}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <p className="font-black text-slate-800">
+                                                School / College
+                                            </p>
+
+                                            <p className="mt-1 text-xs font-medium text-slate-400">
+                                                Class, subject & board
+                                            </p>
+                                        </div>
+
+                                    </button>
+
+                                </div>
                             </div>
 
-                            {/* Resource Type Info */}
+                            {/* =================================================
+                                UNIVERSITY FIELDS
+                            ================================================== */}
 
-                            <div
-                                className="
-                                    upload-resource-info
-                                    flex
-                                    items-center
-                                    gap-3
-                                    rounded-2xl
-                                    border
-                                    border-blue-100
-                                    bg-blue-50/70
-                                    px-4
-                                "
-                            >
-                                <div className="upload-resource-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
-                                    <FileText size={18} />
-                                </div>
+                            {educationLevel ===
+                                "university" && (
+                                <>
+                                    {/* Department */}
 
-                                <div>
-                                    <p className="text-sm font-bold text-slate-700">
-                                        Academic Resource
-                                    </p>
+                                    <div>
 
-                                    <p className="mt-0.5 text-xs text-slate-400">
-                                        Help others learn from your material.
-                                    </p>
-                                </div>
-                            </div>
+                                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                            <FolderOpen
+                                                size={17}
+                                                className="text-blue-600"
+                                            />
+                                            Department
+                                        </label>
+
+                                        <select
+                                            value={
+                                                department
+                                            }
+                                            onChange={(
+                                                e
+                                            ) =>
+                                                setDepartment(
+                                                    e
+                                                        .target
+                                                        .value
+                                                )
+                                            }
+                                            disabled={
+                                                uploading
+                                            }
+                                            className="
+                                                upload-form-control
+                                                mt-3
+                                                h-14
+                                                w-full
+                                                rounded-2xl
+                                                border
+                                                border-slate-200
+                                                bg-slate-50/60
+                                                px-5
+                                                text-slate-700
+                                                outline-none
+                                                transition
+                                                focus:border-blue-500
+                                                focus:bg-white
+                                                focus:ring-4
+                                                focus:ring-blue-100
+                                                disabled:cursor-not-allowed
+                                                disabled:bg-slate-100
+                                            "
+                                        >
+                                            <option value="CSE">
+                                                CSE
+                                            </option>
+                                            <option value="EEE">
+                                                EEE
+                                            </option>
+                                            <option value="Civil">
+                                                Civil
+                                            </option>
+                                            <option value="Architecture">
+                                                Architecture
+                                            </option>
+                                            <option value="Textile">
+                                                Textile
+                                            </option>
+                                            <option value="BBA">
+                                                BBA
+                                            </option>
+                                            <option value="English">
+                                                English
+                                            </option>
+                                            <option value="Law">
+                                                Law
+                                            </option>
+                                        </select>
+
+                                    </div>
+
+                                    {/* Semester */}
+
+                                    <div>
+
+                                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                            <Layers3
+                                                size={17}
+                                                className="text-blue-600"
+                                            />
+                                            Semester
+                                        </label>
+
+                                        <select
+                                            value={
+                                                semester
+                                            }
+                                            onChange={(
+                                                e
+                                            ) =>
+                                                setSemester(
+                                                    e
+                                                        .target
+                                                        .value
+                                                )
+                                            }
+                                            disabled={
+                                                uploading
+                                            }
+                                            className="
+                                                upload-form-control
+                                                mt-3
+                                                h-14
+                                                w-full
+                                                rounded-2xl
+                                                border
+                                                border-slate-200
+                                                bg-slate-50/60
+                                                px-5
+                                                text-slate-700
+                                                outline-none
+                                                transition
+                                                focus:border-blue-500
+                                                focus:bg-white
+                                                focus:ring-4
+                                                focus:ring-blue-100
+                                                disabled:cursor-not-allowed
+                                                disabled:bg-slate-100
+                                            "
+                                        >
+                                            <option value="">
+                                                Select Semester
+                                            </option>
+
+                                            <option value="1st Semester">
+                                                1st Semester
+                                            </option>
+
+                                            <option value="2nd Semester">
+                                                2nd Semester
+                                            </option>
+
+                                            <option value="3rd Semester">
+                                                3rd Semester
+                                            </option>
+
+                                            <option value="4th Semester">
+                                                4th Semester
+                                            </option>
+
+                                            <option value="5th Semester">
+                                                5th Semester
+                                            </option>
+
+                                            <option value="6th Semester">
+                                                6th Semester
+                                            </option>
+
+                                            <option value="7th Semester">
+                                                7th Semester
+                                            </option>
+
+                                            <option value="8th Semester">
+                                                8th Semester
+                                            </option>
+
+                                        </select>
+
+                                    </div>
+
+                                    {/* Course */}
+
+                                    <div className="md:col-span-2">
+
+                                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                            <BookOpen
+                                                size={17}
+                                                className="text-blue-600"
+                                            />
+                                            Course / Subject
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            value={
+                                                course
+                                            }
+                                            onChange={(
+                                                e
+                                            ) =>
+                                                setCourse(
+                                                    e
+                                                        .target
+                                                        .value
+                                                )
+                                            }
+                                            placeholder="Example: Database Management Systems"
+                                            disabled={
+                                                uploading
+                                            }
+                                            className="
+                                                upload-form-control
+                                                mt-3
+                                                h-14
+                                                w-full
+                                                rounded-2xl
+                                                border
+                                                border-slate-200
+                                                bg-slate-50/60
+                                                px-5
+                                                text-slate-700
+                                                outline-none
+                                                transition
+                                                placeholder:text-slate-400
+                                                focus:border-blue-500
+                                                focus:bg-white
+                                                focus:ring-4
+                                                focus:ring-blue-100
+                                                disabled:cursor-not-allowed
+                                                disabled:bg-slate-100
+                                            "
+                                        />
+
+                                    </div>
+                                </>
+                            )}
+
+                            {/* =================================================
+                                SCHOOL / COLLEGE FIELDS
+                            ================================================== */}
+
+                            {educationLevel ===
+                                "school" && (
+                                <>
+                                    {/* Class */}
+
+                                    <div>
+
+                                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                            <School
+                                                size={17}
+                                                className="text-cyan-600"
+                                            />
+                                            Class
+                                        </label>
+
+                                        <select
+                                            value={
+                                                classLevel
+                                            }
+                                            onChange={(
+                                                e
+                                            ) =>
+                                                setClassLevel(
+                                                    e
+                                                        .target
+                                                        .value
+                                                )
+                                            }
+                                            disabled={
+                                                uploading
+                                            }
+                                            className="
+                                                upload-form-control
+                                                mt-3
+                                                h-14
+                                                w-full
+                                                rounded-2xl
+                                                border
+                                                border-slate-200
+                                                bg-slate-50/60
+                                                px-5
+                                                text-slate-700
+                                                outline-none
+                                                transition
+                                                focus:border-cyan-500
+                                                focus:bg-white
+                                                focus:ring-4
+                                                focus:ring-cyan-100
+                                                disabled:cursor-not-allowed
+                                                disabled:bg-slate-100
+                                            "
+                                        >
+                                            <option value="">
+                                                Select Class
+                                            </option>
+
+                                            <option value="Class 1">
+                                                Class 1
+                                            </option>
+
+                                            <option value="Class 2">
+                                                Class 2
+                                            </option>
+
+                                            <option value="Class 3">
+                                                Class 3
+                                            </option>
+
+                                            <option value="Class 4">
+                                                Class 4
+                                            </option>
+
+                                            <option value="Class 5">
+                                                Class 5
+                                            </option>
+
+                                            <option value="Class 6">
+                                                Class 6
+                                            </option>
+
+                                            <option value="Class 7">
+                                                Class 7
+                                            </option>
+
+                                            <option value="Class 8">
+                                                Class 8
+                                            </option>
+
+                                            <option value="Class 9">
+                                                Class 9
+                                            </option>
+
+                                            <option value="Class 10">
+                                                Class 10
+                                            </option>
+
+                                            <option value="Class 11">
+                                                Class 11
+                                            </option>
+
+                                            <option value="Class 12">
+                                                Class 12
+                                            </option>
+
+                                        </select>
+
+                                    </div>
+
+                                    {/* Board */}
+
+                                    <div>
+
+                                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                            <Layers3
+                                                size={17}
+                                                className="text-cyan-600"
+                                            />
+                                            Board / Curriculum
+                                        </label>
+
+                                        <select
+                                            value={
+                                                board
+                                            }
+                                            onChange={(
+                                                e
+                                            ) =>
+                                                setBoard(
+                                                    e
+                                                        .target
+                                                        .value
+                                                )
+                                            }
+                                            disabled={
+                                                uploading
+                                            }
+                                            className="
+                                                upload-form-control
+                                                mt-3
+                                                h-14
+                                                w-full
+                                                rounded-2xl
+                                                border
+                                                border-slate-200
+                                                bg-slate-50/60
+                                                px-5
+                                                text-slate-700
+                                                outline-none
+                                                transition
+                                                focus:border-cyan-500
+                                                focus:bg-white
+                                                focus:ring-4
+                                                focus:ring-cyan-100
+                                                disabled:cursor-not-allowed
+                                                disabled:bg-slate-100
+                                            "
+                                        >
+                                            <option value="">
+                                                Select Board / Curriculum
+                                            </option>
+
+                                            <option value="NCTB">
+                                                NCTB
+                                            </option>
+
+                                            <option value="English Version">
+                                                English Version
+                                            </option>
+
+                                            <option value="Cambridge">
+                                                Cambridge
+                                            </option>
+
+                                            <option value="Edexcel">
+                                                Edexcel
+                                            </option>
+
+                                            <option value="Madrasa">
+                                                Madrasa
+                                            </option>
+
+                                        </select>
+
+                                    </div>
+
+                                    {/* Subject */}
+
+                                    <div>
+
+                                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                            <BookOpen
+                                                size={17}
+                                                className="text-cyan-600"
+                                            />
+                                            Subject
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            value={
+                                                subject
+                                            }
+                                            onChange={(
+                                                e
+                                            ) =>
+                                                setSubject(
+                                                    e
+                                                        .target
+                                                        .value
+                                                )
+                                            }
+                                            placeholder="Example: Physics"
+                                            disabled={
+                                                uploading
+                                            }
+                                            className="
+                                                upload-form-control
+                                                mt-3
+                                                h-14
+                                                w-full
+                                                rounded-2xl
+                                                border
+                                                border-slate-200
+                                                bg-slate-50/60
+                                                px-5
+                                                text-slate-700
+                                                outline-none
+                                                transition
+                                                placeholder:text-slate-400
+                                                focus:border-cyan-500
+                                                focus:bg-white
+                                                focus:ring-4
+                                                focus:ring-cyan-100
+                                                disabled:cursor-not-allowed
+                                                disabled:bg-slate-100
+                                            "
+                                        />
+
+                                    </div>
+
+                                    {/* Chapter */}
+
+                                    <div>
+
+                                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                            <FileText
+                                                size={17}
+                                                className="text-cyan-600"
+                                            />
+                                            Chapter / Topic
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            value={
+                                                chapter
+                                            }
+                                            onChange={(
+                                                e
+                                            ) =>
+                                                setChapter(
+                                                    e
+                                                        .target
+                                                        .value
+                                                )
+                                            }
+                                            placeholder="Example: Motion"
+                                            disabled={
+                                                uploading
+                                            }
+                                            className="
+                                                upload-form-control
+                                                mt-3
+                                                h-14
+                                                w-full
+                                                rounded-2xl
+                                                border
+                                                border-slate-200
+                                                bg-slate-50/60
+                                                px-5
+                                                text-slate-700
+                                                outline-none
+                                                transition
+                                                placeholder:text-slate-400
+                                                focus:border-cyan-500
+                                                focus:bg-white
+                                                focus:ring-4
+                                                focus:ring-cyan-100
+                                                disabled:cursor-not-allowed
+                                                disabled:bg-slate-100
+                                            "
+                                        />
+
+                                    </div>
+                                </>
+                            )}
+
                         </div>
                     </div>
 
@@ -476,7 +1218,9 @@ function Upload() {
                     ====================================================== */}
 
                     <div>
+
                         <div className="mb-5">
+
                             <p className="text-[11px] font-black uppercase tracking-[0.18em] text-blue-600">
                                 Step 02
                             </p>
@@ -488,19 +1232,25 @@ function Upload() {
                             <p className="mt-1 text-sm text-slate-400">
                                 A useful description helps other students find the right resource.
                             </p>
+
                         </div>
 
                         <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
+
                             <FileText
                                 size={17}
                                 className="text-blue-600"
                             />
+
                             Description
+
                         </label>
 
                         <textarea
                             rows="6"
-                            value={description}
+                            value={
+                                description
+                            }
                             onChange={(e) =>
                                 setDescription(
                                     e.target.value
@@ -532,6 +1282,7 @@ function Upload() {
                                 disabled:bg-slate-100
                             "
                         />
+
                     </div>
 
                     {/* =====================================================
@@ -539,7 +1290,9 @@ function Upload() {
                     ====================================================== */}
 
                     <div>
+
                         <div className="mb-5">
+
                             <p className="text-[11px] font-black uppercase tracking-[0.18em] text-blue-600">
                                 Step 03
                             </p>
@@ -551,9 +1304,11 @@ function Upload() {
                             <p className="mt-1 text-sm text-slate-400">
                                 Choose the resource you want to share.
                             </p>
+
                         </div>
 
                         {!file ? (
+
                             <label
                                 className="
                                     upload-file-dropzone
@@ -583,6 +1338,7 @@ function Upload() {
                                     hover:shadow-[0_18px_45px_rgba(37,99,235,0.08)]
                                 "
                             >
+
                                 <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-blue-400/10 blur-3xl transition duration-500 group-hover:scale-125" />
 
                                 <motion.div
@@ -629,11 +1385,18 @@ function Upload() {
                                     hidden
                                     type="file"
                                     accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg"
-                                    onChange={handleFileChange}
-                                    disabled={uploading}
+                                    onChange={
+                                        handleFileChange
+                                    }
+                                    disabled={
+                                        uploading
+                                    }
                                 />
+
                             </label>
+
                         ) : (
+
                             <motion.div
                                 initial={{
                                     opacity: 0,
@@ -655,14 +1418,17 @@ function Upload() {
                                     shadow-sm
                                 "
                             >
+
                                 <div className="flex items-center justify-between gap-4">
 
                                     <div className="flex min-w-0 items-center gap-4">
+
                                         <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-md shadow-blue-500/15">
                                             <FileText size={22} />
                                         </div>
 
                                         <div className="min-w-0">
+
                                             <p className="truncate font-bold text-slate-800">
                                                 {file.name}
                                             </p>
@@ -675,13 +1441,19 @@ function Upload() {
                                                 ).toFixed(2)}{" "}
                                                 MB
                                             </p>
+
                                         </div>
+
                                     </div>
 
                                     <button
                                         type="button"
-                                        onClick={removeFile}
-                                        disabled={uploading}
+                                        onClick={
+                                            removeFile
+                                        }
+                                        disabled={
+                                            uploading
+                                        }
                                         className="
                                             upload-remove-file
                                             flex
@@ -705,14 +1477,18 @@ function Upload() {
                                     >
                                         <X size={18} />
                                     </button>
+
                                 </div>
 
                                 <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-emerald-600">
                                     <CheckCircle2 size={16} />
                                     File ready to upload
                                 </div>
+
                             </motion.div>
+
                         )}
+
                     </div>
 
                     {/* =====================================================
@@ -722,17 +1498,21 @@ function Upload() {
                     <div className="upload-submit-area border-t border-slate-100 pt-7">
 
                         <div className="mb-5 flex items-center gap-2 text-xs font-semibold text-slate-400">
+
                             <ShieldCheck
                                 size={15}
                                 className="text-emerald-500"
                             />
 
                             Your uploaded resource will be shared with the NoteShare community.
+
                         </div>
 
                         <motion.button
                             type="submit"
-                            disabled={uploading}
+                            disabled={
+                                uploading
+                            }
                             whileHover={
                                 !uploading
                                     ? {
@@ -767,8 +1547,11 @@ function Upload() {
                                 disabled:opacity-50
                             "
                         >
+
                             <span className="flex items-center justify-center gap-3">
+
                                 {uploading ? (
+
                                     <>
                                         <Loader2
                                             size={20}
@@ -776,17 +1559,28 @@ function Upload() {
                                         />
                                         Uploading Note...
                                     </>
+
                                 ) : (
+
                                     <>
-                                        <UploadCloud size={20} />
+                                        <UploadCloud
+                                            size={20}
+                                        />
                                         Upload Note
                                     </>
+
                                 )}
+
                             </span>
+
                         </motion.button>
+
                     </div>
+
                 </form>
+
             </div>
+
         </section>
     );
 }

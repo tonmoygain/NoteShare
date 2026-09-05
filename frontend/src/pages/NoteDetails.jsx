@@ -16,6 +16,9 @@ import {
     Sparkles,
     ShieldCheck,
     ArrowUpRight,
+    GraduationCap,
+    School,
+    Layers3,
 } from "lucide-react";
 
 import API from "../services/api";
@@ -32,7 +35,68 @@ function NoteDetails() {
 
     const [toast, setToast] = useState(null);
 
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] =
+        useState(false);
+
+    const [isDarkMode, setIsDarkMode] = useState(
+        document.documentElement.classList.contains("dark")
+    );
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsDarkMode(
+                document.documentElement.classList.contains("dark")
+            );
+        });
+
+        observer.observe(
+            document.documentElement,
+            {
+                attributes: true,
+                attributeFilter: ["class"],
+            }
+        );
+
+        return () => observer.disconnect();
+    }, []);
+
+    /*
+    =============================================================
+    EXPLICIT THEME
+    -------------------------------------------------------------
+    NoteDetails does not rely on Tailwind dark: variants for the
+    main content. This keeps light mode genuinely light and dark
+    mode genuinely dark even when global styles are present.
+    =============================================================
+    */
+
+    const pageTheme = isDarkMode
+        ? "text-slate-100"
+        : "text-slate-700";
+
+    const cardTheme = isDarkMode
+        ? "border-slate-800 bg-slate-950 shadow-[0_30px_90px_rgba(0,0,0,0.35)]"
+        : "border-slate-200/80 bg-white shadow-[0_25px_70px_rgba(15,23,42,0.08)]";
+
+    const primaryText = isDarkMode
+        ? "text-white"
+        : "text-slate-800";
+
+    const bodyText = isDarkMode
+        ? "text-slate-300"
+        : "text-slate-700";
+
+    const mutedText = isDarkMode
+        ? "text-slate-500"
+        : "text-slate-400";
+
+    const subtleCard = isDarkMode
+        ? "border-slate-800 bg-slate-800/55"
+        : "border-slate-200 bg-slate-50/70";
+
+    const innerCard = isDarkMode
+        ? "border-slate-700 bg-slate-900/55"
+        : "border-slate-200/80 bg-white/80";
 
     useEffect(() => {
         const fetchNote = async () => {
@@ -86,17 +150,16 @@ function NoteDetails() {
         return Boolean(
             loggedInUsername &&
                 uploaderUsername &&
-                loggedInUsername ===
-                    uploaderUsername
+                loggedInUsername === uploaderUsername
         );
     }, [note]);
 
     const handleDelete = async () => {
         if (!note || deleting) return;
-        
+
         setShowDeleteConfirm(true);
     };
-        
+
     const confirmDeleteNote = async () => {
         if (!note || deleting) return;
 
@@ -134,7 +197,6 @@ function NoteDetails() {
                 setTimeout(() => {
                     navigate("/login");
                 }, 1000);
-
             } else if (
                 err.response?.status === 403
             ) {
@@ -143,7 +205,6 @@ function NoteDetails() {
                     message:
                         "You do not have permission to delete this note.",
                 });
-
             } else {
                 setToast({
                     type: "error",
@@ -158,34 +219,84 @@ function NoteDetails() {
         }
     };
 
-
     // =========================================================
     // ERROR
     // =========================================================
 
     if (error) {
         return (
-            <div className="min-h-[70vh] px-6 flex items-center justify-center">
+            <div className="
+                min-h-[70vh]
+                px-6
+                flex
+                items-center
+                justify-center
+            ">
                 <motion.div
                     initial={{
                         opacity: 0,
                         y: 16,
+                        scale: 0.98,
                     }}
                     animate={{
                         opacity: 1,
                         y: 0,
+                        scale: 1,
                     }}
-                    className="w-full max-w-lg rounded-[30px] border border-slate-200 bg-white p-10 text-center shadow-[0_20px_55px_rgba(15,23,42,0.08)]"
+                    transition={{
+                        duration: 0.4,
+                        ease: "easeOut",
+                    }}
+                    className={`
+                        w-full
+                        max-w-lg
+                        rounded-[30px]
+                        border
+                        p-10
+                        text-center
+                        transition-all
+                        duration-300
+                        ${cardTheme}
+                    `}
                 >
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+                    <div
+                        className={`
+                            mx-auto
+                            flex
+                            h-16
+                            w-16
+                            items-center
+                            justify-center
+                            rounded-2xl
+                            ${
+                                isDarkMode
+                                    ? "bg-red-500/10 text-red-400 ring-1 ring-red-500/15"
+                                    : "bg-red-50 text-red-500 ring-1 ring-red-100"
+                            }
+                        `}
+                    >
                         <FileText size={28} />
                     </div>
 
-                    <h2 className="mt-6 text-3xl font-black text-slate-800">
+                    <h2
+                        className={`
+                            mt-6
+                            text-3xl
+                            font-black
+                            tracking-tight
+                            ${primaryText}
+                        `}
+                    >
                         Note Not Found
                     </h2>
 
-                    <p className="mt-3 leading-7 text-slate-500">
+                    <p
+                        className={`
+                            mt-3
+                            leading-7
+                            ${mutedText}
+                        `}
+                    >
                         {error ||
                             "The requested study note is unavailable."}
                     </p>
@@ -194,7 +305,25 @@ function NoteDetails() {
                         onClick={() =>
                             navigate("/notes")
                         }
-                        className="mt-7 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/15"
+                        className="
+                            mt-7
+                            inline-flex
+                            items-center
+                            gap-2
+                            rounded-xl
+                            bg-blue-600
+                            px-6
+                            py-3
+                            font-bold
+                            text-white
+                            shadow-lg
+                            shadow-blue-500/15
+                            transition-all
+                            duration-300
+                            hover:-translate-y-0.5
+                            hover:bg-blue-700
+                            hover:shadow-xl
+                        "
                     >
                         <ArrowLeft size={18} />
                         Back to Notes
@@ -203,7 +332,6 @@ function NoteDetails() {
             </div>
         );
     }
-
 
     if (!note) {
         return null;
@@ -225,8 +353,50 @@ function NoteDetails() {
     const uploaderInitial =
         uploader.charAt(0).toUpperCase();
 
+    const educationLevel =
+        (
+            note?.education_level ||
+            "university"
+        ).toLowerCase();
+
+    const isSchool =
+        educationLevel === "school";
+
+    const department =
+        note?.department || "";
+
+    const classLevel =
+        note?.class_level || "";
+
+    const subject =
+        note?.subject || "";
+
+    const chapter =
+        note?.chapter || "";
+
+    const board =
+        note?.board || "";
+
+    const semester =
+        note?.semester || "";
+
+    const course =
+        note?.course || "";
+
     return (
-        <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+        <section
+            className={`
+                mx-auto
+                max-w-6xl
+                px-4
+                py-6
+                transition-colors
+                duration-300
+                sm:px-6
+                sm:py-10
+                ${pageTheme}
+            `}
+        >
 
             <Toast
                 toast={toast}
@@ -246,8 +416,10 @@ function NoteDetails() {
                     opacity: 1,
                     x: 0,
                 }}
-                onClick={() => navigate("/notes")}
-                className="
+                onClick={() =>
+                    navigate("/notes")
+                }
+                className={`
                     note-details-back
                     group
                     inline-flex
@@ -255,23 +427,30 @@ function NoteDetails() {
                     gap-2
                     rounded-full
                     border
-                    border-slate-200
-                    bg-white/80
                     px-4
                     py-2.5
                     text-sm
                     font-bold
-                    text-slate-600
                     shadow-sm
                     backdrop-blur-sm
-                    transition
-                    hover:border-blue-200
-                    hover:text-blue-600
-                "
+                    transition-all
+                    duration-300
+                    hover:-translate-y-0.5
+                    hover:shadow-md
+                    ${
+                        isDarkMode
+                            ? "border-slate-700 bg-slate-900/90 text-slate-300 hover:border-blue-500/50 hover:text-blue-400"
+                            : "border-slate-200 bg-white/90 text-slate-600 hover:border-blue-200 hover:text-blue-600"
+                    }
+                `}
             >
                 <ArrowLeft
                     size={17}
-                    className="transition-transform duration-300 group-hover:-translate-x-0.5"
+                    className="
+                        transition-transform
+                        duration-300
+                        group-hover:-translate-x-0.5
+                    "
                 />
 
                 Back to Notes
@@ -294,16 +473,22 @@ function NoteDetails() {
                     duration: 0.55,
                     ease: "easeOut",
                 }}
-                className="
+                className={`
                     note-details-card
                     mt-7
                     overflow-hidden
                     rounded-[34px]
                     border
-                    border-slate-200/80
-                    bg-white
-                    shadow-[0_25px_70px_rgba(15,23,42,0.08)]
-                "
+                    ring-1
+                    transition-all
+                    duration-300
+                    ${cardTheme}
+                    ${
+                        isDarkMode
+                            ? "ring-white/[0.03]"
+                            : "ring-slate-950/[0.02]"
+                    }
+                `}
             >
 
                 {/* =================================================
@@ -378,11 +563,23 @@ function NoteDetails() {
                         "
                     />
 
-                    <div className="relative px-6 py-9 sm:px-9 sm:py-12 lg:px-12 lg:py-14">
+                    <div className="
+                        relative
+                        px-6
+                        py-9
+                        sm:px-9
+                        sm:py-12
+                        lg:px-12
+                        lg:py-14
+                    ">
 
-                        <div className="flex flex-col gap-7 md:flex-row md:items-center">
-
-                            {/* Icon */}
+                        <div className="
+                            flex
+                            flex-col
+                            gap-7
+                            md:flex-row
+                            md:items-center
+                        ">
 
                             <motion.div
                                 initial={{
@@ -415,13 +612,16 @@ function NoteDetails() {
                                     bg-white/10
                                     text-white
                                     shadow-2xl
+                                    shadow-black/10
                                     backdrop-blur-xl
                                 "
                             >
-                                <FileText size={42} />
+                                {isSchool ? (
+                                    <School size={42} />
+                                ) : (
+                                    <FileText size={42} />
+                                )}
                             </motion.div>
-
-                            {/* Title */}
 
                             <div className="min-w-0">
 
@@ -458,43 +658,188 @@ function NoteDetails() {
                                     {note.title}
                                 </h1>
 
-                                <div className="mt-5 flex flex-wrap gap-2">
-                                    {note.department && (
-                                        <span className="
-                                            rounded-full
-                                            border
-                                            border-white/10
-                                            bg-white/10
-                                            px-3
-                                            py-1.5
-                                            text-xs
-                                            font-bold
-                                            text-blue-100
-                                        ">
-                                            {note.department}
-                                        </span>
+                                <div className="
+                                    mt-5
+                                    flex
+                                    flex-wrap
+                                    gap-2
+                                ">
+
+                                    <span className="
+                                        inline-flex
+                                        items-center
+                                        gap-1.5
+                                        rounded-full
+                                        border
+                                        border-white/10
+                                        bg-white/10
+                                        px-3
+                                        py-1.5
+                                        text-xs
+                                        font-bold
+                                        text-cyan-100
+                                        backdrop-blur-sm
+                                    ">
+                                        {isSchool ? (
+                                            <>
+                                                <School size={13} />
+                                                School / College
+                                            </>
+                                        ) : (
+                                            <>
+                                                <GraduationCap size={13} />
+                                                University
+                                            </>
+                                        )}
+                                    </span>
+
+                                    {isSchool ? (
+                                        <>
+                                            {classLevel && (
+                                                <span className="
+                                                    inline-flex
+                                                    items-center
+                                                    gap-1.5
+                                                    rounded-full
+                                                    border
+                                                    border-white/10
+                                                    bg-white/10
+                                                    px-3
+                                                    py-1.5
+                                                    text-xs
+                                                    font-bold
+                                                    text-blue-100
+                                                ">
+                                                    <School size={13} />
+                                                    {classLevel}
+                                                </span>
+                                            )}
+
+                                            {subject && (
+                                                <span className="
+                                                    inline-flex
+                                                    items-center
+                                                    gap-1.5
+                                                    rounded-full
+                                                    border
+                                                    border-white/10
+                                                    bg-white/10
+                                                    px-3
+                                                    py-1.5
+                                                    text-xs
+                                                    font-bold
+                                                    text-cyan-100
+                                                ">
+                                                    <BookOpen size={13} />
+                                                    {subject}
+                                                </span>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <>
+                                            {department && (
+                                                <span className="
+                                                    inline-flex
+                                                    items-center
+                                                    gap-1.5
+                                                    rounded-full
+                                                    border
+                                                    border-white/10
+                                                    bg-white/10
+                                                    px-3
+                                                    py-1.5
+                                                    text-xs
+                                                    font-bold
+                                                    text-blue-100
+                                                ">
+                                                    <Layers3 size={13} />
+                                                    {department}
+                                                </span>
+                                            )}
+
+                                            {semester && (
+                                                <span className="
+                                                    inline-flex
+                                                    items-center
+                                                    rounded-full
+                                                    border
+                                                    border-white/10
+                                                    bg-white/10
+                                                    px-3
+                                                    py-1.5
+                                                    text-xs
+                                                    font-bold
+                                                    text-violet-100
+                                                ">
+                                                    {semester}
+                                                </span>
+                                            )}
+
+                                            {course && (
+                                                <span className="
+                                                    inline-flex
+                                                    items-center
+                                                    gap-1.5
+                                                    rounded-full
+                                                    border
+                                                    border-white/10
+                                                    bg-white/10
+                                                    px-3
+                                                    py-1.5
+                                                    text-xs
+                                                    font-bold
+                                                    text-emerald-100
+                                                ">
+                                                    <BookOpen size={13} />
+                                                    {course}
+                                                </span>
+                                            )}
+                                        </>
                                     )}
 
-                                    {note.category && (
-                                        <span className="
-                                            rounded-full
-                                            border
-                                            border-white/10
-                                            bg-white/10
-                                            px-3
-                                            py-1.5
-                                            text-xs
-                                            font-bold
-                                            text-cyan-100
-                                        ">
-                                            {note.category}
-                                        </span>
-                                    )}
+                                    {isSchool &&
+                                        chapter && (
+                                            <span className="
+                                                inline-flex
+                                                items-center
+                                                gap-1.5
+                                                rounded-full
+                                                border
+                                                border-white/10
+                                                bg-white/10
+                                                px-3
+                                                py-1.5
+                                                text-xs
+                                                font-bold
+                                                text-slate-200
+                                            ">
+                                                <FileText size={13} />
+                                                {chapter}
+                                            </span>
+                                        )}
+
+                                    {isSchool &&
+                                        board && (
+                                            <span className="
+                                                inline-flex
+                                                items-center
+                                                gap-1.5
+                                                rounded-full
+                                                border
+                                                border-emerald-300/10
+                                                bg-emerald-400/10
+                                                px-3
+                                                py-1.5
+                                                text-xs
+                                                font-bold
+                                                text-emerald-100
+                                            ">
+                                                {board}
+                                            </span>
+                                        )}
                                 </div>
                             </div>
                         </div>
-
-                        {/* Hero bottom meta */}
 
                         <div className="
                             relative
@@ -561,170 +906,541 @@ function NoteDetails() {
                     BODY
                 ================================================== */}
 
-                <div className="p-6 sm:p-9 lg:p-12">
+                <div
+                    className={`
+                        p-6
+                        transition-colors
+                        duration-300
+                        sm:p-9
+                        lg:p-12
+                        ${
+                            isDarkMode
+                                ? "bg-slate-950"
+                                : "bg-white"
+                        }
+                    `}
+                >
 
                     {/* =================================================
                         META CARDS
                     ================================================== */}
 
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="
+                        grid
+                        gap-4
+                        sm:grid-cols-2
+                        lg:grid-cols-4
+                    ">
 
+                        {[
+                            {
+                                icon: CalendarDays,
+                                label: "Uploaded",
+                                content: (
+                                    <p
+                                        className={`
+                                            mt-2
+                                            font-bold
+                                            ${bodyText}
+                                        `}
+                                    >
+                                        {uploadedDate}
+                                    </p>
+                                ),
+                            },
+                            {
+                                icon: User,
+                                label: "Uploaded By",
+                                content: (
+                                    <div className="
+                                        mt-2
+                                        flex
+                                        min-w-0
+                                        items-center
+                                        gap-2
+                                    ">
+                                        <div className="
+                                            flex
+                                            h-7
+                                            w-7
+                                            shrink-0
+                                            items-center
+                                            justify-center
+                                            rounded-full
+                                            bg-gradient-to-br
+                                            from-slate-800
+                                            to-slate-500
+                                            text-[11px]
+                                            font-black
+                                            text-white
+                                            shadow-sm
+                                        ">
+                                            {uploaderInitial}
+                                        </div>
+
+                                        <p
+                                            className={`
+                                                truncate
+                                                font-bold
+                                                ${bodyText}
+                                            `}
+                                        >
+                                            {uploader}
+                                        </p>
+                                    </div>
+                                ),
+                            },
+                            {
+                                icon: Eye,
+                                label: "Views",
+                                content: (
+                                    <p
+                                        className={`
+                                            mt-1
+                                            text-3xl
+                                            font-black
+                                            tracking-tight
+                                            ${primaryText}
+                                        `}
+                                    >
+                                        {note.views || 0}
+                                    </p>
+                                ),
+                            },
+                            {
+                                icon: Download,
+                                label: "Downloads",
+                                content: (
+                                    <p
+                                        className={`
+                                            mt-1
+                                            text-3xl
+                                            font-black
+                                            tracking-tight
+                                            ${primaryText}
+                                        `}
+                                    >
+                                        {note.downloads || 0}
+                                    </p>
+                                ),
+                            },
+                        ].map((item) => {
+                            const Icon = item.icon;
+
+                            return (
+                                <motion.div
+                                    key={item.label}
+                                    whileHover={{
+                                        y: -3,
+                                    }}
+                                    transition={{
+                                        duration: 0.2,
+                                    }}
+                                    className={`
+                                        note-details-meta
+                                        rounded-2xl
+                                        border
+                                        p-5
+                                        shadow-sm
+                                        transition-all
+                                        duration-300
+                                        ${subtleCard}
+                                        ${
+                                            isDarkMode
+                                                ? "shadow-[0_10px_30px_rgba(0,0,0,0.15)]"
+                                                : "hover:shadow-md"
+                                        }
+                                    `}
+                                >
+                                    <div
+                                        className={`
+                                            flex
+                                            items-center
+                                            gap-2
+                                            ${mutedText}
+                                        `}
+                                    >
+                                        <Icon size={17} />
+
+                                        <span className="
+                                            text-[10px]
+                                            font-black
+                                            uppercase
+                                            tracking-wider
+                                        ">
+                                            {item.label}
+                                        </span>
+                                    </div>
+
+                                    {item.content}
+                                </motion.div>
+                            );
+                        })}
+                    </div>
+
+                    {/* =================================================
+                        ACADEMIC INFORMATION
+                    ================================================== */}
+
+                    {(isSchool ||
+                        department ||
+                        semester ||
+                        course) && (
                         <motion.div
-                            whileHover={{
-                                y: -2,
+                            initial={{
+                                opacity: 0,
+                                y: 12,
                             }}
-                            className="
-                                note-details-meta
-                                rounded-2xl
-                                border
-                                border-slate-200
-                                bg-slate-50/70
-                                p-5
-                            "
-                        >
-                            <div className="flex items-center gap-2 text-slate-400">
-                                <CalendarDays size={17} />
-
-                                <span className="
-                                    text-[10px]
-                                    font-black
-                                    uppercase
-                                    tracking-wider
-                                ">
-                                    Uploaded
-                                </span>
-                            </div>
-
-                            <p className="mt-2 font-bold text-slate-700">
-                                {uploadedDate}
-                            </p>
-                        </motion.div>
-
-                        <motion.div
-                            whileHover={{
-                                y: -2,
+                            animate={{
+                                opacity: 1,
+                                y: 0,
                             }}
-                            className="
-                                note-details-meta
-                                rounded-2xl
+                            transition={{
+                                duration: 0.45,
+                                delay: 0.05,
+                            }}
+                            className={`
+                                mt-8
+                                rounded-[28px]
                                 border
-                                border-slate-200
-                                bg-slate-50/70
-                                p-5
-                            "
+                                p-6
+                                shadow-sm
+                                transition-colors
+                                duration-300
+                                sm:p-7
+                                ${
+                                    isDarkMode
+                                        ? "border-blue-500/15 bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 shadow-none"
+                                        : "border-blue-100 bg-gradient-to-br from-blue-50/80 via-white to-cyan-50/50"
+                                }
+                            `}
                         >
-                            <div className="flex items-center gap-2 text-slate-400">
-                                <User size={17} />
 
-                                <span className="
-                                    text-[10px]
-                                    font-black
-                                    uppercase
-                                    tracking-wider
-                                ">
-                                    Uploaded By
-                                </span>
-                            </div>
+                            <div className="
+                                flex
+                                items-start
+                                gap-3
+                            ">
 
-                            <div className="mt-2 flex min-w-0 items-center gap-2">
                                 <div className="
                                     flex
-                                    h-7
-                                    w-7
+                                    h-11
+                                    w-11
                                     shrink-0
                                     items-center
                                     justify-center
-                                    rounded-full
+                                    rounded-2xl
                                     bg-gradient-to-br
-                                    from-slate-800
-                                    to-slate-500
-                                    text-[11px]
-                                    font-black
+                                    from-blue-600
+                                    to-cyan-500
                                     text-white
+                                    shadow-lg
+                                    shadow-blue-500/15
                                 ">
-                                    {uploaderInitial}
+                                    {isSchool ? (
+                                        <School size={20} />
+                                    ) : (
+                                        <GraduationCap size={21} />
+                                    )}
                                 </div>
 
-                                <p className="truncate font-bold text-slate-700">
-                                    {uploader}
-                                </p>
-                            </div>
-                        </motion.div>
+                                <div>
+                                    <p className="
+                                        text-[10px]
+                                        font-black
+                                        uppercase
+                                        tracking-[0.16em]
+                                        text-blue-600
+                                    ">
+                                        Academic Context
+                                    </p>
 
-                        <motion.div
-                            whileHover={{
-                                y: -2,
-                            }}
-                            className="
-                                note-details-meta
-                                rounded-2xl
-                                border
-                                border-slate-200
-                                bg-slate-50/70
-                                p-5
-                            "
-                        >
-                            <div className="flex items-center gap-2 text-slate-400">
-                                <Eye size={17} />
-
-                                <span className="
-                                    text-[10px]
-                                    font-black
-                                    uppercase
-                                    tracking-wider
-                                ">
-                                    Views
-                                </span>
+                                    <h2
+                                        className={`
+                                            mt-1
+                                            text-xl
+                                            font-black
+                                            ${primaryText}
+                                        `}
+                                    >
+                                        Resource Information
+                                    </h2>
+                                </div>
                             </div>
 
-                            <p className="
-                                mt-1
-                                text-3xl
-                                font-black
-                                tracking-tight
-                                text-slate-800
+                            <div className="
+                                mt-6
+                                grid
+                                gap-3
+                                sm:grid-cols-2
+                                lg:grid-cols-4
                             ">
-                                {note.views || 0}
-                            </p>
-                        </motion.div>
 
-                        <motion.div
-                            whileHover={{
-                                y: -2,
-                            }}
-                            className="
-                                note-details-meta
-                                rounded-2xl
-                                border
-                                border-slate-200
-                                bg-slate-50/70
-                                p-5
-                            "
-                        >
-                            <div className="flex items-center gap-2 text-slate-400">
-                                <Download size={17} />
+                                <div
+                                    className={`
+                                        rounded-2xl
+                                        border
+                                        p-4
+                                        shadow-sm
+                                        ${innerCard}
+                                    `}
+                                >
+                                    <p
+                                        className={`
+                                            text-[10px]
+                                            font-black
+                                            uppercase
+                                            tracking-wider
+                                            ${mutedText}
+                                        `}
+                                    >
+                                        Level
+                                    </p>
 
-                                <span className="
-                                    text-[10px]
-                                    font-black
-                                    uppercase
-                                    tracking-wider
-                                ">
-                                    Downloads
-                                </span>
+                                    <p
+                                        className={`
+                                            mt-1.5
+                                            font-black
+                                            ${bodyText}
+                                        `}
+                                    >
+                                        {isSchool
+                                            ? "School / College"
+                                            : "University"}
+                                    </p>
+                                </div>
+
+                                {isSchool ? (
+                                    <>
+                                        {classLevel && (
+                                            <div
+                                                className={`
+                                                    rounded-2xl
+                                                    border
+                                                    p-4
+                                                    shadow-sm
+                                                    ${innerCard}
+                                                `}
+                                            >
+                                                <p
+                                                    className={`
+                                                        text-[10px]
+                                                        font-black
+                                                        uppercase
+                                                        tracking-wider
+                                                        ${mutedText}
+                                                    `}
+                                                >
+                                                    Class
+                                                </p>
+
+                                                <p
+                                                    className={`
+                                                        mt-1.5
+                                                        font-black
+                                                        ${bodyText}
+                                                    `}
+                                                >
+                                                    {classLevel}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {subject && (
+                                            <div
+                                                className={`
+                                                    rounded-2xl
+                                                    border
+                                                    p-4
+                                                    shadow-sm
+                                                    ${innerCard}
+                                                `}
+                                            >
+                                                <p
+                                                    className={`
+                                                        text-[10px]
+                                                        font-black
+                                                        uppercase
+                                                        tracking-wider
+                                                        ${mutedText}
+                                                    `}
+                                                >
+                                                    Subject
+                                                </p>
+
+                                                <p
+                                                    className={`
+                                                        mt-1.5
+                                                        font-black
+                                                        ${bodyText}
+                                                    `}
+                                                >
+                                                    {subject}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {(chapter ||
+                                            board) && (
+                                            <div
+                                                className={`
+                                                    rounded-2xl
+                                                    border
+                                                    p-4
+                                                    shadow-sm
+                                                    ${innerCard}
+                                                `}
+                                            >
+                                                <p
+                                                    className={`
+                                                        text-[10px]
+                                                        font-black
+                                                        uppercase
+                                                        tracking-wider
+                                                        ${mutedText}
+                                                    `}
+                                                >
+                                                    {chapter
+                                                        ? "Chapter / Topic"
+                                                        : "Board"}
+                                                </p>
+
+                                                <p
+                                                    className={`
+                                                        mt-1.5
+                                                        font-black
+                                                        ${bodyText}
+                                                    `}
+                                                >
+                                                    {chapter ||
+                                                        board}
+                                                </p>
+
+                                                {chapter &&
+                                                    board && (
+                                                        <p
+                                                            className={`
+                                                                mt-1
+                                                                text-xs
+                                                                font-semibold
+                                                                ${mutedText}
+                                                            `}
+                                                        >
+                                                            {board}
+                                                        </p>
+                                                    )}
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        {department && (
+                                            <div
+                                                className={`
+                                                    rounded-2xl
+                                                    border
+                                                    p-4
+                                                    shadow-sm
+                                                    ${innerCard}
+                                                `}
+                                            >
+                                                <p
+                                                    className={`
+                                                        text-[10px]
+                                                        font-black
+                                                        uppercase
+                                                        tracking-wider
+                                                        ${mutedText}
+                                                    `}
+                                                >
+                                                    Department
+                                                </p>
+
+                                                <p
+                                                    className={`
+                                                        mt-1.5
+                                                        font-black
+                                                        ${bodyText}
+                                                    `}
+                                                >
+                                                    {department}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {semester && (
+                                            <div
+                                                className={`
+                                                    rounded-2xl
+                                                    border
+                                                    p-4
+                                                    shadow-sm
+                                                    ${innerCard}
+                                                `}
+                                            >
+                                                <p
+                                                    className={`
+                                                        text-[10px]
+                                                        font-black
+                                                        uppercase
+                                                        tracking-wider
+                                                        ${mutedText}
+                                                    `}
+                                                >
+                                                    Semester
+                                                </p>
+
+                                                <p
+                                                    className={`
+                                                        mt-1.5
+                                                        font-black
+                                                        ${bodyText}
+                                                    `}
+                                                >
+                                                    {semester}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {course && (
+                                            <div
+                                                className={`
+                                                    rounded-2xl
+                                                    border
+                                                    p-4
+                                                    shadow-sm
+                                                    ${innerCard}
+                                                `}
+                                            >
+                                                <p
+                                                    className={`
+                                                        text-[10px]
+                                                        font-black
+                                                        uppercase
+                                                        tracking-wider
+                                                        ${mutedText}
+                                                    `}
+                                                >
+                                                    Course / Subject
+                                                </p>
+
+                                                <p
+                                                    className={`
+                                                        mt-1.5
+                                                        font-black
+                                                        ${bodyText}
+                                                    `}
+                                                >
+                                                    {course}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
                             </div>
-
-                            <p className="
-                                mt-1
-                                text-3xl
-                                font-black
-                                tracking-tight
-                                text-slate-800
-                            ">
-                                {note.downloads || 0}
-                            </p>
                         </motion.div>
-                    </div>
+                    )}
 
                     {/* =================================================
                         DESCRIPTION
@@ -732,48 +1448,75 @@ function NoteDetails() {
 
                     <div className="mt-10">
 
-                        <div className="flex items-center gap-3">
-                            <div className="
-                                flex
-                                h-10
-                                w-10
-                                items-center
-                                justify-center
-                                rounded-xl
-                                bg-blue-50
-                                text-blue-600
-                            ">
+                        <div className="
+                            flex
+                            items-center
+                            gap-3
+                        ">
+                            <div
+                                className={`
+                                    flex
+                                    h-10
+                                    w-10
+                                    items-center
+                                    justify-center
+                                    rounded-xl
+                                    ${
+                                        isDarkMode
+                                            ? "bg-blue-500/10 text-blue-400"
+                                            : "bg-blue-50 text-blue-600"
+                                    }
+                                `}
+                            >
                                 <FileText size={19} />
                             </div>
 
                             <div>
-                                <h2 className="text-2xl font-black text-slate-800">
+                                <h2
+                                    className={`
+                                        text-2xl
+                                        font-black
+                                        ${primaryText}
+                                    `}
+                                >
                                     Description
                                 </h2>
 
-                                <p className="mt-1 text-xs text-slate-400">
+                                <p
+                                    className={`
+                                        mt-1
+                                        text-xs
+                                        ${mutedText}
+                                    `}
+                                >
                                     About this study resource
                                 </p>
                             </div>
                         </div>
 
-                        <div className="
-                            note-details-description
-                            mt-5
-                            rounded-[26px]
-                            border
-                            border-slate-200/80
-                            bg-slate-50/70
-                            p-6
-                            sm:p-8
-                        ">
-                            <p className="
-                                whitespace-pre-line
-                                text-base
-                                leading-8
-                                text-slate-700
-                                sm:text-lg
-                            ">
+                        <div
+                            className={`
+                                note-details-description
+                                mt-5
+                                rounded-[26px]
+                                border
+                                p-6
+                                shadow-sm
+                                transition-colors
+                                duration-300
+                                sm:p-8
+                                ${subtleCard}
+                            `}
+                        >
+                            <p
+                                className={`
+                                    whitespace-pre-line
+                                    text-base
+                                    leading-8
+                                    sm:text-lg
+                                    ${bodyText}
+                                `}
+                            >
                                 {note.description ||
                                     "No description provided."}
                             </p>
@@ -803,9 +1546,29 @@ function NoteDetails() {
                             sm:p-8
                         "
                     >
-                        <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+                        <div className="
+                            pointer-events-none
+                            absolute
+                            -right-12
+                            -top-12
+                            h-40
+                            w-40
+                            rounded-full
+                            bg-white/10
+                            blur-2xl
+                        " />
 
-                        <div className="pointer-events-none absolute -bottom-16 -left-10 h-40 w-40 rounded-full bg-cyan-300/10 blur-2xl" />
+                        <div className="
+                            pointer-events-none
+                            absolute
+                            -bottom-16
+                            -left-10
+                            h-40
+                            w-40
+                            rounded-full
+                            bg-cyan-300/10
+                            blur-2xl
+                        " />
 
                         <div className="
                             relative
@@ -873,7 +1636,8 @@ function NoteDetails() {
                                     font-black
                                     text-blue-700
                                     shadow-xl
-                                    transition
+                                    transition-all
+                                    duration-300
                                     hover:-translate-y-1
                                     hover:bg-blue-50
                                     hover:shadow-2xl
@@ -912,44 +1676,73 @@ function NoteDetails() {
                             viewport={{
                                 once: true,
                             }}
-                            className="
+                            className={`
                                 note-details-owner
                                 mt-10
                                 rounded-[28px]
                                 border
-                                border-amber-100
-                                bg-gradient-to-br
-                                from-amber-50
-                                to-red-50/50
                                 p-6
-                            "
+                                transition-colors
+                                duration-300
+                                ${
+                                    isDarkMode
+                                        ? "border-amber-500/15 bg-gradient-to-br from-amber-500/10 to-red-500/5"
+                                        : "border-amber-100 bg-gradient-to-br from-amber-50 to-red-50/50"
+                                }
+                            `}
                         >
-                            <div className="flex items-center gap-3">
-                                <div className="
-                                    flex
-                                    h-10
-                                    w-10
-                                    items-center
-                                    justify-center
-                                    rounded-xl
-                                    bg-amber-100
-                                    text-amber-600
-                                ">
+                            <div className="
+                                flex
+                                items-center
+                                gap-3
+                            ">
+                                <div
+                                    className={`
+                                        flex
+                                        h-10
+                                        w-10
+                                        items-center
+                                        justify-center
+                                        rounded-xl
+                                        ${
+                                            isDarkMode
+                                                ? "bg-amber-500/10 text-amber-400"
+                                                : "bg-amber-100 text-amber-600"
+                                        }
+                                    `}
+                                >
                                     <Pencil size={18} />
                                 </div>
 
                                 <div>
-                                    <h3 className="font-black text-slate-800">
+                                    <h3
+                                        className={`
+                                            font-black
+                                            ${primaryText}
+                                        `}
+                                    >
                                         Manage Your Note
                                     </h3>
 
-                                    <p className="mt-1 text-xs text-slate-400">
+                                    <p
+                                        className={`
+                                            mt-1
+                                            text-xs
+                                            ${mutedText}
+                                        `}
+                                    >
                                         Edit or remove your uploaded resource.
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                            <div className="
+                                mt-5
+                                grid
+                                gap-3
+                                sm:grid-cols-2
+                            ">
+
                                 <button
                                     onClick={() =>
                                         navigate(
@@ -967,7 +1760,10 @@ function NoteDetails() {
                                         py-3.5
                                         font-bold
                                         text-white
-                                        transition
+                                        shadow-sm
+                                        transition-all
+                                        duration-300
+                                        hover:-translate-y-0.5
                                         hover:bg-amber-600
                                         hover:shadow-lg
                                         hover:shadow-amber-500/15
@@ -993,7 +1789,10 @@ function NoteDetails() {
                                         py-3.5
                                         font-bold
                                         text-white
-                                        transition
+                                        shadow-sm
+                                        transition-all
+                                        duration-300
+                                        hover:-translate-y-0.5
                                         hover:bg-red-700
                                         hover:shadow-lg
                                         hover:shadow-red-500/15
@@ -1016,6 +1815,7 @@ function NoteDetails() {
                                         </>
                                     )}
                                 </button>
+
                             </div>
                         </motion.div>
                     )}
@@ -1024,19 +1824,27 @@ function NoteDetails() {
                         BOTTOM NAV
                     ================================================== */}
 
-                    <div className="
-                        note-details-footer
-                        mt-10
-                        flex
-                        flex-col
-                        items-center
-                        justify-between
-                        gap-4
-                        border-t
-                        border-slate-100
-                        pt-7
-                        sm:flex-row
-                    ">
+                    <div
+                        className={`
+                            note-details-footer
+                            mt-10
+                            flex
+                            flex-col
+                            items-center
+                            justify-between
+                            gap-4
+                            border-t
+                            pt-7
+                            transition-colors
+                            duration-300
+                            sm:flex-row
+                            ${
+                                isDarkMode
+                                    ? "border-slate-800"
+                                    : "border-slate-100"
+                            }
+                        `}
+                    >
                         <button
                             onClick={() =>
                                 navigate("/notes")
@@ -1062,23 +1870,30 @@ function NoteDetails() {
                                     behavior: "smooth",
                                 })
                             }
-                            className="
+                            className={`
                                 inline-flex
                                 items-center
                                 gap-2
                                 font-semibold
-                                text-slate-400
                                 transition
-                                hover:text-slate-700
-                            "
+                                ${
+                                    isDarkMode
+                                        ? "text-slate-500 hover:text-slate-200"
+                                        : "text-slate-400 hover:text-slate-700"
+                                }
+                            `}
                         >
                             Back to Top
                             <ArrowUpRight size={15} />
                         </button>
                     </div>
+
                 </div>
             </motion.article>
 
+            {/* =====================================================
+                DELETE CONFIRMATION
+            ====================================================== */}
 
             <AnimatePresence>
                 {showDeleteConfirm && (
@@ -1125,135 +1940,135 @@ function NoteDetails() {
                             onClick={(event) =>
                                 event.stopPropagation()
                             }
-                            className="
+                            className={`
                                 relative
                                 w-full
                                 max-w-md
                                 overflow-hidden
                                 rounded-[30px]
                                 border
-                                border-slate-200/80
-                                bg-white
                                 shadow-[0_30px_100px_rgba(15,23,42,0.24)]
-                                dark:border-slate-700
-                                dark:bg-slate-900
-                            "
+                                transition-colors
+                                duration-300
+                                ${
+                                    isDarkMode
+                                        ? "border-slate-700 bg-slate-900"
+                                        : "border-slate-200/80 bg-white"
+                                }
+                            `}
                         >
-                            <div
-                                className="
-                                    pointer-events-none
-                                    absolute
-                                    -right-20
-                                    -top-20
-                                    h-44
-                                    w-44
-                                    rounded-full
-                                    bg-red-500/10
-                                    blur-3xl
-                                "
-                            />
+                            <div className="
+                                pointer-events-none
+                                absolute
+                                -right-20
+                                -top-20
+                                h-44
+                                w-44
+                                rounded-full
+                                bg-red-500/10
+                                blur-3xl
+                            " />
 
-                            <div className="relative p-7 sm:p-8">
+                            <div className="
+                                relative
+                                p-7
+                                sm:p-8
+                            ">
 
-                                <div
-                                    className="
-                                        flex
-                                        h-14
-                                        w-14
-                                        items-center
-                                        justify-center
-                                        rounded-2xl
-                                        bg-gradient-to-br
-                                        from-red-500
-                                        to-rose-600
-                                        text-white
-                                        shadow-lg
-                                        shadow-red-500/20
-                                    "
-                                >
+                                <div className="
+                                    flex
+                                    h-14
+                                    w-14
+                                    items-center
+                                    justify-center
+                                    rounded-2xl
+                                    bg-gradient-to-br
+                                    from-red-500
+                                    to-rose-600
+                                    text-white
+                                    shadow-lg
+                                    shadow-red-500/20
+                                ">
                                     <Trash2 size={23} />
                                 </div>
 
-                                <p
-                                    className="
-                                        mt-6
-                                        text-[10px]
-                                        font-black
-                                        uppercase
-                                        tracking-[0.18em]
-                                        text-red-500
-                                        dark:text-red-400
-                                    "
-                                >
+                                <p className="
+                                    mt-6
+                                    text-[10px]
+                                    font-black
+                                    uppercase
+                                    tracking-[0.18em]
+                                    text-red-500
+                                ">
                                     Permanent action
                                 </p>
 
                                 <h3
-                                    className="
+                                    className={`
                                         mt-2
                                         text-2xl
                                         font-black
                                         tracking-tight
-                                        text-slate-900
-                                        dark:text-white
-                                    "
+                                        ${primaryText}
+                                    `}
                                 >
                                     Delete this note?
                                 </h3>
 
                                 <p
-                                    className="
+                                    className={`
                                         mt-3
                                         text-sm
                                         leading-6
-                                        text-slate-500
-                                        dark:text-slate-400
-                                    "
+                                        ${mutedText}
+                                    `}
                                 >
                                     You are about to permanently remove
                                     this study resource from NoteShare.
                                 </p>
 
                                 <div
-                                    className="
+                                    className={`
                                         mt-5
                                         rounded-2xl
                                         border
-                                        border-red-100
-                                        bg-red-50/70
                                         p-4
-                                        dark:border-red-500/15
-                                        dark:bg-red-500/5
-                                    "
+                                        ${
+                                            isDarkMode
+                                                ? "border-red-500/15 bg-red-500/5"
+                                                : "border-red-100 bg-red-50/70"
+                                        }
+                                    `}
                                 >
-                                    <p
-                                        className="
-                                            text-[10px]
-                                            font-black
-                                            uppercase
-                                            tracking-[0.14em]
-                                            text-red-500
-                                            dark:text-red-400
-                                        "
-                                    >
+                                    <p className="
+                                        text-[10px]
+                                        font-black
+                                        uppercase
+                                        tracking-[0.14em]
+                                        text-red-500
+                                    ">
                                         Note
                                     </p>
 
                                     <p
-                                        className="
+                                        className={`
                                             mt-1
                                             truncate
                                             text-sm
                                             font-bold
-                                            text-slate-700
-                                            dark:text-slate-200
-                                        "
+                                            ${bodyText}
+                                        `}
                                     >
                                         {note.title}
                                     </p>
                                 </div>
 
-                                <div className="mt-7 grid grid-cols-2 gap-3">
+                                <div className="
+                                    mt-7
+                                    grid
+                                    grid-cols-2
+                                    gap-3
+                                ">
 
                                     <button
                                         type="button"
@@ -1261,24 +2076,23 @@ function NoteDetails() {
                                         onClick={() =>
                                             setShowDeleteConfirm(false)
                                         }
-                                        className="
+                                        className={`
                                             rounded-2xl
                                             border
-                                            border-slate-200
-                                            bg-white
                                             px-4
                                             py-3.5
                                             text-sm
                                             font-bold
-                                            text-slate-600
-                                            transition
+                                            transition-all
+                                            duration-300
                                             hover:-translate-y-0.5
-                                            hover:bg-slate-50
-                                            dark:border-slate-700
-                                            dark:bg-slate-800
-                                            dark:text-slate-300
-                                            dark:hover:bg-slate-700
-                                        "
+                                            hover:shadow-sm
+                                            ${
+                                                isDarkMode
+                                                    ? "border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700"
+                                                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                                            }
+                                        `}
                                     >
                                         Keep Note
                                     </button>
@@ -1286,7 +2100,9 @@ function NoteDetails() {
                                     <button
                                         type="button"
                                         disabled={deleting}
-                                        onClick={confirmDeleteNote}
+                                        onClick={
+                                            confirmDeleteNote
+                                        }
                                         className="
                                             inline-flex
                                             items-center
@@ -1303,7 +2119,8 @@ function NoteDetails() {
                                             text-white
                                             shadow-lg
                                             shadow-red-500/20
-                                            transition
+                                            transition-all
+                                            duration-300
                                             hover:-translate-y-0.5
                                             hover:shadow-xl
                                             disabled:cursor-not-allowed
@@ -1329,13 +2146,13 @@ function NoteDetails() {
                                 </div>
 
                                 <p
-                                    className="
+                                    className={`
                                         mt-4
                                         text-center
                                         text-[10px]
                                         font-semibold
-                                        text-slate-400
-                                    "
+                                        ${mutedText}
+                                    `}
                                 >
                                     This action cannot be undone.
                                 </p>
@@ -1345,6 +2162,7 @@ function NoteDetails() {
                     </motion.div>
                 )}
             </AnimatePresence>
+
         </section>
     );
 }

@@ -14,6 +14,8 @@ import {
     ArrowUpRight,
     Filter,
     FileText,
+    GraduationCap,
+    School,
 } from "lucide-react";
 
 import {
@@ -35,7 +37,16 @@ function Notes() {
         searchParams.get("search") || ""
     );
 
+    const [educationLevel, setEducationLevel] =
+        useState("All");
+
     const [department, setDepartment] =
+        useState("All");
+
+    const [classLevel, setClassLevel] =
+        useState("All");
+
+    const [board, setBoard] =
         useState("All");
 
     const [page, setPage] = useState(1);
@@ -46,10 +57,37 @@ function Notes() {
         "All",
         "CSE",
         "EEE",
-        "CE",
+        "Civil",
+        "Architecture",
+        "Textile",
         "BBA",
         "English",
         "Law",
+    ];
+
+    const classOptions = [
+        "All",
+        "Class 1",
+        "Class 2",
+        "Class 3",
+        "Class 4",
+        "Class 5",
+        "Class 6",
+        "Class 7",
+        "Class 8",
+        "Class 9",
+        "Class 10",
+        "Class 11",
+        "Class 12",
+    ];
+
+    const boardOptions = [
+        "All",
+        "NCTB",
+        "English Version",
+        "Cambridge",
+        "Edexcel",
+        "Madrasa",
     ];
 
     /* =========================================================
@@ -66,11 +104,19 @@ function Notes() {
                 const searchQuery =
                     searchParams.get("search") || "";
 
-                /* =================================================
-                   NORMAL MODE
-                ================================================= */
+                /*
+                 * Load all pages when searching or filtering,
+                 * so filters can work across the complete
+                 * available note collection.
+                 */
+                const hasFilters =
+                    searchQuery.trim() ||
+                    educationLevel !== "All" ||
+                    department !== "All" ||
+                    classLevel !== "All" ||
+                    board !== "All";
 
-                if (!searchQuery.trim()) {
+                if (!hasFilters) {
                     const response =
                         await API.get(
                             `notes/?page=${page}`
@@ -84,7 +130,9 @@ function Notes() {
                         response?.data || {};
 
                     const receivedNotes =
-                        Array.isArray(data.notes)
+                        Array.isArray(
+                            data.notes
+                        )
                             ? data.notes
                             : [];
 
@@ -100,12 +148,6 @@ function Notes() {
 
                     return;
                 }
-
-                /* =================================================
-                   SEARCH MODE
-                   Load all pages so search can find
-                   every available note.
-                ================================================= */
 
                 const firstResponse =
                     await API.get(
@@ -169,11 +211,10 @@ function Notes() {
                                     data.notes
                                 )
                             ) {
-                                allNotes =
-                                    [
-                                        ...allNotes,
-                                        ...data.notes,
-                                    ];
+                                allNotes = [
+                                    ...allNotes,
+                                    ...data.notes,
+                                ];
                             }
                         }
                     );
@@ -186,9 +227,9 @@ function Notes() {
                 setNotes(allNotes);
 
                 /*
-                 * Search results are shown together,
-                 * therefore pagination is disabled
-                 * during search.
+                 * Search/filter results are shown together,
+                 * therefore pagination is disabled while
+                 * any active search/filter is being used.
                  */
                 setTotalPages(1);
             } catch (error) {
@@ -213,7 +254,14 @@ function Notes() {
         return () => {
             mounted = false;
         };
-    }, [page, searchParams]);
+    }, [
+        page,
+        searchParams,
+        educationLevel,
+        department,
+        classLevel,
+        board,
+    ]);
 
     /* =========================================================
        SYNC SEARCH WITH URL
@@ -259,21 +307,75 @@ function Notes() {
                     ""
                 ).toLowerCase();
 
+            const subject =
+                (
+                    note?.subject || ""
+                ).toLowerCase();
+
+            const chapter =
+                (
+                    note?.chapter || ""
+                ).toLowerCase();
+
+            const course =
+                (
+                    note?.course || ""
+                ).toLowerCase();
+
             const searchMatch =
                 !keyword ||
                 title.includes(keyword) ||
                 description.includes(keyword) ||
                 dept.includes(keyword) ||
-                uploader.includes(keyword);
+                uploader.includes(keyword) ||
+                subject.includes(keyword) ||
+                chapter.includes(keyword) ||
+                course.includes(keyword);
+
+            const noteEducationLevel =
+                (
+                    note?.education_level ||
+                    "university"
+                ).toLowerCase();
+
+            const educationMatch =
+                educationLevel ===
+                    "All" ||
+                (educationLevel ===
+                    "University" &&
+                    noteEducationLevel ===
+                        "university") ||
+                (educationLevel ===
+                    "School & College" &&
+                    noteEducationLevel ===
+                        "school");
 
             const departmentMatch =
+                educationLevel !==
+                    "University" ||
                 department === "All" ||
                 note?.department ===
                     department;
 
+            const classMatch =
+                educationLevel !==
+                    "School & College" ||
+                classLevel === "All" ||
+                note?.class_level ===
+                    classLevel;
+
+            const boardMatch =
+                educationLevel !==
+                    "School & College" ||
+                board === "All" ||
+                note?.board === board;
+
             return (
                 searchMatch &&
-                departmentMatch
+                educationMatch &&
+                departmentMatch &&
+                classMatch &&
+                boardMatch
             );
         });
 
@@ -283,9 +385,41 @@ function Notes() {
 
     const clearFilters = () => {
         setSearch("");
+        setEducationLevel("All");
         setDepartment("All");
+        setClassLevel("All");
+        setBoard("All");
         setPage(1);
         setSearchParams({});
+    };
+
+    /* =========================================================
+       EDUCATION LEVEL CHANGE
+    ========================================================= */
+
+    const handleEducationLevelChange = (
+        value
+    ) => {
+        setEducationLevel(value);
+        setPage(1);
+
+        if (value === "University") {
+            setClassLevel("All");
+            setBoard("All");
+        }
+
+        if (
+            value ===
+            "School & College"
+        ) {
+            setDepartment("All");
+        }
+
+        if (value === "All") {
+            setDepartment("All");
+            setClassLevel("All");
+            setBoard("All");
+        }
     };
 
     /* =========================================================
@@ -320,6 +454,13 @@ function Notes() {
         });
     };
 
+    const hasActiveFilters =
+        Boolean(search) ||
+        educationLevel !== "All" ||
+        department !== "All" ||
+        classLevel !== "All" ||
+        board !== "All";
+
     /* =========================================================
        RENDER
     ========================================================= */
@@ -336,7 +477,6 @@ function Notes() {
 
             {/* =====================================================
                 HERO
-                Same visual structure as Blogs
             ====================================================== */}
 
             <motion.div
@@ -370,7 +510,6 @@ function Notes() {
                     lg:p-12
                 "
             >
-                {/* Ambient glows */}
 
                 <div className="
                     pointer-events-none
@@ -417,10 +556,6 @@ function Notes() {
                     lg:items-end
                     lg:justify-between
                 ">
-
-                    {/* =================================================
-                        LEFT
-                    ================================================== */}
 
                     <div className="max-w-3xl">
 
@@ -537,12 +672,11 @@ function Notes() {
 
                                 Academic Resources
                             </div>
+
                         </div>
                     </div>
 
-                    {/* =================================================
-                        UPLOAD BUTTON
-                    ================================================== */}
+                    {/* Upload button */}
 
                     <motion.div
                         whileHover={{
@@ -625,6 +759,7 @@ function Notes() {
                     sm:p-5
                 "
             >
+
                 <div className="
                     mb-4
                     flex
@@ -632,11 +767,13 @@ function Notes() {
                     justify-between
                     gap-3
                 ">
+
                     <div className="
                         flex
                         items-center
                         gap-2.5
                     ">
+
                         <div className="
                             flex
                             h-9
@@ -653,6 +790,7 @@ function Notes() {
                         </div>
 
                         <div>
+
                             <p className="
                                 text-sm
                                 font-extrabold
@@ -668,14 +806,13 @@ function Notes() {
                                 sm:block
                             ">
                                 Search by title, subject,
-                                department or uploader
+                                chapter, course or uploader
                             </p>
+
                         </div>
                     </div>
 
-                    {(search ||
-                        department !==
-                            "All") && (
+                    {hasActiveFilters && (
                         <button
                             onClick={
                                 clearFilters
@@ -694,104 +831,112 @@ function Notes() {
                             Clear all
                         </button>
                     )}
+
                 </div>
 
+                {/* Search */}
+
                 <div className="
-                    grid
-                    gap-3
-                    lg:grid-cols-[1fr_220px]
+                    relative
                 ">
 
-                    {/* Search */}
+                    <Search
+                        size={19}
+                        className="
+                            pointer-events-none
+                            absolute
+                            left-4
+                            top-1/2
+                            -translate-y-1/2
+                            text-slate-400
+                        "
+                    />
 
-                    <div className="
-                        relative
-                    ">
-                        <Search
-                            size={19}
-                            className="
-                                pointer-events-none
-                                absolute
-                                left-4
-                                top-1/2
-                                -translate-y-1/2
-                                text-slate-400
-                            "
-                        />
-
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(
+                    <input
+                        type="text"
+                        value={search}
+                        onChange={(
+                            event
+                        ) => {
+                            setSearch(
                                 event
-                            ) => {
-                                setSearch(
-                                    event
-                                        .target
-                                        .value
-                                );
+                                    .target
+                                    .value
+                            );
 
+                            setPage(1);
+                        }}
+                        placeholder="Search notes, subjects, chapters, courses..."
+                        className="
+                            h-13
+                            w-full
+                            rounded-xl
+                            border
+                            border-slate-200
+                            bg-slate-50/80
+                            pl-11
+                            pr-11
+                            text-sm
+                            font-medium
+                            text-slate-700
+                            outline-none
+                            transition-all
+                            duration-200
+                            placeholder:text-slate-400
+                            focus:border-blue-400
+                            focus:bg-white
+                            focus:ring-4
+                            focus:ring-blue-100/60
+                        "
+                    />
+
+                    {search && (
+                        <button
+                            onClick={() => {
+                                setSearch("");
                                 setPage(1);
                             }}
-                            placeholder="Search notes..."
                             className="
-                                h-13
-                                w-full
-                                rounded-xl
-                                border
-                                border-slate-200
-                                bg-slate-50/80
-                                pl-11
-                                pr-11
-                                text-sm
-                                font-medium
-                                text-slate-700
-                                outline-none
-                                transition-all
-                                duration-200
-                                placeholder:text-slate-400
-                                focus:border-blue-400
-                                focus:bg-white
-                                focus:ring-4
-                                focus:ring-blue-100/60
+                                absolute
+                                right-3
+                                top-1/2
+                                flex
+                                h-8
+                                w-8
+                                -translate-y-1/2
+                                items-center
+                                justify-center
+                                rounded-lg
+                                bg-slate-200
+                                text-slate-500
+                                transition
+                                hover:bg-slate-300
                             "
-                        />
+                            title="Clear search"
+                        >
+                            <X size={15} />
+                        </button>
+                    )}
+                </div>
 
-                        {search && (
-                            <button
-                                onClick={() => {
-                                    setSearch("");
-                                    setPage(1);
-                                }}
-                                className="
-                                    absolute
-                                    right-3
-                                    top-1/2
-                                    flex
-                                    h-8
-                                    w-8
-                                    -translate-y-1/2
-                                    items-center
-                                    justify-center
-                                    rounded-lg
-                                    bg-slate-200
-                                    text-slate-500
-                                    transition
-                                    hover:bg-slate-300
-                                "
-                                title="Clear search"
-                            >
-                                <X size={15} />
-                            </button>
-                        )}
-                    </div>
+                {/* =================================================
+                    EDUCATION FILTER
+                ================================================== */}
 
-                    {/* Department */}
+                <div className="
+                    mt-4
+                    grid
+                    gap-3
+                    md:grid-cols-2
+                ">
+
+                    {/* Education Level */}
 
                     <div className="
                         relative
                     ">
-                        <SlidersHorizontal
+
+                        <GraduationCap
                             size={17}
                             className="
                                 pointer-events-none
@@ -805,19 +950,17 @@ function Notes() {
 
                         <select
                             value={
-                                department
+                                educationLevel
                             }
                             onChange={(
                                 event
-                            ) => {
-                                setDepartment(
+                            ) =>
+                                handleEducationLevelChange(
                                     event
                                         .target
                                         .value
-                                );
-
-                                setPage(1);
-                            }}
+                                )
+                            }
                             className="
                                 h-13
                                 w-full
@@ -840,28 +983,326 @@ function Notes() {
                                 focus:ring-blue-100/60
                             "
                         >
-                            {departmentOptions.map(
-                                (item) => (
-                                    <option
-                                        key={item}
-                                        value={item}
-                                    >
-                                        {item ===
-                                        "All"
-                                            ? "All Departments"
-                                            : item}
-                                    </option>
-                                )
-                            )}
+                            <option value="All">
+                                All Education Levels
+                            </option>
+
+                            <option value="School & College">
+                                School & College
+                            </option>
+
+                            <option value="University">
+                                University
+                            </option>
                         </select>
+
                     </div>
+
+                    {/* Contextual Filter */}
+
+                    {educationLevel ===
+                        "University" ? (
+
+                        <div className="
+                            relative
+                        ">
+
+                            <SlidersHorizontal
+                                size={17}
+                                className="
+                                    pointer-events-none
+                                    absolute
+                                    left-4
+                                    top-1/2
+                                    -translate-y-1/2
+                                    text-slate-400
+                                "
+                            />
+
+                            <select
+                                value={
+                                    department
+                                }
+                                onChange={(
+                                    event
+                                ) => {
+                                    setDepartment(
+                                        event
+                                            .target
+                                            .value
+                                    );
+
+                                    setPage(1);
+                                }}
+                                className="
+                                    h-13
+                                    w-full
+                                    appearance-none
+                                    rounded-xl
+                                    border
+                                    border-slate-200
+                                    bg-slate-50/80
+                                    pl-10
+                                    pr-4
+                                    text-sm
+                                    font-semibold
+                                    text-slate-700
+                                    outline-none
+                                    transition-all
+                                    duration-200
+                                    focus:border-blue-400
+                                    focus:bg-white
+                                    focus:ring-4
+                                    focus:ring-blue-100/60
+                                "
+                            >
+                                {departmentOptions.map(
+                                    (item) => (
+                                        <option
+                                            key={
+                                                item
+                                            }
+                                            value={
+                                                item
+                                            }
+                                        >
+                                            {item ===
+                                            "All"
+                                                ? "All Departments"
+                                                : item}
+                                        </option>
+                                    )
+                                )}
+                            </select>
+
+                        </div>
+
+                    ) : educationLevel ===
+                      "School & College" ? (
+
+                        <div className="
+                            relative
+                        ">
+
+                            <School
+                                size={17}
+                                className="
+                                    pointer-events-none
+                                    absolute
+                                    left-4
+                                    top-1/2
+                                    -translate-y-1/2
+                                    text-slate-400
+                                "
+                            />
+
+                            <select
+                                value={
+                                    classLevel
+                                }
+                                onChange={(
+                                    event
+                                ) => {
+                                    setClassLevel(
+                                        event
+                                            .target
+                                            .value
+                                    );
+
+                                    setPage(1);
+                                }}
+                                className="
+                                    h-13
+                                    w-full
+                                    appearance-none
+                                    rounded-xl
+                                    border
+                                    border-slate-200
+                                    bg-slate-50/80
+                                    pl-10
+                                    pr-4
+                                    text-sm
+                                    font-semibold
+                                    text-slate-700
+                                    outline-none
+                                    transition-all
+                                    duration-200
+                                    focus:border-cyan-400
+                                    focus:bg-white
+                                    focus:ring-4
+                                    focus:ring-cyan-100/60
+                                "
+                            >
+                                {classOptions.map(
+                                    (item) => (
+                                        <option
+                                            key={
+                                                item
+                                            }
+                                            value={
+                                                item
+                                            }
+                                        >
+                                            {item ===
+                                            "All"
+                                                ? "All Classes"
+                                                : item}
+                                        </option>
+                                    )
+                                )}
+                            </select>
+
+                        </div>
+
+                    ) : (
+
+                        <div className="
+                            flex
+                            h-13
+                            items-center
+                            gap-3
+                            rounded-xl
+                            border
+                            border-slate-200
+                            bg-slate-50/70
+                            px-4
+                            text-sm
+                            font-semibold
+                            text-slate-500
+                        ">
+
+                            <Layers3
+                                size={17}
+                                className="text-blue-500"
+                            />
+
+                            <span>
+                                Choose an education level to refine results
+                            </span>
+
+                        </div>
+
+                    )}
+
                 </div>
+
+                {/* =================================================
+                    SCHOOL BOARD FILTER
+                ================================================== */}
+
+                {educationLevel ===
+                    "School & College" && (
+                    <div className="
+                        mt-3
+                        grid
+                        gap-3
+                        md:grid-cols-2
+                    ">
+
+                        <div className="
+                            relative
+                        ">
+
+                            <Layers3
+                                size={17}
+                                className="
+                                    pointer-events-none
+                                    absolute
+                                    left-4
+                                    top-1/2
+                                    -translate-y-1/2
+                                    text-slate-400
+                                "
+                            />
+
+                            <select
+                                value={
+                                    board
+                                }
+                                onChange={(
+                                    event
+                                ) => {
+                                    setBoard(
+                                        event
+                                            .target
+                                            .value
+                                    );
+
+                                    setPage(1);
+                                }}
+                                className="
+                                    h-13
+                                    w-full
+                                    appearance-none
+                                    rounded-xl
+                                    border
+                                    border-slate-200
+                                    bg-slate-50/80
+                                    pl-10
+                                    pr-4
+                                    text-sm
+                                    font-semibold
+                                    text-slate-700
+                                    outline-none
+                                    transition-all
+                                    duration-200
+                                    focus:border-cyan-400
+                                    focus:bg-white
+                                    focus:ring-4
+                                    focus:ring-cyan-100/60
+                                "
+                            >
+                                {boardOptions.map(
+                                    (item) => (
+                                        <option
+                                            key={
+                                                item
+                                            }
+                                            value={
+                                                item
+                                            }
+                                        >
+                                            {item ===
+                                            "All"
+                                                ? "All Boards / Curriculums"
+                                                : item}
+                                        </option>
+                                    )
+                                )}
+                            </select>
+
+                        </div>
+
+                        <div className="
+                            flex
+                            h-13
+                            items-center
+                            gap-3
+                            rounded-xl
+                            border
+                            border-cyan-100
+                            bg-cyan-50/60
+                            px-4
+                            text-xs
+                            font-semibold
+                            text-cyan-700
+                        ">
+
+                            <BookOpen
+                                size={17}
+                            />
+
+                            Search by subject or chapter
+                            to discover specific study materials.
+
+                        </div>
+
+                    </div>
+                )}
 
                 {/* Active filters */}
 
-                {(search ||
-                    department !==
-                        "All") && (
+                {hasActiveFilters && (
                     <div
                         className="
                             mt-4
@@ -874,6 +1315,7 @@ function Notes() {
                             pt-4
                         "
                     >
+
                         <span className="
                             mr-1
                             text-[10px]
@@ -914,40 +1356,145 @@ function Notes() {
                                     {search}
                                 </span>
 
-                                <X size={12} />
+                                <X
+                                    size={12}
+                                />
                             </button>
                         )}
 
-                        {department !==
+                        {educationLevel !==
                             "All" && (
                             <button
-                                onClick={() =>
-                                    setDepartment(
+                                onClick={() => {
+                                    handleEducationLevelChange(
                                         "All"
-                                    )
-                                }
+                                    );
+                                }}
                                 className="
                                     inline-flex
                                     items-center
                                     gap-2
                                     rounded-full
                                     border
-                                    border-violet-100
-                                    bg-violet-50
+                                    border-blue-100
+                                    bg-blue-50
                                     px-3
                                     py-1.5
                                     text-xs
                                     font-bold
-                                    text-violet-700
+                                    text-blue-700
                                 "
                             >
-                                {department}
+                                {educationLevel}
 
-                                <X size={12} />
+                                <X
+                                    size={12}
+                                />
                             </button>
                         )}
+
+                        {educationLevel ===
+                            "University" &&
+                            department !==
+                                "All" && (
+                                <button
+                                    onClick={() =>
+                                        setDepartment(
+                                            "All"
+                                        )
+                                    }
+                                    className="
+                                        inline-flex
+                                        items-center
+                                        gap-2
+                                        rounded-full
+                                        border
+                                        border-violet-100
+                                        bg-violet-50
+                                        px-3
+                                        py-1.5
+                                        text-xs
+                                        font-bold
+                                        text-violet-700
+                                    "
+                                >
+                                    {department}
+
+                                    <X
+                                        size={12}
+                                    />
+                                </button>
+                            )}
+
+                        {educationLevel ===
+                            "School & College" &&
+                            classLevel !==
+                                "All" && (
+                                <button
+                                    onClick={() =>
+                                        setClassLevel(
+                                            "All"
+                                        )
+                                    }
+                                    className="
+                                        inline-flex
+                                        items-center
+                                        gap-2
+                                        rounded-full
+                                        border
+                                        border-cyan-100
+                                        bg-cyan-50
+                                        px-3
+                                        py-1.5
+                                        text-xs
+                                        font-bold
+                                        text-cyan-700
+                                    "
+                                >
+                                    {classLevel}
+
+                                    <X
+                                        size={12}
+                                    />
+                                </button>
+                            )}
+
+                        {educationLevel ===
+                            "School & College" &&
+                            board !==
+                                "All" && (
+                                <button
+                                    onClick={() =>
+                                        setBoard(
+                                            "All"
+                                        )
+                                    }
+                                    className="
+                                        inline-flex
+                                        items-center
+                                        gap-2
+                                        rounded-full
+                                        border
+                                        border-emerald-100
+                                        bg-emerald-50
+                                        px-3
+                                        py-1.5
+                                        text-xs
+                                        font-bold
+                                        text-emerald-700
+                                    "
+                                >
+                                    {board}
+
+                                    <X
+                                        size={12}
+                                    />
+                                </button>
+                            )}
+
                     </div>
                 )}
+
             </motion.div>
 
             {/* =====================================================
@@ -977,7 +1524,9 @@ function Notes() {
                     sm:justify-between
                 "
             >
+
                 <div>
+
                     <div className="
                         inline-flex
                         items-center
@@ -1019,6 +1568,7 @@ function Notes() {
                         Find the material you need and
                         get back to learning faster.
                     </p>
+
                 </div>
 
                 <div className="
@@ -1038,6 +1588,7 @@ function Notes() {
                     text-slate-600
                     shadow-sm
                 ">
+
                     <Filter
                         size={16}
                         className="text-blue-600"
@@ -1046,7 +1597,9 @@ function Notes() {
                     {filteredNotes.length}
                     {" "}
                     matching notes
+
                 </div>
+
             </motion.div>
 
             {/* =====================================================
@@ -1054,12 +1607,14 @@ function Notes() {
             ====================================================== */}
 
             {loading ? (
+
                 <div className="
                     mt-8
                     grid
                     gap-6
                     md:grid-cols-2
                 ">
+
                     {[1, 2, 3, 4].map(
                         (item) => (
                             <div
@@ -1075,9 +1630,12 @@ function Notes() {
                             />
                         )
                     )}
+
                 </div>
+
             ) : filteredNotes.length ===
               0 ? (
+
                 <motion.div
                     initial={{
                         opacity: 0,
@@ -1104,6 +1662,7 @@ function Notes() {
                         shadow-sm
                     "
                 >
+
                     <div className="
                         mx-auto
                         flex
@@ -1140,14 +1699,16 @@ function Notes() {
                         leading-6
                         text-slate-500
                     ">
-                        Try a different keyword or
-                        select another department to
-                        discover more study materials.
+                        {educationLevel ===
+                            "School & College"
+                            ? "Try another class, board or search term to discover school and college resources."
+                            : educationLevel ===
+                              "University"
+                            ? "Try another department or search term to discover university resources."
+                            : "Try a different keyword or education level to discover more study materials."}
                     </p>
 
-                    {(search ||
-                        department !==
-                            "All") && (
+                    {hasActiveFilters && (
                         <motion.button
                             whileHover={{
                                 y: -2,
@@ -1176,14 +1737,18 @@ function Notes() {
                             Clear filters
                         </motion.button>
                     )}
+
                 </motion.div>
+
             ) : (
+
                 <div className="
                     mt-8
                     grid
                     gap-6
                     md:grid-cols-2
                 ">
+
                     {filteredNotes.map(
                         (
                             note,
@@ -1217,6 +1782,7 @@ function Notes() {
                             </motion.div>
                         )
                     )}
+
                 </div>
             )}
 
@@ -1248,6 +1814,7 @@ function Notes() {
                             gap-3
                         "
                     >
+
                         <motion.button
                             whileHover={
                                 page > 1
@@ -1311,6 +1878,7 @@ function Notes() {
                                 text-slate-600
                             "
                         >
+
                             <span className="
                                 text-blue-600
                             ">
@@ -1322,6 +1890,7 @@ function Notes() {
                             <span>
                                 {totalPages}
                             </span>
+
                         </div>
 
                         <motion.button
@@ -1370,6 +1939,7 @@ function Notes() {
                                 size={19}
                             />
                         </motion.button>
+
                     </motion.div>
                 )}
 

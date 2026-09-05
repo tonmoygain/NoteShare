@@ -113,7 +113,7 @@ function Hero() {
                 // FIXED PLATFORM DEPARTMENTS
                 // ==========================================
 
-                const departments = 6;
+                const departments = 8;
 
                 // ==========================================
                 // FINAL STATS

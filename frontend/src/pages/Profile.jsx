@@ -1509,6 +1509,15 @@ function Profile() {
                                         <option value="EEE">
                                             EEE
                                         </option>
+                                        <option value="Civil">
+                                            Civil
+                                        </option>
+                                        <option value="Architecture">
+                                            Architecture
+                                        </option>
+                                        <option value="Textile">
+                                            Textile
+                                        </option>
                                         <option value="BBA">
                                             BBA
                                         </option>

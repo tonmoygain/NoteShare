@@ -9,6 +9,9 @@ import {
     Sparkles,
     CalendarDays,
     UserRound,
+    GraduationCap,
+    School,
+    Layers3,
 } from "lucide-react";
 
 function NoteCard({ note }) {
@@ -21,21 +24,53 @@ function NoteCard({ note }) {
         note?.description ||
         "No description provided.";
 
+    const educationLevel =
+        (
+            note?.education_level ||
+            "university"
+        ).toLowerCase();
+
+    const isSchool =
+        educationLevel === "school";
+
     const department =
         note?.department || "General";
 
-    const uploader =
-        note?.uploader_name || "Student";
+    const classLevel =
+        note?.class_level || "";
 
-    const uploadedDate = note?.uploaded_at
-        ? new Date(
-              note.uploaded_at
-          ).toLocaleDateString(undefined, {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-          })
-        : "";
+    const subject =
+        note?.subject || "";
+
+    const chapter =
+        note?.chapter || "";
+
+    const board =
+        note?.board || "";
+
+    const semester =
+        note?.semester || "";
+
+    const course =
+        note?.course || "";
+
+    const uploader =
+        note?.uploader_name ||
+        "Student";
+
+    const uploadedDate =
+        note?.uploaded_at
+            ? new Date(
+                  note.uploaded_at
+              ).toLocaleDateString(
+                  undefined,
+                  {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                  }
+              )
+            : "";
 
     const uploaderInitial =
         uploader.charAt(0).toUpperCase();
@@ -72,6 +107,7 @@ function NoteCard({ note }) {
                 hover:shadow-[0_25px_60px_rgba(15,23,42,0.10)]
             "
         >
+
             {/* =====================================================
                 TOP ACCENT
             ====================================================== */}
@@ -173,7 +209,8 @@ function NoteCard({ note }) {
 
                         <div className="min-w-0">
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
+
                                 <span className="
                                     inline-flex
                                     items-center
@@ -187,6 +224,36 @@ function NoteCard({ note }) {
                                     <Sparkles size={11} />
                                     Study Note
                                 </span>
+
+                                <span className="
+                                    inline-flex
+                                    items-center
+                                    gap-1.5
+                                    rounded-full
+                                    border
+                                    border-slate-200
+                                    bg-slate-50
+                                    px-2.5
+                                    py-1
+                                    text-[9px]
+                                    font-black
+                                    uppercase
+                                    tracking-[0.12em]
+                                    text-slate-500
+                                ">
+                                    {isSchool ? (
+                                        <>
+                                            <School size={10} />
+                                            School
+                                        </>
+                                    ) : (
+                                        <>
+                                            <GraduationCap size={10} />
+                                            University
+                                        </>
+                                    )}
+                                </span>
+
                             </div>
 
                             <h3 className="
@@ -204,25 +271,101 @@ function NoteCard({ note }) {
                                 {title}
                             </h3>
 
-                            <span className="
-                                mt-3
-                                inline-flex
-                                max-w-full
-                                items-center
-                                rounded-lg
-                                border
-                                border-blue-100
-                                bg-blue-50
-                                px-3
-                                py-1.5
-                                text-[11px]
-                                font-black
-                                uppercase
-                                tracking-wider
-                                text-blue-700
-                            ">
-                                {department}
-                            </span>
+                            {/* Primary academic label */}
+
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
+
+                                {isSchool ? (
+                                    <>
+                                        {classLevel && (
+                                            <span className="
+                                                inline-flex
+                                                items-center
+                                                gap-1.5
+                                                rounded-lg
+                                                border
+                                                border-cyan-100
+                                                bg-cyan-50
+                                                px-3
+                                                py-1.5
+                                                text-[11px]
+                                                font-black
+                                                uppercase
+                                                tracking-wider
+                                                text-cyan-700
+                                            ">
+                                                <School size={11} />
+                                                {classLevel}
+                                            </span>
+                                        )}
+
+                                        {subject && (
+                                            <span className="
+                                                inline-flex
+                                                items-center
+                                                gap-1.5
+                                                rounded-lg
+                                                border
+                                                border-blue-100
+                                                bg-blue-50
+                                                px-3
+                                                py-1.5
+                                                text-[11px]
+                                                font-black
+                                                tracking-wider
+                                                text-blue-700
+                                            ">
+                                                <BookIcon />
+                                                {subject}
+                                            </span>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        {department && (
+                                            <span className="
+                                                inline-flex
+                                                items-center
+                                                gap-1.5
+                                                rounded-lg
+                                                border
+                                                border-blue-100
+                                                bg-blue-50
+                                                px-3
+                                                py-1.5
+                                                text-[11px]
+                                                font-black
+                                                uppercase
+                                                tracking-wider
+                                                text-blue-700
+                                            ">
+                                                <Layers3 size={11} />
+                                                {department}
+                                            </span>
+                                        )}
+
+                                        {semester && (
+                                            <span className="
+                                                inline-flex
+                                                items-center
+                                                rounded-lg
+                                                border
+                                                border-violet-100
+                                                bg-violet-50
+                                                px-3
+                                                py-1.5
+                                                text-[11px]
+                                                font-black
+                                                tracking-wider
+                                                text-violet-700
+                                            ">
+                                                {semester}
+                                            </span>
+                                        )}
+                                    </>
+                                )}
+
+                            </div>
 
                         </div>
                     </div>
@@ -264,6 +407,85 @@ function NoteCard({ note }) {
                             "
                         />
                     </motion.div>
+
+                </div>
+
+                {/* =================================================
+                    ACADEMIC METADATA
+                ================================================== */}
+
+                <div className="
+                    mt-5
+                    flex
+                    flex-wrap
+                    gap-2
+                ">
+
+                    {isSchool ? (
+                        <>
+                            {chapter && (
+                                <span className="
+                                    inline-flex
+                                    items-center
+                                    gap-1.5
+                                    rounded-full
+                                    border
+                                    border-slate-200
+                                    bg-slate-50
+                                    px-3
+                                    py-1.5
+                                    text-[10px]
+                                    font-bold
+                                    text-slate-600
+                                ">
+                                    <FileText size={11} />
+                                    {chapter}
+                                </span>
+                            )}
+
+                            {board && (
+                                <span className="
+                                    inline-flex
+                                    items-center
+                                    gap-1.5
+                                    rounded-full
+                                    border
+                                    border-emerald-100
+                                    bg-emerald-50
+                                    px-3
+                                    py-1.5
+                                    text-[10px]
+                                    font-bold
+                                    text-emerald-700
+                                ">
+                                    {board}
+                                </span>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            {course && (
+                                <span className="
+                                    inline-flex
+                                    items-center
+                                    gap-1.5
+                                    rounded-full
+                                    border
+                                    border-slate-200
+                                    bg-slate-50
+                                    px-3
+                                    py-1.5
+                                    text-[10px]
+                                    font-bold
+                                    text-slate-600
+                                ">
+                                    <BookIcon />
+                                    {course}
+                                </span>
+                            )}
+                        </>
+                    )}
+
                 </div>
 
                 {/* =================================================
@@ -314,6 +536,7 @@ function NoteCard({ note }) {
                         items-center
                         gap-3
                     ">
+
                         <div className="
                             relative
                             flex
@@ -347,6 +570,7 @@ function NoteCard({ note }) {
                         </div>
 
                         <div className="min-w-0">
+
                             <p className="
                                 flex
                                 items-center
@@ -370,6 +594,7 @@ function NoteCard({ note }) {
                             ">
                                 {uploader}
                             </p>
+
                         </div>
                     </div>
 
@@ -459,6 +684,7 @@ function NoteCard({ note }) {
                                 {uploadedDate}
                             </div>
                         )}
+
                     </div>
                 </div>
 
@@ -475,6 +701,7 @@ function NoteCard({ note }) {
                     border-slate-100
                     pt-4
                 ">
+
                     <span className="
                         text-[10px]
                         font-black
@@ -496,9 +723,21 @@ function NoteCard({ note }) {
                     ">
                         Open note →
                     </span>
+
                 </div>
+
             </div>
         </motion.article>
+    );
+}
+
+/*
+ * Small reusable inline icon wrappers keep the card JSX clean
+ * without changing the visual language of the existing component.
+ */
+function BookIcon() {
+    return (
+        <FileText size={11} />
     );
 }
 
