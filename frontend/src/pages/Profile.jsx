@@ -174,6 +174,8 @@ function Profile() {
 
     const handleDeleteAccount = async () => {
 
+        setDeleteDialogOpen(false);
+
         try {
             await API.delete("profile/delete-account/");
 
@@ -543,6 +545,17 @@ function Profile() {
                     setDeleteNoteId(null);
                     await handleDelete(id);
                 }}
+            />
+
+            <ConfirmDialog
+                open={deleteDialogOpen}
+                title="Delete your account?"
+                message="This permanently removes your account and associated content. This action cannot be undone."
+                confirmText="Permanently Delete"
+                cancelText="Keep My Account"
+                danger={true}
+                onCancel={() => setDeleteDialogOpen(false)}
+                onConfirm={handleDeleteAccount}
             />
 
             {/* =====================================================
@@ -1821,7 +1834,10 @@ function Profile() {
                     </div>
 
                     <button
-                        onClick={() => setDeleteDialogOpen(true)}
+                        type="button"
+                        onClick={() => {
+                            setDeleteDialogOpen(true)
+                        }}
                         className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 font-black text-white transition hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/20"
                     >
                         <Trash2 size={18} />
