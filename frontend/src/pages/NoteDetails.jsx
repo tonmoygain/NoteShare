@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 import API from "../services/api";
+import Toast from "../components/Toast";
 
 function NoteDetails() {
     const { id } = useParams();
@@ -28,6 +29,8 @@ function NoteDetails() {
     const [loading, setLoading] = useState(true);
     const [deleting, setDeleting] = useState(false);
     const [error, setError] = useState("");
+
+    const [toast, setToast] = useState(null);
 
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -123,20 +126,32 @@ function NoteDetails() {
             );
 
             if (err.response?.status === 401) {
-                alert("Please login first.");
-                navigate("/login");
+                setToast({
+                    type: "error",
+                    message: "Please login first.",
+                });
+
+                setTimeout(() => {
+                    navigate("/login");
+                }, 1000);
+
             } else if (
                 err.response?.status === 403
             ) {
-                alert(
-                    "You do not have permission to delete this note."
-                );
+                setToast({
+                    type: "error",
+                    message:
+                        "You do not have permission to delete this note.",
+                });
+
             } else {
-                alert(
-                    err.response?.data?.detail ||
+                setToast({
+                    type: "error",
+                    message:
+                        err.response?.data?.detail ||
                         err.response?.data?.error ||
-                        "Delete failed."
-                );
+                        "Delete failed.",
+                });
             }
         } finally {
             setDeleting(false);
@@ -212,6 +227,11 @@ function NoteDetails() {
 
     return (
         <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+
+            <Toast
+                toast={toast}
+                onClose={() => setToast(null)}
+            />
 
             {/* =====================================================
                 BACK

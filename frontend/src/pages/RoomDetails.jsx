@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { motion } from "motion/react";
 import { useNavigate, useParams } from "react-router-dom";
 import API from "../services/api";
+import Toast from "../components/Toast";
 
 import {
     MessageSquare,
@@ -32,6 +33,8 @@ function RoomDetails() {
     const [sending, setSending] = useState(false);
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
+
+    const [toast, setToast] = useState(null);
 
     const messagesEndRef = useRef(null);
 
@@ -136,11 +139,16 @@ function RoomDetails() {
                 localStorage.getItem("access");
 
             if (!token) {
-                alert(
-                    "Please login first to join this room."
-                );
+                setToast({
+                    type: "error",
+                    message:
+                        "Please login first to join this room.",
+                });
 
-                navigate("/login");
+               setTimeout(() => {
+                    navigate("/login");
+                }, 1000);
+
                 return;
             }
 
@@ -164,9 +172,11 @@ function RoomDetails() {
                 };
             });
 
-            alert(
-                "Joined the discussion room successfully."
-            );
+            setToast({
+                type: "success",
+                message:
+                    "Joined the discussion room successfully.",
+            });
         } catch (error) {
             console.error(
                 "JOIN ERROR:",
@@ -176,19 +186,26 @@ function RoomDetails() {
             if (
                 error.response?.status === 401
             ) {
-                alert(
-                    "Please login first to join this room."
-                );
+                setToast({
+                    type: "error",
+                    message:
+                        "Please login first to join this room.",
+                });
 
-                navigate("/login");
+                setTimeout(() => {
+                    navigate("/login");
+                }, 1000);
+
             } else {
-                alert(
-                    error.response?.data
-                        ?.detail ||
+                setToast({
+                    type: "error",
+                    message:
+                        error.response?.data
+                            ?.detail ||
                         error.response?.data
                             ?.error ||
-                        "Could not join the room."
-                );
+                        "Could not join the room.",
+                });
             }
         } finally {
             setJoining(false);
@@ -205,9 +222,11 @@ function RoomDetails() {
 
             setIsMember(false);
 
-            alert(
-                "You left the discussion room."
-            );
+            setToast({
+                type: "success",
+                message:
+                    "You left the discussion room.",
+            });
 
             await loadRoom();
         } catch (error) {
@@ -219,12 +238,21 @@ function RoomDetails() {
             if (
                 error.response?.status === 401
             ) {
-                alert("Please login first.");
-                navigate("/login");
+                setToast({
+                    type: "error",
+                    message: "Please login first.",
+                });
+
+                setTimeout(() => {
+                    navigate("/login");
+                }, 1000);
+
             } else {
-                alert(
-                    "Could not leave the room."
-                );
+                setToast({
+                    type: "error",
+                    message:
+                        "Could not leave the room.",
+                });
             }
         } finally {
             setJoining(false);
@@ -263,15 +291,22 @@ function RoomDetails() {
             if (
                 error.response?.status === 401
             ) {
-                alert(
-                    "Please login first to send a message."
-                );
+                setToast({
+                    type: "error",
+                    message:
+                        "Please login first to send a message.",
+                });
 
-                navigate("/login");
+                setTimeout(() => {
+                    navigate("/login");
+                }, 1000);
+
             } else {
-                alert(
-                    "Could not send message."
-                );
+                setToast({
+                    type: "error",
+                    message:
+                        "Could not send message.",
+                });
             }
         } finally {
             setSending(false);
@@ -328,6 +363,11 @@ function RoomDetails() {
 
     return (
         <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
+
+            <Toast
+                toast={toast}
+                onClose={() => setToast(null)}
+            />
 
             {/* =====================================================
                 BACK

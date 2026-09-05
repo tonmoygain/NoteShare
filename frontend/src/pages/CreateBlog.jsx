@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import API from "../services/api";
+import Toast from "../components/Toast";
 
 function CreateBlog() {
     const navigate = useNavigate();
@@ -23,17 +24,24 @@ function CreateBlog() {
     const [content, setContent] = useState("");
     const [image, setImage] = useState(null);
     const [uploading, setUploading] = useState(false);
+    const [toast, setToast] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!title.trim()) {
-            alert("Please enter blog title");
+            setToast({
+                type: "error",
+                message: "Please enter a title for your blog.",
+            });
             return;
         }
 
         if (!content.trim()) {
-            alert("Please enter blog content");
+            setToast({
+                type: "error",
+                message: "Please add some content before publishing.",
+            });
             return;
         }
 
@@ -78,7 +86,13 @@ function CreateBlog() {
         } catch (err) {
             console.log(err);
 
-            alert("Failed to publish blog");
+            setToast({
+                type: "error",
+                message:
+                    err.response?.data?.detail ||
+                    err.response?.data?.error ||
+                    "Failed to publish the blog. Please try again.",
+            });
         } finally {
             setUploading(false);
         }
@@ -86,6 +100,11 @@ function CreateBlog() {
 
     return (
         <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+
+            <Toast
+                toast={toast}
+                onClose={() => setToast(null)}
+            />
 
             <div
                 

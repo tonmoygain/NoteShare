@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import API from "../services/api";
+import Toast from "../components/Toast";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 import {
     User,
@@ -34,6 +36,9 @@ function Profile() {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [toast, setToast] = useState(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [deleteNoteId, setDeleteNoteId] = useState(null);
 
     const [showEditModal, setShowEditModal] = useState(false);
     const [showPasswordModal, setShowPasswordModal] =
@@ -129,12 +134,7 @@ function Profile() {
     }, [navigate]);
 
     const handleDelete = async (id) => {
-        const ok = window.confirm(
-            "Are you sure you want to delete this note?"
-        );
-
-        if (!ok) return;
-
+        
         try {
             await API.delete(`notes/delete/${id}/`);
 
@@ -154,28 +154,25 @@ function Profile() {
                     ),
                 };
             });
+
+            setToast({
+                type: "success",
+                message: "Note deleted successfully.",
+            });
+
         } catch (err) {
             console.error("Delete Note Error:", err);
 
-            alert(
-                err.response?.data?.error ||
-                    "Delete failed."
-            );
+            setToast({
+                type: "error",
+                message:
+                    err.response?.data?.error ||
+                    "Delete failed.",
+            });
         }
     };
 
     const handleDeleteAccount = async () => {
-        const firstConfirm = window.confirm(
-            "This will permanently delete your account, uploaded notes and blogs. Continue?"
-        );
-
-        if (!firstConfirm) return;
-
-        const secondConfirm = window.confirm(
-            "This action cannot be undone. Are you absolutely sure?"
-        );
-
-        if (!secondConfirm) return;
 
         try {
             await API.delete("profile/delete-account/");
@@ -184,31 +181,43 @@ function Profile() {
             localStorage.removeItem("refresh");
             localStorage.removeItem("username");
 
-            alert(
-                "Your account has been deleted successfully."
-            );
+            setToast({
+                type: "success",
+                message:
+                    "Your account has been permanently deleted.",
+            });
 
-            navigate("/");
-            window.location.reload();
+            setTimeout(() => {
+                navigate("/");
+                window.location.reload();
+            }, 1000);
+
         } catch (err) {
             console.error("Delete Account Error:", err);
 
             if (err.response?.status === 401) {
-                alert(
-                    "Your session has expired. Please login again."
-                );
+                 setToast({
+                    type: "error",
+                    message:
+                        "Your session has expired. Please login again.",
+                });
 
                 localStorage.clear();
 
-                navigate("/login");
+                setTimeout(() => {
+                    navigate("/login");
+                }, 1000);
+
                 return;
             }
 
-            alert(
-                err.response?.data?.error ||
+            setToast({
+                type: "error",
+                message:
+                    err.response?.data?.error ||
                     err.response?.data?.detail ||
-                    "Failed to delete your account."
-            );
+                    "Failed to delete your account.",
+            });
         }
     };
 
@@ -307,9 +316,10 @@ function Profile() {
                 updatedUsername
             );
 
-            alert(
-                "Profile updated successfully."
-            );
+            setToast({
+                type: "success",
+                message: "Profile updated successfully.",
+            });
 
             setShowEditModal(false);
 
@@ -322,11 +332,14 @@ function Profile() {
                 err
             );
 
-            alert(
-                err.response?.data?.error ||
+            setToast({
+                type: "error",
+                message:
+                    err.response?.data?.error ||
                     err.response?.data?.detail ||
-                    "Failed to update profile."
-            );
+                    "Failed to update profile.",
+            });
+
         } finally {
             setSavingProfile(false);
         }
@@ -347,9 +360,11 @@ function Profile() {
         if (
             passwordForm.new_password.length < 6
         ) {
-            alert(
-                "New password must be at least 6 characters."
-            );
+            setToast({
+                type: "error",
+                message:
+                    "New password must be at least 6 characters.",
+            });
 
             return;
         }
@@ -358,9 +373,10 @@ function Profile() {
             passwordForm.new_password !==
             passwordForm.confirm_password
         ) {
-            alert(
-                "New passwords do not match."
-            );
+            setToast({
+                type: "error",
+                message: "New passwords do not match.",
+            });
 
             return;
         }
@@ -373,9 +389,15 @@ function Profile() {
                 passwordForm
             );
 
-            alert(
-                "Password changed successfully. Please login again."
-            );
+            setToast({
+                type: "success",
+                message:
+                    "Password changed successfully. Please login again.",
+            });
+
+            setTimeout(() => {
+                navigate("/login");
+            }, 1000);
 
             setPasswordForm({
                 current_password: "",
@@ -395,11 +417,14 @@ function Profile() {
                 err
             );
 
-            alert(
-                err.response?.data?.error ||
+            setToast({
+                type: "error",
+                message:
+                    err.response?.data?.error ||
                     err.response?.data?.detail ||
-                    "Failed to change password."
-            );
+                    "Failed to change password.",
+            });
+
         } finally {
             setChangingPassword(false);
         }
@@ -499,6 +524,26 @@ function Profile() {
 
     return (
         <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
+
+            <Toast
+                toast={toast}
+                onClose={() => setToast(null)}
+            />
+
+            <ConfirmDialog
+                open={deleteNoteId !== null}
+                title="Delete your account?"
+                message="This will permanently remove the note from your profile. This action cannot be undone."
+                confirmText="Delete Note"
+                cancelText="Keep Note"
+                danger={true}
+                onCancel={() => setDeleteNoteId(null)}
+                onConfirm={async () => {
+                    const id = deleteNoteId;
+                    setDeleteNoteId(null);
+                    await handleDelete(id);
+                }}
+            />
 
             {/* =====================================================
                 PROFILE HERO
@@ -1039,9 +1084,7 @@ function Profile() {
 
                                         <button
                                             onClick={() =>
-                                                handleDelete(
-                                                    note.id
-                                                )
+                                                setDeleteNoteId(note.id)
                                             }
                                             className="profile-note-action h-10 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-red-300 hover:text-red-600"
                                         >
@@ -1778,7 +1821,7 @@ function Profile() {
                     </div>
 
                     <button
-                        onClick={handleDeleteAccount}
+                        onClick={() => setDeleteDialogOpen(true)}
                         className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 font-black text-white transition hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-lg hover:shadow-red-500/20"
                     >
                         <Trash2 size={18} />

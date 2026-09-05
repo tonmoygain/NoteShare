@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 
 import API from "../services/api";
+import Toast from "../components/Toast";
 
 import {
     MessageSquare,
@@ -32,6 +33,8 @@ function Rooms() {
     const [creatingRoom, setCreatingRoom] =
         useState(false);
 
+    const [toast, setToast] = useState(null);
+
     const [parentRooms, setParentRooms] = useState([]);
 
     const [roomForm, setRoomForm] = useState({
@@ -50,7 +53,10 @@ function Rooms() {
         e.preventDefault();
 
         if (!roomForm.name.trim()) {
-            alert("Please enter a room name.");
+            setToast({
+                type: "error",
+                message: "Please enter a room name.",
+            });
             return;
         }
 
@@ -58,11 +64,16 @@ function Rooms() {
             const token = localStorage.getItem("access");
 
             if (!token) {
-                alert(
-                    "Please login first to create a room."
-                );
+                setToast({
+                    type: "error",
+                    message:
+                        "Please login first to create a room.",
+                });
 
-                navigate("/login");
+                setTimeout(() => {
+                    navigate("/login");
+                }, 1000);
+
                 return;
             }
 
@@ -90,9 +101,11 @@ function Rooms() {
                 response.data
             );
 
-            alert(
-                "Discussion room created successfully."
-            );
+            setToast({
+                type: "success",
+                message:
+                    "Discussion room created successfully.",
+            });
 
             setRoomForm({
                 name: "",
@@ -122,17 +135,24 @@ function Rooms() {
             );
 
             if (error.response?.status === 401) {
-                alert(
-                    "Please login first to create a room."
-                );
+                setToast({
+                    type: "error",
+                    message:
+                        "Please login first to create a room.",
+                });
 
-                navigate("/login");
+                setTimeout(() => {
+                    navigate("/login");
+                }, 1000);
+
             } else {
-                alert(
-                    error.response?.data?.detail ||
+                setToast({
+                    type: "error",
+                    message:
+                        error.response?.data?.detail ||
                         error.response?.data?.error ||
-                        "Could not create the room."
-                );
+                        "Could not create the room.",
+                });
             }
         } finally {
             setCreatingRoom(false);
@@ -254,6 +274,11 @@ function Rooms() {
 
     return (
         <>
+            <Toast
+                toast={toast}
+                onClose={() => setToast(null)}
+            />
+
             {/* =====================================================
                 CREATE ROOM MODAL
             ====================================================== */}

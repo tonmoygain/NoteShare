@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import API from "../services/api";
+import Toast from "../components/Toast";
 
 function SocialCallback() {
 
@@ -10,6 +11,7 @@ function SocialCallback() {
     const [searchParams] =
         useSearchParams();
 
+    const [toast, setToast] = useState(null);
 
     useEffect(() => {
 
@@ -66,12 +68,16 @@ function SocialCallback() {
                         error
                     );
 
-                    alert(
-                        error.response?.data?.detail ||
-                        "Google login failed."
-                    );
+                    setToast({
+                        type: "error",
+                        message:
+                            error.response?.data?.detail ||
+                            "Google login failed.",
+                    });
 
-                    navigate("/login");
+                    setTimeout(() => {
+                        navigate("/login");
+                    }, 1000);
 
                 }
 
@@ -85,31 +91,39 @@ function SocialCallback() {
 
     return (
 
-        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <>
+            <Toast
+                toast={toast}
+                onClose={() => setToast(null)}
+            />
 
-            <div className="text-center">
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
 
-                <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center animate-pulse">
+                <div className="text-center">
 
-                    <div className="w-6 h-6 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+                    <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center animate-pulse">
+
+                        <div className="w-6 h-6 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+
+                    </div>
+
+                    <h2 className="text-xl font-black text-slate-800 mt-5">
+
+                        Completing Google Sign In...
+
+                    </h2>
+
+                    <p className="text-sm text-slate-400 mt-2">
+
+                        Please wait while we sign you into NoteShare.
+
+                    </p>
 
                 </div>
 
-                <h2 className="text-xl font-black text-slate-800 mt-5">
-
-                    Completing Google Sign In...
-
-                </h2>
-
-                <p className="text-sm text-slate-400 mt-2">
-
-                    Please wait while we sign you into NoteShare.
-
-                </p>
-
             </div>
 
-        </div>
+        </>
 
     );
 

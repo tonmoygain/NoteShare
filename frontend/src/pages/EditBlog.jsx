@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import API from "../services/api";
+import Toast from "../components/Toast";
 
 function EditBlog() {
     const { id } = useParams();
@@ -29,6 +30,7 @@ function EditBlog() {
     const [updating, setUpdating] = useState(false);
 
     const [error, setError] = useState("");
+    const [toast, setToast] = useState(null);
 
     useEffect(() => {
         const loadBlog = async () => {
@@ -138,14 +140,24 @@ function EditBlog() {
             if (
                 err.response?.status === 401
             ) {
-                alert("Please login first.");
-                navigate("/login");
+                setToast({
+                    type: "error",
+                    message: "Please login first.",
+                });
+
+                setTimeout(() => {
+                    navigate("/login");
+                }, 1000);
+                
             } else if (
                 err.response?.status === 403
             ) {
-                alert(
-                    "You do not have permission to edit this blog."
-                );
+                setToast({
+                    type: "error",
+                    message:
+                        "You do not have permission to edit this blog.",
+                });
+
             } else {
                 setError(
                     err.response?.data?.detail ||
@@ -205,6 +217,11 @@ function EditBlog() {
 
     return (
         <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+
+            <Toast
+                toast={toast}
+                onClose={() => setToast(null)}
+            />
 
             {/* =====================================================
                 TOP NAV

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import API from "../services/api";
+import Toast from "../components/Toast";
 
 function EditNote() {
     const { id } = useParams();
@@ -30,6 +31,7 @@ function EditNote() {
     const [oldFile, setOldFile] = useState("");
 
     const [error, setError] = useState("");
+    const [toast, setToast] = useState(null);
 
     useEffect(() => {
         const loadNote = async () => {
@@ -153,14 +155,23 @@ function EditNote() {
             if (
                 err.response?.status === 401
             ) {
-                alert("Please login first.");
-                navigate("/login");
+                setToast({
+                    type: "error",
+                    message: "Please login first.",
+                });
+
+                setTimeout(() => {
+                    navigate("/login");
+                }, 1000);
+
             } else if (
                 err.response?.status === 403
             ) {
-                alert(
-                    "You do not have permission to edit this note."
-                );
+                setToast({
+                    type: "error",
+                    message:
+                        "You do not have permission to edit this note.",
+                });
             } else {
                 setError(
                     err.response?.data?.detail ||
@@ -223,6 +234,11 @@ function EditNote() {
 
     return (
         <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+
+            <Toast
+                toast={toast}
+                onClose={() => setToast(null)}
+            />
 
             {/* =====================================================
                 TOP NAV

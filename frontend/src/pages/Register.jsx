@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
+import Toast from "../components/Toast";
 
 import {
     User,
@@ -31,6 +32,7 @@ function Register() {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [toast, setToast] = useState(null);
 
     const [showPassword, setShowPassword] =
         useState(false);
@@ -115,12 +117,17 @@ function Register() {
                     password,
                 }
             );
+ 
+            setToast({
+                type: "success",
+                message: "Registration successful. Please login.",
+            });
 
-            alert(
-                "Registration successful. Please login."
-            );
 
-            navigate("/login");
+            setTimeout(() => {
+                navigate("/login");
+            }, 1000);
+
         } catch (error) {
             console.error(
                 "Registration Error:",
@@ -162,7 +169,12 @@ function Register() {
 
     return (
         <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-cyan-900 px-4 py-8 sm:px-6">
-
+            
+            <Toast
+                toast={toast}
+                onClose={() => setToast(null)}
+            />
+            
             {/* =====================================================
                 BACKGROUND
             ====================================================== */}

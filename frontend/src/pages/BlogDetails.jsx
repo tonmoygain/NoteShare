@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../services/api";
+import Toast from "../components/Toast";
 
 import {
     CalendarDays,
@@ -28,6 +29,8 @@ function BlogDetails() {
     const [deleting, setDeleting] = useState(false);
     const [copied, setCopied] = useState(false);
     const [error, setError] = useState("");
+
+    const [toast, setToast] = useState(null);
 
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -111,17 +114,27 @@ function BlogDetails() {
             console.error("Delete Blog Error:", err);
 
             if (err.response?.status === 401) {
-                alert("Please login first.");
-                navigate("/login");
+                setToast({
+                    type: "error",
+                    message: "Please login first.",
+                });
+
+                setTimeout(() => {
+                    navigate("/login");
+                }, 1000);
             } else if (err.response?.status === 403) {
-                alert(
-                    "You do not have permission to delete this blog."
-                );
+                setToast({
+                    type: "error",
+                    message:
+                        "You do not have permission to delete this blog.",
+                });
             } else {
-                alert(
-                    err.response?.data?.detail ||
-                        "Failed to delete the blog."
-                );
+                setToast({
+                    type: "error",
+                    message:
+                        err.response?.data?.detail ||
+                        "Failed to delete the blog.",
+                });
             }
         } finally {
             setDeleting(false);
@@ -176,9 +189,11 @@ function BlogDetails() {
                 err
             );
 
-            alert(
-                "Could not copy the link. Please copy it manually."
-            );
+            setToast({
+                type: "error",
+                message:
+                    "Could not copy the link. Please copy it manually.",
+            });
         }
     };
 
@@ -264,6 +279,11 @@ function BlogDetails() {
 
     return (
         <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+
+            <Toast
+                toast={toast}
+                onClose={() => setToast(null)}
+            />
 
             {/* =====================================================
                 BACK
