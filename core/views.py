@@ -2518,11 +2518,9 @@ def ai_chat(request):
     ]
 
     is_calendar_query = (
-        use_calendar
-        or any(
-            keyword in message_lower
-            for keyword in calendar_keywords
-        )
+        
+        keyword in message_lower
+        for keyword in calendar_keywords 
     )
 
     calendar_events = []
@@ -3041,7 +3039,13 @@ for the authenticated user.
 
     sources = []
 
-    for note in relevant_notes[:3]:
+    notes_for_ai = (
+        []
+        if is_calendar_query and not tutor_mode
+        else relevant_notes[:3]
+    )
+
+    for note in notes_for_ai:
 
         sources.append({
             "id": note.id,
