@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
 
@@ -13,6 +13,10 @@ import {
     ArrowUpRight,
     MessageCircle,
     FileText,
+    CalendarDays,
+    Clock3,
+    ExternalLink,
+    CheckCircle2,
 } from "lucide-react";
 
 import API from "../services/api";
@@ -33,6 +37,20 @@ function AIAssistant() {
 
     const [loading, setLoading] = useState(false);
 
+    // =====================================================
+    // GOOGLE CALENDAR STATE
+    // =====================================================
+
+    const [calendarConnected, setCalendarConnected] = useState(false);
+    const [calendarEvents, setCalendarEvents] = useState([]);
+    const [calendarLoading, setCalendarLoading] = useState(false);
+    const [calendarConnecting, setCalendarConnecting] = useState(false);
+    const [calendarError, setCalendarError] = useState("");
+
+    // =====================================================
+    // CLEAR CHAT
+    // =====================================================
+
     const clearChat = () => {
         setMessages([
             {
@@ -42,6 +60,220 @@ function AIAssistant() {
             },
         ]);
     };
+
+    // =====================================================
+    // GOOGLE CALENDAR HELPERS
+    // =====================================================
+
+    const loadCalendar = async () => {
+        setCalendarLoading(true);
+        setCalendarError("");
+
+        try {
+            const statusResponse = await API.get(
+                "google-calendar/status/"
+            );
+
+            const connected =
+                statusResponse.data?.connected === true;
+
+            setCalendarConnected(connected);
+
+            if (!connected) {
+                setCalendarEvents([]);
+                return;
+            }
+
+            const eventsResponse = await API.get(
+                "google-calendar/events/?days=7"
+            );
+
+            setCalendarEvents(
+                Array.isArray(eventsResponse.data?.events)
+                    ? eventsResponse.data.events
+                    : []
+            );
+        } catch (error) {
+            console.error(
+                "Google Calendar Load Error:",
+                error
+            );
+
+            setCalendarEvents([]);
+
+            if (error.response?.status === 401) {
+                setCalendarConnected(false);
+                setCalendarError(
+                    "Please log in to use your personal calendar."
+                );
+            } else {
+                setCalendarError(
+                    "Unable to load your calendar right now."
+                );
+            }
+        } finally {
+            setCalendarLoading(false);
+        }
+    };
+
+    // =====================================================
+    // LOAD CALENDAR WHEN ASSISTANT OPENS
+    // =====================================================
+
+    useEffect(() => {
+        if (!isOpen) {
+            return;
+        }
+
+        loadCalendar();
+    }, [isOpen]);
+
+    // =====================================================
+    // CONNECT GOOGLE CALENDAR
+    // =====================================================
+
+    const connectGoogleCalendar = async () => {
+        if (calendarConnecting) {
+            return;
+        }
+
+        setCalendarConnecting(true);
+        setCalendarError("");
+
+        try {
+            const response = await API.get(
+                "google-calendar/connect/"
+            );
+
+            const authorizationUrl =
+                response.data?.authorization_url;
+
+            if (!authorizationUrl) {
+                throw new Error(
+                    "Authorization URL was not returned."
+                );
+            }
+
+            window.location.href = authorizationUrl;
+        } catch (error) {
+            console.error(
+                "Google Calendar Connect Error:",
+                error
+            );
+
+            if (error.response?.status === 401) {
+                setCalendarError(
+                    "Please log in to connect Google Calendar."
+                );
+            } else {
+                setCalendarError(
+                    error.response?.data?.error ||
+                        "Could not connect Google Calendar."
+                );
+            }
+
+            setCalendarConnecting(false);
+        }
+    };
+
+    // =====================================================
+    // FORMAT CALENDAR DATE / TIME
+    // =====================================================
+
+    const formatEventTime = (event) => {
+        if (!event?.start) {
+            return "";
+        }
+
+        if (event.is_all_day) {
+            return "All day";
+        }
+
+        const date = new Date(event.start);
+
+        if (Number.isNaN(date.getTime())) {
+            return "";
+        }
+
+        return new Intl.DateTimeFormat(
+            undefined,
+            {
+                hour: "numeric",
+                minute: "2-digit",
+                month: "short",
+                day: "numeric",
+            }
+        ).format(date);
+    };
+
+    const formatEventDay = (event) => {
+        if (!event?.start) {
+            return "";
+        }
+
+        const date = new Date(event.start);
+
+        if (Number.isNaN(date.getTime())) {
+            return "";
+        }
+
+        return new Intl.DateTimeFormat(
+            undefined,
+            {
+                weekday: "short",
+            }
+        ).format(date);
+    };
+
+    const isToday = (event) => {
+        if (!event?.start || event.is_all_day) {
+            const eventDate = event?.start;
+
+            if (!eventDate) {
+                return false;
+            }
+
+            const date = new Date(eventDate);
+
+            if (Number.isNaN(date.getTime())) {
+                return false;
+            }
+
+            const now = new Date();
+
+            return (
+                date.getFullYear() === now.getFullYear() &&
+                date.getMonth() === now.getMonth() &&
+                date.getDate() === now.getDate()
+            );
+        }
+
+        const date = new Date(event.start);
+
+        if (Number.isNaN(date.getTime())) {
+            return false;
+        }
+
+        const now = new Date();
+
+        return (
+            date.getFullYear() === now.getFullYear() &&
+            date.getMonth() === now.getMonth() &&
+            date.getDate() === now.getDate()
+        );
+    };
+
+    const todayEvents = calendarEvents.filter(
+        (event) => isToday(event)
+    );
+
+    const upcomingEvents = calendarEvents.filter(
+        (event) => !isToday(event)
+    );
+
+    // =====================================================
+    // SEND MESSAGE
+    // =====================================================
 
     const sendMessage = async () => {
         const trimmedMessage = message.trim();
@@ -64,6 +296,7 @@ function AIAssistant() {
         try {
             const response = await API.post("ai/chat/", {
                 message: trimmedMessage,
+                use_calendar: calendarConnected,
             });
 
             setMessages((previous) => [
@@ -74,6 +307,12 @@ function AIAssistant() {
                     sources: response.data.sources || [],
                 },
             ]);
+
+            // Refresh agenda after an AI interaction
+            // so the assistant stays current.
+            if (calendarConnected) {
+                loadCalendar();
+            }
         } catch (error) {
             console.error("AI Assistant Error:", error);
 
@@ -96,17 +335,33 @@ function AIAssistant() {
         }
     };
 
+    // =====================================================
+    // KEYBOARD
+    // =====================================================
+
     const handleKeyDown = (event) => {
-        if (event.key === "Enter" && !event.shiftKey) {
+        if (
+            event.key === "Enter" &&
+            !event.shiftKey
+        ) {
             event.preventDefault();
             sendMessage();
         }
     };
 
+    // =====================================================
+    // SUGGESTED QUESTIONS
+    // =====================================================
+
     const suggestedQuestions = [
         "Summarize my notes",
         "Explain this topic simply",
         "What are the key points?",
+    ];
+
+    const calendarQuestions = [
+        "What do I have today?",
+        "What's coming up this week?",
     ];
 
     return (
@@ -404,277 +659,726 @@ function AIAssistant() {
                                 py-5
                             "
                         >
-                            {/* Suggested prompts */}
+                            {/* =================================================
+                                PERSONAL ASSISTANT / CALENDAR
+                            ================================================== */}
 
-                            {messages.length === 1 && !loading && (
-                                <motion.div
-                                    initial={{
-                                        opacity: 0,
-                                        y: 8,
-                                    }}
-                                    animate={{
-                                        opacity: 1,
-                                        y: 0,
-                                    }}
-                                    className="mb-5"
-                                >
-                                    <p
+                            <motion.div
+                                initial={{
+                                    opacity: 0,
+                                    y: 8,
+                                }}
+                                animate={{
+                                    opacity: 1,
+                                    y: 0,
+                                }}
+                                className="
+                                    ai-assistant-calendar-panel
+                                    mb-5
+                                    overflow-hidden
+                                    rounded-2xl
+                                    border
+                                    border-blue-100
+                                    bg-gradient-to-br
+                                    from-blue-50
+                                    via-white
+                                    to-cyan-50
+                                "
+                            >
+                                <div className="flex items-center justify-between gap-3 px-4 py-3">
+                                    <div className="flex min-w-0 items-center gap-3">
+                                        <div
+                                            className="
+                                                flex
+                                                h-9
+                                                w-9
+                                                shrink-0
+                                                items-center
+                                                justify-center
+                                                rounded-xl
+                                                bg-blue-600
+                                                text-white
+                                                shadow-sm
+                                            "
+                                        >
+                                            <CalendarDays size={17} />
+                                        </div>
+
+                                        <div className="min-w-0">
+                                            <p className="ai-assistant-calendar-title text-[11px] font-black uppercase tracking-[0.12em] text-blue-700">
+                                                Personal Assistant
+                                            </p>
+
+                                            <p className="ai-assistant-calendar-subtitle mt-0.5 text-[10px] font-semibold text-slate-500">
+                                                Your schedule, right inside NoteShare
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {calendarConnected && (
+                                        <span
+                                            className="
+                                                flex
+                                                shrink-0
+                                                items-center
+                                                gap-1
+                                                rounded-full
+                                                bg-emerald-100
+                                                px-2
+                                                py-1
+                                                text-[9px]
+                                                font-black
+                                                text-emerald-700
+                                            "
+                                        >
+                                            <CheckCircle2 size={10} />
+                                            Connected
+                                        </span>
+                                    )}
+                                </div>
+
+                                {calendarError && (
+                                    <div
                                         className="
-                                            ai-assistant-section-label
+                                            ai-assistant-calendar-error
 
-                                            mb-2
+                                            mx-4
+                                            mb-3
+                                            rounded-xl
+                                            border
+                                            border-amber-200
+                                            bg-amber-50
+                                            px-3
+                                            py-2.5
                                             text-[10px]
-                                            font-black
-                                            uppercase
-                                            tracking-[0.15em]
-                                            text-slate-400
+                                            font-semibold
+                                            leading-5
+                                            text-amber-700
                                         "
                                     >
-                                        Try asking
-                                    </p>
-
-                                    <div className="flex flex-wrap gap-2">
-                                        {suggestedQuestions.map(
-                                            (question) => (
-                                                <button
-                                                    key={question}
-                                                    type="button"
-                                                    onClick={() =>
-                                                        setMessage(question)
-                                                    }
-                                                    className="
-                                                        ai-assistant-suggestion
-
-                                                        rounded-full
-                                                        border
-                                                        border-blue-100
-                                                        bg-blue-50
-                                                        px-3
-                                                        py-2
-                                                        text-left
-                                                        text-[11px]
-                                                        font-bold
-                                                        text-blue-600
-                                                        transition
-                                                        hover:border-blue-200
-                                                        hover:bg-blue-100
-                                                    "
-                                                >
-                                                    {question}
-                                                </button>
-                                            )
-                                        )}
+                                        {calendarError}
                                     </div>
-                                </motion.div>
-                            )}
+                                )}
 
-                            <div className="space-y-4">
-                                {messages.map((item, index) => {
-                                    const isUser =
-                                        item.role === "user";
+                                {!calendarConnected ? (
+                                    <div className="px-4 pb-4">
+                                        <p className="ai-assistant-calendar-description mb-3 text-[11px] leading-5 text-slate-600">
+                                            Connect your Google Calendar so NoteShare AI can
+                                            show today's agenda and upcoming events and answer
+                                            schedule questions.
+                                        </p>
 
-                                    return (
-                                        <motion.div
-                                            key={`${item.role}-${index}`}
-                                            initial={{
-                                                opacity: 0,
-                                                y: 10,
-                                                scale: 0.98,
-                                            }}
-                                            animate={{
-                                                opacity: 1,
-                                                y: 0,
-                                                scale: 1,
-                                            }}
-                                            transition={{
-                                                duration: 0.25,
-                                            }}
-                                            className={
-                                                isUser
-                                                    ? "flex justify-end"
-                                                    : "flex justify-start"
+                                        <button
+                                            type="button"
+                                            onClick={
+                                                connectGoogleCalendar
                                             }
+                                            disabled={
+                                                calendarConnecting
+                                            }
+                                            className="
+                                                ai-assistant-calendar-connect
+
+                                                flex
+                                                w-full
+                                                items-center
+                                                justify-center
+                                                gap-2
+                                                rounded-xl
+                                                bg-gradient-to-r
+                                                from-blue-600
+                                                to-cyan-500
+                                                px-4
+                                                py-2.5
+                                                text-[11px]
+                                                font-black
+                                                text-white
+                                                shadow-md
+                                                shadow-blue-500/15
+                                                transition
+                                                hover:from-blue-700
+                                                hover:to-cyan-600
+                                                disabled:cursor-not-allowed
+                                                disabled:opacity-60
+                                            "
                                         >
-                                            {!isUser && (
+                                            {calendarConnecting ? (
+                                                <>
+                                                    <Loader2
+                                                        size={14}
+                                                        className="animate-spin"
+                                                    />
+                                                    Connecting...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <CalendarDays size={14} />
+                                                    Connect Google Calendar
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                ) : calendarLoading ? (
+                                    <div
+                                        className="
+                                            ai-assistant-calendar-loading
+
+                                            flex
+                                            items-center
+                                            gap-2
+                                            px-4
+                                            pb-4
+                                            text-[10px]
+                                            font-semibold
+                                            text-slate-500
+                                        "
+                                    >
+                                        <Loader2
+                                            size={14}
+                                            className="animate-spin text-blue-500"
+                                        />
+                                        Syncing your schedule...
+                                    </div>
+                                ) : (
+                                    <div className="px-4 pb-4">
+                                        {/* TODAY */}
+
+                                        <div className="mb-4">
+                                            <div className="mb-2 flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <Clock3
+                                                        size={13}
+                                                        className="ai-assistant-calendar-icon text-blue-600"
+                                                    />
+
+                                                    <p className="ai-assistant-calendar-heading text-[10px] font-black uppercase tracking-wider text-slate-500">
+                                                        Today's Agenda
+                                                    </p>
+                                                </div>
+
+                                                <span className="ai-assistant-calendar-count text-[9px] font-bold text-slate-400">
+                                                    {todayEvents.length}{" "}
+                                                    {todayEvents.length ===
+                                                    1
+                                                        ? "item"
+                                                        : "items"}
+                                                </span>
+                                            </div>
+
+                                            {todayEvents.length ===
+                                            0 ? (
                                                 <div
                                                     className="
-                                                        mr-2
-                                                        mt-1
-                                                        flex
-                                                        h-8
-                                                        w-8
-                                                        shrink-0
-                                                        items-center
-                                                        justify-center
+                                                        ai-assistant-empty-calendar
+
                                                         rounded-xl
-                                                        bg-gradient-to-br
-                                                        from-blue-600
-                                                        to-cyan-500
-                                                        text-white
-                                                        shadow-sm
+                                                        border
+                                                        border-dashed
+                                                        border-blue-200
+                                                        bg-white/70
+                                                        px-3
+                                                        py-3
+                                                        text-[10px]
+                                                        font-semibold
+                                                        text-slate-500
                                                     "
                                                 >
-                                                    <Bot size={16} />
+                                                    No calendar events today.
+                                                    Your day is currently clear.
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-2">
+                                                    {todayEvents
+                                                        .slice(0, 4)
+                                                        .map(
+                                                            (
+                                                                event
+                                                            ) => (
+                                                                <div
+                                                                    key={
+                                                                        event.id
+                                                                    }
+                                                                    className="
+                                                                        ai-assistant-calendar-event
+
+                                                                        rounded-xl
+                                                                        border
+                                                                        border-blue-100
+                                                                        bg-white
+                                                                        px-3
+                                                                        py-2.5
+                                                                    "
+                                                                >
+                                                                    <div className="flex items-start gap-3">
+                                                                        <div className="min-w-[55px] text-[9px] font-black text-blue-600">
+                                                                            {event.is_all_day
+                                                                                ? "ALL DAY"
+                                                                                : formatEventTime(
+                                                                                      event
+                                                                                  )}
+                                                                        </div>
+
+                                                                        <div className="min-w-0 flex-1">
+                                                                            <p className="ai-assistant-event-title break-words text-[11px] font-black text-slate-700">
+                                                                                {event.summary ||
+                                                                                    "Untitled event"}
+                                                                            </p>
+
+                                                                            {event.location && (
+                                                                                <p className="ai-assistant-event-meta mt-1 truncate text-[9px] font-semibold text-slate-400">
+                                                                                    {
+                                                                                        event.location
+                                                                                    }
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+
+                                                                        {event.html_link && (
+                                                                            <a
+                                                                                href={
+                                                                                    event.html_link
+                                                                                }
+                                                                                target="_blank"
+                                                                                rel="noreferrer"
+                                                                                className="ai-assistant-calendar-link shrink-0 rounded-lg p-1.5 text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
+                                                                                title="Open in Google Calendar"
+                                                                            >
+                                                                                <ExternalLink
+                                                                                    size={
+                                                                                        12
+                                                                                    }
+                                                                                />
+                                                                            </a>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        )}
                                                 </div>
                                             )}
+                                        </div>
 
-                                            <div
-                                                className={
-                                                    isUser
-                                                        ? `
-                                                            ai-assistant-user-message
+                                        {/* UPCOMING */}
 
-                                                            max-w-[82%]
-                                                            rounded-2xl
-                                                            rounded-br-md
-                                                            bg-gradient-to-br
-                                                            from-blue-600
-                                                            to-blue-500
-                                                            px-4
-                                                            py-3
-                                                            text-sm
-                                                            leading-6
-                                                            text-white
-                                                            shadow-md
-                                                            shadow-blue-500/10
-                                                        `
-                                                        : `
-                                                            ai-assistant-ai-message
+                                        {upcomingEvents.length >
+                                            0 && (
+                                            <div>
+                                                <div className="mb-2 flex items-center gap-2">
+                                                    <CalendarDays
+                                                        size={13}
+                                                        className="ai-assistant-calendar-icon text-cyan-600"
+                                                    />
 
-                                                            max-w-[84%]
-                                                            rounded-2xl
-                                                            rounded-bl-md
-                                                            border
-                                                            border-slate-200
-                                                            bg-white
-                                                            px-4
-                                                            py-3
-                                                            text-sm
-                                                            leading-6
-                                                            text-slate-700
-                                                            shadow-sm
-                                                        `
-                                                }
-                                            >
-                                                <p className="whitespace-pre-wrap break-words">
-                                                    {item.content}
-                                                </p>
+                                                    <p className="ai-assistant-calendar-heading text-[10px] font-black uppercase tracking-wider text-slate-500">
+                                                        Upcoming
+                                                    </p>
+                                                </div>
 
-                                                {/* Sources */}
+                                                <div className="space-y-2">
+                                                    {upcomingEvents
+                                                        .slice(
+                                                            0,
+                                                            3
+                                                        )
+                                                        .map(
+                                                            (
+                                                                event
+                                                            ) => (
+                                                                <div
+                                                                    key={
+                                                                        event.id
+                                                                    }
+                                                                    className="
+                                                                        ai-assistant-calendar-event
 
-                                                {item.sources?.length > 0 && (
-                                                    <div
+                                                                        rounded-xl
+                                                                        border
+                                                                        border-slate-200
+                                                                        bg-white
+                                                                        px-3
+                                                                        py-2.5
+                                                                    "
+                                                                >
+                                                                    <div className="flex items-start gap-3">
+                                                                        <div className="min-w-[48px]">
+                                                                            <p className="ai-assistant-event-day text-[9px] font-black text-cyan-600">
+                                                                                {formatEventDay(
+                                                                                    event
+                                                                                )}
+                                                                            </p>
+
+                                                                            <p className="ai-assistant-event-time mt-0.5 text-[9px] font-semibold text-slate-400">
+                                                                                {event.is_all_day
+                                                                                    ? "All day"
+                                                                                    : formatEventTime(
+                                                                                          event
+                                                                                      )}
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <div className="min-w-0 flex-1">
+                                                                            <p className="ai-assistant-event-title break-words text-[11px] font-black text-slate-700">
+                                                                                {event.summary ||
+                                                                                    "Untitled event"}
+                                                                            </p>
+
+                                                                            {event.location && (
+                                                                                <p className="ai-assistant-event-meta mt-1 truncate text-[9px] font-semibold text-slate-400">
+                                                                                    {
+                                                                                        event.location
+                                                                                    }
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* CALENDAR QUESTIONS */}
+
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {calendarQuestions.map(
+                                                (question) => (
+                                                    <button
+                                                        key={question}
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setMessage(
+                                                                question
+                                                            )
+                                                        }
                                                         className="
-                                                            ai-assistant-sources
+                                                            ai-assistant-calendar-question
 
-                                                            mt-3
-                                                            border-t
-                                                            border-slate-200
-                                                            pt-3
+                                                            rounded-full
+                                                            border
+                                                            border-cyan-100
+                                                            bg-cyan-50
+                                                            px-3
+                                                            py-2
+                                                            text-left
+                                                            text-[10px]
+                                                            font-bold
+                                                            text-cyan-700
+                                                            transition
+                                                            hover:border-cyan-200
+                                                            hover:bg-cyan-100
                                                         "
                                                     >
-                                                        <div
-                                                            className="
-                                                                mb-2
-                                                                flex
-                                                                items-center
-                                                                gap-2
-                                                            "
-                                                        >
-                                                            <BookOpen
-                                                                size={13}
-                                                                className="
-                                                                    ai-assistant-source-icon
-                                                                    text-blue-600
-                                                                "
-                                                            />
+                                                        {question}
+                                                    </button>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </motion.div>
 
-                                                            <p
-                                                                className="
-                                                                    ai-assistant-source-label
+                            {/* Suggested prompts */}
 
-                                                                    text-[10px]
-                                                                    font-black
-                                                                    uppercase
-                                                                    tracking-wider
-                                                                    text-slate-400
-                                                                "
-                                                            >
-                                                                Note Sources
-                                                            </p>
-                                                        </div>
+                            {messages.length === 1 &&
+                                !loading && (
+                                    <motion.div
+                                        initial={{
+                                            opacity: 0,
+                                            y: 8,
+                                        }}
+                                        animate={{
+                                            opacity: 1,
+                                            y: 0,
+                                        }}
+                                        className="mb-5"
+                                    >
+                                        <p
+                                            className="
+                                                ai-assistant-section-label
 
-                                                        <div className="space-y-1.5">
-                                                            {item.sources.map(
-                                                                (source) => (
-                                                                    <button
-                                                                        key={
-                                                                            source.id
-                                                                        }
-                                                                        onClick={() =>
-                                                                            navigate(
-                                                                                `/note/${source.id}`
-                                                                            )
-                                                                        }
-                                                                        className="
-                                                                            ai-assistant-source-card
+                                                mb-2
+                                                text-[10px]
+                                                font-black
+                                                uppercase
+                                                tracking-[0.15em]
+                                                text-slate-400
+                                            "
+                                        >
+                                            Try asking
+                                        </p>
 
-                                                                            group
-                                                                            flex
-                                                                            w-full
-                                                                            items-center
-                                                                            justify-between
-                                                                            gap-2
-                                                                            rounded-xl
-                                                                            border
-                                                                            border-blue-100
-                                                                            bg-blue-50
-                                                                            px-3
-                                                                            py-2.5
-                                                                            text-left
-                                                                            transition
-                                                                            hover:border-blue-200
-                                                                            hover:bg-blue-100
-                                                                        "
-                                                                    >
-                                                                        <span
-                                                                            className="
-                                                                                ai-assistant-source-title
+                                        <div className="flex flex-wrap gap-2">
+                                            {suggestedQuestions.map(
+                                                (
+                                                    question
+                                                ) => (
+                                                    <button
+                                                        key={
+                                                            question
+                                                        }
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setMessage(
+                                                                question
+                                                            )
+                                                        }
+                                                        className="
+                                                            ai-assistant-suggestion
 
-                                                                                line-clamp-2
-                                                                                min-w-0
-                                                                                text-[11px]
-                                                                                font-bold
-                                                                                text-blue-700
-                                                                            "
-                                                                        >
-                                                                            {
-                                                                                source.title
-                                                                            }
-                                                                        </span>
+                                                            rounded-full
+                                                            border
+                                                            border-blue-100
+                                                            bg-blue-50
+                                                            px-3
+                                                            py-2
+                                                            text-left
+                                                            text-[11px]
+                                                            font-bold
+                                                            text-blue-600
+                                                            transition
+                                                            hover:border-blue-200
+                                                            hover:bg-blue-100
+                                                        "
+                                                    >
+                                                        {
+                                                            question
+                                                        }
+                                                    </button>
+                                                )
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
 
-                                                                        <ArrowUpRight
-                                                                            size={14}
-                                                                            className="
-                                                                                ai-assistant-source-arrow
+                            <div className="space-y-4">
+                                {messages.map(
+                                    (
+                                        item,
+                                        index
+                                    ) => {
+                                        const isUser =
+                                            item.role ===
+                                            "user";
 
-                                                                                shrink-0
-                                                                                text-blue-400
-                                                                                transition
-                                                                                group-hover:translate-x-0.5
-                                                                                group-hover:-translate-y-0.5
-                                                                            "
-                                                                        />
-                                                                    </button>
-                                                                )
-                                                            )}
-                                                        </div>
+                                        return (
+                                            <motion.div
+                                                key={`${item.role}-${index}`}
+                                                initial={{
+                                                    opacity: 0,
+                                                    y: 10,
+                                                    scale: 0.98,
+                                                }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    y: 0,
+                                                    scale: 1,
+                                                }}
+                                                transition={{
+                                                    duration: 0.25,
+                                                }}
+                                                className={
+                                                    isUser
+                                                        ? "flex justify-end"
+                                                        : "flex justify-start"
+                                                }
+                                            >
+                                                {!isUser && (
+                                                    <div
+                                                        className="
+                                                            mr-2
+                                                            mt-1
+                                                            flex
+                                                            h-8
+                                                            w-8
+                                                            shrink-0
+                                                            items-center
+                                                            justify-center
+                                                            rounded-xl
+                                                            bg-gradient-to-br
+                                                            from-blue-600
+                                                            to-cyan-500
+                                                            text-white
+                                                            shadow-sm
+                                                        "
+                                                    >
+                                                        <Bot
+                                                            size={
+                                                                16
+                                                            }
+                                                        />
                                                     </div>
                                                 )}
-                                            </div>
-                                        </motion.div>
-                                    );
-                                })}
+
+                                                <div
+                                                    className={
+                                                        isUser
+                                                            ? `
+                                                                ai-assistant-user-message
+
+                                                                max-w-[82%]
+                                                                rounded-2xl
+                                                                rounded-br-md
+                                                                bg-gradient-to-br
+                                                                from-blue-600
+                                                                to-blue-500
+                                                                px-4
+                                                                py-3
+                                                                text-sm
+                                                                leading-6
+                                                                text-white
+                                                                shadow-md
+                                                                shadow-blue-500/10
+                                                            `
+                                                            : `
+                                                                ai-assistant-ai-message
+
+                                                                max-w-[84%]
+                                                                rounded-2xl
+                                                                rounded-bl-md
+                                                                border
+                                                                border-slate-200
+                                                                bg-white
+                                                                px-4
+                                                                py-3
+                                                                text-sm
+                                                                leading-6
+                                                                text-slate-700
+                                                                shadow-sm
+                                                            `
+                                                    }
+                                                >
+                                                    <p className="whitespace-pre-wrap break-words">
+                                                        {
+                                                            item.content
+                                                        }
+                                                    </p>
+
+                                                    {/* Sources */}
+
+                                                    {item
+                                                        .sources
+                                                        ?.length >
+                                                        0 && (
+                                                        <div
+                                                            className="
+                                                                ai-assistant-sources
+
+                                                                mt-3
+                                                                border-t
+                                                                border-slate-200
+                                                                pt-3
+                                                            "
+                                                        >
+                                                            <div
+                                                                className="
+                                                                    mb-2
+                                                                    flex
+                                                                    items-center
+                                                                    gap-2
+                                                                "
+                                                            >
+                                                                <BookOpen
+                                                                    size={
+                                                                        13
+                                                                    }
+                                                                    className="
+                                                                        ai-assistant-source-icon
+                                                                        text-blue-600
+                                                                    "
+                                                                />
+
+                                                                <p
+                                                                    className="
+                                                                        ai-assistant-source-label
+
+                                                                        text-[10px]
+                                                                        font-black
+                                                                        uppercase
+                                                                        tracking-wider
+                                                                        text-slate-400
+                                                                    "
+                                                                >
+                                                                    Note Sources
+                                                                </p>
+                                                            </div>
+
+                                                            <div className="space-y-1.5">
+                                                                {item.sources.map(
+                                                                    (
+                                                                        source
+                                                                    ) => (
+                                                                        <button
+                                                                            key={
+                                                                                source.id
+                                                                            }
+                                                                            onClick={() =>
+                                                                                navigate(
+                                                                                    `/note/${source.id}`
+                                                                                )
+                                                                            }
+                                                                            className="
+                                                                                ai-assistant-source-card
+
+                                                                                group
+                                                                                flex
+                                                                                w-full
+                                                                                items-center
+                                                                                justify-between
+                                                                                gap-2
+                                                                                rounded-xl
+                                                                                border
+                                                                                border-blue-100
+                                                                                bg-blue-50
+                                                                                px-3
+                                                                                py-2.5
+                                                                                text-left
+                                                                                transition
+                                                                                hover:border-blue-200
+                                                                                hover:bg-blue-100
+                                                                            "
+                                                                        >
+                                                                            <span
+                                                                                className="
+                                                                                    ai-assistant-source-title
+
+                                                                                    line-clamp-2
+                                                                                    min-w-0
+                                                                                    text-[11px]
+                                                                                    font-bold
+                                                                                    text-blue-700
+                                                                                "
+                                                                            >
+                                                                                {
+                                                                                    source.title
+                                                                                }
+                                                                            </span>
+
+                                                                            <ArrowUpRight
+                                                                                size={
+                                                                                    14
+                                                                                }
+                                                                                className="
+                                                                                    ai-assistant-source-arrow
+
+                                                                                    shrink-0
+                                                                                    text-blue-400
+                                                                                    transition
+                                                                                    group-hover:translate-x-0.5
+                                                                                    group-hover:-translate-y-0.5
+                                                                                "
+                                                                            />
+                                                                        </button>
+                                                                    )
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        );
+                                    }
+                                )}
 
                                 {/* AI loading */}
 
@@ -781,8 +1485,10 @@ function AIAssistant() {
                                             event.target.value
                                         )
                                     }
-                                    onKeyDown={handleKeyDown}
-                                    placeholder="Ask about your notes..."
+                                    onKeyDown={
+                                        handleKeyDown
+                                    }
+                                    placeholder="Ask about your notes or schedule..."
                                     rows={1}
                                     disabled={loading}
                                     className="
@@ -806,7 +1512,9 @@ function AIAssistant() {
                                 />
 
                                 <motion.button
-                                    onClick={sendMessage}
+                                    onClick={
+                                        sendMessage
+                                    }
                                     disabled={
                                         loading ||
                                         !message.trim()

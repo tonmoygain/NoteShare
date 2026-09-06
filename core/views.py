@@ -52,6 +52,14 @@ from .serializers import (
     UserProfileSerializer,
 )
 
+from .google_calendar import (
+    get_google_authorization_url,
+    complete_google_authorization,
+    save_google_credentials,
+    is_google_calendar_connected,
+    get_upcoming_events,
+)
+
 
 # ==========================
 # Notifications
@@ -2471,6 +2479,71 @@ def ai_chat(request):
 
     message_lower = message.lower()
 
+    # =====================================================
+    # CALENDAR / PERSONAL ASSISTANT CONTEXT
+    # =====================================================
+
+    use_calendar = (
+        request.data.get(
+            "use_calendar",
+            False
+        )
+        is True
+    )
+
+    calendar_keywords = [
+        "today",
+        "tomorrow",
+        "schedule",
+        "calendar",
+        "event",
+        "events",
+        "meeting",
+        "meetings",
+        "class",
+        "classes",
+        "appointment",
+        "appointments",
+        "deadline",
+        "deadlines",
+        "busy",
+        "free",
+        "upcoming",
+        "next week",
+        "agenda",
+        "plan my day",
+        "what do i have",
+        "what's on",
+        "whats on",
+    ]
+
+    is_calendar_query = (
+        use_calendar
+        or any(
+            keyword in message_lower
+            for keyword in calendar_keywords
+        )
+    )
+
+    calendar_events = []
+
+    if is_calendar_query:
+
+        try:
+
+            calendar_events = get_upcoming_events(
+                request.user,
+                days=7,
+                max_results=20,
+            )
+
+        except Exception as error:
+
+            print(
+                "Calendar Context Error:",
+                repr(error)
+            )
+
     if (
         any(
             keyword in message_lower
@@ -2836,6 +2909,45 @@ Rules:
    student's education level and subject context.
 """
 
+
+    # =====================================================
+    # ADD PERSONAL ASSISTANT / CALENDAR INSTRUCTION
+    # =====================================================
+
+    if is_calendar_query:
+
+        system_prompt += """
+
+PERSONAL ASSISTANT / CALENDAR RULES:
+
+You may receive Google Calendar information for the
+authenticated NoteShare user.
+
+1. Use the supplied calendar events when answering
+   schedule-related questions.
+
+2. Never invent calendar events.
+
+3. If the calendar contains no events for the requested
+   period, clearly say that no matching event was found.
+
+4. When useful, organize the answer chronologically.
+
+5. For questions about today, prioritize today's events.
+
+6. For questions about upcoming plans, prioritize the
+   nearest future events.
+
+7. Do not expose access tokens, refresh tokens, OAuth
+   credentials, or internal authentication details.
+
+8. Calendar information is private user context and
+   should only be used for the authenticated user.
+
+9. If calendar information is unavailable, say that the
+   calendar could not be accessed instead of guessing.
+"""
+
     # =====================================================
     # CONTENTS
     # =====================================================
@@ -2853,6 +2965,75 @@ USER QUESTION:
 {message}
 """
     )
+
+    # =====================================================
+    # CALENDAR CONTEXT
+    # =====================================================
+
+    if is_calendar_query:
+
+        if calendar_events:
+
+            calendar_lines = []
+
+            for event in calendar_events:
+
+                start = event.get(
+                    "start"
+                ) or "Unknown time"
+
+                end = event.get(
+                    "end"
+                ) or ""
+
+                summary = event.get(
+                    "summary",
+                    "Untitled event"
+                )
+
+                location = event.get(
+                    "location",
+                    ""
+                )
+
+                event_line = (
+                    f"- {summary}\n"
+                    f"  Start: {start}\n"
+                    f"  End: {end or 'Not specified'}"
+                )
+
+                if location:
+                    event_line += (
+                        f"\n  Location: {location}"
+                    )
+
+                calendar_lines.append(
+                    event_line
+                )
+
+            contents.append(
+                f"""
+--- GOOGLE CALENDAR CONTEXT ---
+
+The following events belong to the authenticated
+NoteShare user's Google Calendar.
+
+{chr(10).join(calendar_lines)}
+
+Use these events as the only source for calendar facts.
+"""
+            )
+
+        else:
+
+            contents.append(
+                """
+--- GOOGLE CALENDAR CONTEXT ---
+
+No upcoming Google Calendar events were available
+for the authenticated user.
+"""
+            )
 
     # =====================================================
     # ADD ACADEMIC CONTEXT
@@ -3136,3 +3317,165 @@ def mark_notifications_read(request):
         "message": "All notifications marked as read.",
         "updated": updated,
     })
+
+
+# =========================================================
+# GOOGLE CALENDAR
+# =========================================================
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def google_calendar_connect(request):
+
+    try:
+
+        authorization_url = (
+            get_google_authorization_url(
+                request.user.id
+            )
+        )
+
+        return Response({
+            "authorization_url":
+                authorization_url
+        })
+
+    except Exception as error:
+
+        print(
+            "Google Calendar Connect Error:",
+            repr(error)
+        )
+
+        return Response(
+            {
+                "error":
+                    "Could not start Google Calendar connection."
+            },
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+
+
+def google_calendar_callback(request):
+
+    frontend_url = os.getenv(
+        "FRONTEND_URL",
+        "http://localhost:5173"
+    )
+
+    try:
+
+        user_id, credentials = (
+            complete_google_authorization(
+                request
+            )
+        )
+
+        user = get_object_or_404(
+            User,
+            id=user_id
+        )
+
+        save_google_credentials(
+            user,
+            credentials
+        )
+
+        return HttpResponseRedirect(
+            f"{frontend_url}/?calendar=connected"
+        )
+
+    except Exception as error:
+
+        print(
+            "Google Calendar Callback Error:",
+            repr(error)
+        )
+
+        return HttpResponseRedirect(
+            f"{frontend_url}/?calendar=error"
+        )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def google_calendar_status(request):
+
+    connected = (
+        is_google_calendar_connected(
+            request.user
+        )
+    )
+
+    return Response({
+        "connected": connected
+    })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def google_calendar_events(request):
+
+    if not is_google_calendar_connected(
+        request.user
+    ):
+
+        return Response({
+            "connected": False,
+            "events": [],
+        })
+
+    try:
+
+        days = int(
+            request.GET.get(
+                "days",
+                7
+            )
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        days = 7
+
+    days = max(
+        1,
+        min(days, 30)
+    )
+
+    try:
+
+        events = get_upcoming_events(
+            request.user,
+            days=days,
+            max_results=20,
+        )
+
+        return Response({
+
+            "connected": True,
+
+            "events": events,
+
+        })
+
+    except Exception as error:
+
+        print(
+            "Google Calendar Events Error:",
+            repr(error)
+        )
+
+        return Response(
+            {
+                "connected": True,
+                "events": [],
+                "error":
+                    "Could not retrieve calendar events."
+            },
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )

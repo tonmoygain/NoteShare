@@ -2996,3 +2996,835 @@ html.dark .learning-insights-page .bg-gradient-to-br {
 html.dark .learning-insights-page > p.text-slate-400 {
     color: #64748b !important;
 }
+
+
+/* =========================================
+   AI TUTOR - FINAL PREMIUM DARK MODE
+   IMPORTANT:
+   This block is scoped only to AI Tutor.
+   Light mode remains completely unchanged.
+   ========================================= */
+
+html.dark .ai-tutor-page {
+    color: #e2e8f0;
+}
+
+
+/* =========================================
+   PAGE SURFACES
+   ========================================= */
+
+html.dark .ai-tutor-page .ai-tutor-note-panel,
+html.dark .ai-tutor-page .ai-tutor-mode-card,
+html.dark .ai-tutor-page .ai-tutor-session-card,
+html.dark .ai-tutor-page .ai-tutor-session-header,
+html.dark .ai-tutor-page .ai-tutor-chat-panel,
+html.dark .ai-tutor-page .ai-tutor-info-card {
+    background: #111827 !important;
+    border-color: #263247 !important;
+}
+
+
+/* =========================================
+   TOP NOTE SELECTOR
+   ========================================= */
+
+html.dark .ai-tutor-page .ai-tutor-note-panel {
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.22),
+        0 4px 18px rgba(0, 0, 0, 0.12) !important;
+}
+
+
+/* Study note heading */
+
+html.dark .ai-tutor-page .ai-tutor-note-panel h3 {
+    color: #f1f5f9 !important;
+}
+
+
+/* =========================================
+   EXPLORE WITHOUT A NOTE
+   ========================================= */
+
+/* Normal Explore card */
+
+html.dark .ai-tutor-note-panel > div.mt-5 > button:first-child {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(15, 23, 42, 0.96),
+            rgba(17, 24, 39, 0.98)
+        ) !important;
+
+    border-color: #334155 !important;
+    box-shadow:
+        0 12px 32px rgba(0, 0, 0, 0.16) !important;
+}
+
+
+/* Explore card hover */
+
+html.dark
+    .ai-tutor-note-panel
+    > div.mt-5
+    > button:first-child:hover {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(8, 47, 73, 0.72),
+            rgba(30, 41, 59, 0.96)
+        ) !important;
+
+    border-color: rgba(34, 211, 238, 0.42) !important;
+}
+
+
+/* Selected Explore card */
+
+html.dark
+    .ai-tutor-note-panel
+    > div.mt-5
+    > button:first-child[class*="border-cyan-300"] {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(8, 47, 73, 0.78),
+            rgba(30, 58, 138, 0.62)
+        ) !important;
+
+    border-color: rgba(34, 211, 238, 0.58) !important;
+
+    box-shadow:
+        0 18px 45px rgba(6, 182, 212, 0.10) !important;
+}
+
+
+/* Explore title */
+
+html.dark
+    .ai-tutor-note-panel
+    > div.mt-5
+    > button:first-child
+    .text-slate-800 {
+    color: #f1f5f9 !important;
+}
+
+
+/* Explore description */
+
+html.dark
+    .ai-tutor-note-panel
+    > div.mt-5
+    > button:first-child
+    .text-slate-400 {
+    color: #94a3b8 !important;
+}
+
+
+/* =========================================
+   NOTE OPTIONS
+   ========================================= */
+
+html.dark .ai-tutor-note-option {
+    background:
+        linear-gradient(
+            135deg,
+            #0f172a,
+            #111827
+        ) !important;
+
+    border-color: #263247 !important;
+}
+
+
+html.dark .ai-tutor-note-option:hover {
+    background:
+        linear-gradient(
+            135deg,
+            #172033,
+            #182338
+        ) !important;
+
+    border-color: #3b4a63 !important;
+}
+
+
+html.dark
+    .ai-tutor-note-option[class*="border-blue-300"] {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(30, 64, 175, 0.18),
+            rgba(6, 182, 212, 0.08)
+        ) !important;
+
+    border-color: #3b82f6 !important;
+
+    box-shadow:
+        0 14px 34px rgba(37, 99, 235, 0.10) !important;
+}
+
+
+html.dark .ai-tutor-note-option .text-slate-800 {
+    color: #f1f5f9 !important;
+}
+
+
+html.dark .ai-tutor-note-option .text-slate-400 {
+    color: #64748b !important;
+}
+
+
+/* =========================================
+   LEARNING MODE CARDS
+   ========================================= */
+
+html.dark .ai-tutor-mode-card {
+    background:
+        linear-gradient(
+            145deg,
+            #111827,
+            #0f172a
+        ) !important;
+
+    border-color: #263247 !important;
+}
+
+
+html.dark .ai-tutor-mode-card:hover {
+    background:
+        linear-gradient(
+            145deg,
+            #172033,
+            #111827
+        ) !important;
+
+    border-color: #3b4a63 !important;
+
+    box-shadow:
+        0 24px 55px rgba(0, 0, 0, 0.22) !important;
+}
+
+
+html.dark
+    .ai-tutor-mode-card[class*="border-blue-300"] {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(30, 64, 175, 0.18),
+            rgba(17, 24, 39, 0.98)
+        ) !important;
+
+    border-color: #3b82f6 !important;
+
+    box-shadow:
+        0 20px 48px rgba(37, 99, 235, 0.11) !important;
+}
+
+
+html.dark .ai-tutor-mode-card .bg-slate-100 {
+    background: #1e293b !important;
+    color: #94a3b8 !important;
+}
+
+
+html.dark .ai-tutor-mode-card h3 {
+    color: #f1f5f9 !important;
+}
+
+
+html.dark .ai-tutor-mode-card p {
+    color: #94a3b8 !important;
+}
+
+
+/* =========================================
+   DIFFICULTY CARDS
+   ========================================= */
+
+/*
+   Your current JSX does not use a special
+   difficulty class, so this targets only the
+   Step 03 card area through its content.
+*/
+
+html.dark .ai-tutor-page section button:has(h4) {
+    background:
+        linear-gradient(
+            145deg,
+            #111827,
+            #0f172a
+        ) !important;
+
+    border-color: #263247 !important;
+}
+
+
+html.dark .ai-tutor-page section button:has(h4):hover {
+    background:
+        linear-gradient(
+            145deg,
+            #172033,
+            #111827
+        ) !important;
+
+    border-color: #3b4a63 !important;
+}
+
+
+html.dark .ai-tutor-page section button:has(h4) h4 {
+    color: #f1f5f9 !important;
+}
+
+
+html.dark .ai-tutor-page section button:has(h4) p {
+    color: #94a3b8 !important;
+}
+
+
+html.dark .ai-tutor-page section button:has(h4) .bg-slate-100 {
+    background: #1e293b !important;
+    color: #94a3b8 !important;
+}
+
+
+/* Selected difficulty */
+
+html.dark
+    .ai-tutor-page
+    section
+    button:has(h4)[class*="border-blue-300"] {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(30, 64, 175, 0.18),
+            rgba(17, 24, 39, 0.98)
+        ) !important;
+
+    border-color: #3b82f6 !important;
+
+    box-shadow:
+        0 18px 42px rgba(37, 99, 235, 0.10) !important;
+}
+
+
+/* =========================================
+   START SESSION
+   ========================================= */
+
+html.dark .ai-tutor-session-card {
+    background:
+        linear-gradient(
+            145deg,
+            #111827,
+            #0f172a
+        ) !important;
+
+    border-color: #263247 !important;
+}
+
+
+html.dark .ai-tutor-session-card h3 {
+    color: #f1f5f9 !important;
+}
+
+
+html.dark .ai-tutor-session-card p {
+    color: #94a3b8 !important;
+}
+
+
+/* Learning Intelligence button */
+
+html.dark
+    .ai-tutor-session-card
+    button:not([disabled]) {
+    border-color: #334155 !important;
+}
+
+
+/* =========================================
+   ACTIVE SESSION HEADER
+   ========================================= */
+
+html.dark .ai-tutor-session-header {
+    background:
+        linear-gradient(
+            145deg,
+            #111827,
+            #0f172a
+        ) !important;
+
+    border-color: #263247 !important;
+
+    box-shadow:
+        0 20px 55px rgba(0, 0, 0, 0.18) !important;
+}
+
+
+html.dark .ai-tutor-session-header h2 {
+    color: #f8fafc !important;
+}
+
+
+/* =========================================
+   ACADEMIC CONTEXT BADGE
+   ========================================= */
+
+html.dark
+    .ai-tutor-session-header
+    span[class*="border-cyan-100"] {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(8, 47, 73, 0.62),
+            rgba(30, 58, 138, 0.44)
+        ) !important;
+
+    border-color: rgba(34, 211, 238, 0.30) !important;
+
+    color: #67e8f9 !important;
+}
+
+
+/* Context source */
+
+html.dark
+    .ai-tutor-session-header
+    span[class*="bg-white/80"] {
+    background: rgba(15, 23, 42, 0.74) !important;
+    color: #67e8f9 !important;
+}
+
+
+/* =========================================
+   SESSION METRICS
+   ========================================= */
+
+html.dark
+    .ai-tutor-session-header
+    .bg-slate-50\/70 {
+    background:
+        linear-gradient(
+            145deg,
+            #172033,
+            #111827
+        ) !important;
+
+    border-color: #263247 !important;
+}
+
+
+html.dark
+    .ai-tutor-session-header
+    .text-slate-400 {
+    color: #64748b !important;
+}
+
+
+html.dark
+    .ai-tutor-session-header
+    .text-slate-800 {
+    color: #f1f5f9 !important;
+}
+
+
+/* Emerald metric */
+
+html.dark
+    .ai-tutor-session-header
+    .bg-emerald-50\/60 {
+    background: rgba(16, 185, 129, 0.09) !important;
+
+    border-color: rgba(52, 211, 153, 0.20) !important;
+}
+
+
+/* Amber metric */
+
+html.dark
+    .ai-tutor-session-header
+    .bg-amber-50\/60 {
+    background: rgba(245, 158, 11, 0.09) !important;
+
+    border-color: rgba(245, 158, 11, 0.20) !important;
+}
+
+
+/* Blue metric */
+
+html.dark
+    .ai-tutor-session-header
+    .bg-blue-50\/60 {
+    background: rgba(37, 99, 235, 0.11) !important;
+
+    border-color: rgba(59, 130, 246, 0.22) !important;
+}
+
+
+/* =========================================
+   NEW SESSION BUTTON
+   ========================================= */
+
+html.dark
+    .ai-tutor-session-header
+    button {
+    background: #111827 !important;
+    border-color: #334155 !important;
+    color: #cbd5e1 !important;
+}
+
+
+html.dark
+    .ai-tutor-session-header
+    button:hover {
+    background: #172033 !important;
+    border-color: #3b82f6 !important;
+    color: #93c5fd !important;
+}
+
+
+/* =========================================
+   CHAT PANEL
+   ========================================= */
+
+html.dark .ai-tutor-chat-panel {
+    background: #111827 !important;
+    border-color: #263247 !important;
+
+    box-shadow:
+        0 24px 65px rgba(0, 0, 0, 0.24) !important;
+}
+
+
+html.dark .ai-tutor-chat-panel > div:first-child {
+    background: #111827 !important;
+    border-bottom-color: #263247 !important;
+}
+
+
+html.dark .ai-tutor-chat-panel .bg-blue-50 {
+    background: rgba(37, 99, 235, 0.12) !important;
+}
+
+
+html.dark .ai-tutor-chat-panel .text-blue-600 {
+    color: #60a5fa !important;
+}
+
+
+/* Messages */
+
+html.dark .ai-tutor-messages {
+    background:
+        radial-gradient(
+            circle at 15% 15%,
+            rgba(37, 99, 235, 0.06),
+            transparent 26%
+        ),
+        radial-gradient(
+            circle at 85% 80%,
+            rgba(6, 182, 212, 0.04),
+            transparent 25%
+        ),
+        #0b1120 !important;
+}
+
+
+/* AI message */
+
+html.dark
+    .ai-tutor-chat-panel
+    .max-w-\[88\%\] {
+    background:
+        linear-gradient(
+            145deg,
+            #172033,
+            #111827
+        ) !important;
+
+    border-color: #263247 !important;
+
+    color: #e2e8f0 !important;
+
+    box-shadow:
+        0 8px 26px rgba(0, 0, 0, 0.18) !important;
+}
+
+
+/* =========================================
+   SOURCE NOTES
+   ========================================= */
+
+html.dark
+    .ai-tutor-chat-panel
+    [class*="border-t"] {
+    border-color: #263247 !important;
+}
+
+
+html.dark
+    .ai-tutor-chat-panel
+    button[class*="bg-blue-50"] {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(30, 64, 175, 0.17),
+            rgba(6, 182, 212, 0.07)
+        ) !important;
+
+    border-color: rgba(59, 130, 246, 0.28) !important;
+}
+
+
+html.dark
+    .ai-tutor-chat-panel
+    button[class*="bg-blue-50"]:hover {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(30, 64, 175, 0.25),
+            rgba(6, 182, 212, 0.11)
+        ) !important;
+
+    border-color: rgba(59, 130, 246, 0.45) !important;
+}
+
+
+/* =========================================
+   LOADING STATE
+   ========================================= */
+
+html.dark
+    .ai-tutor-messages
+    .border-slate-200 {
+    border-color: #263247 !important;
+}
+
+
+html.dark
+    .ai-tutor-messages
+    .bg-white {
+    background: #172033 !important;
+}
+
+
+/* =========================================
+   CHAT COMPOSER
+   ========================================= */
+
+html.dark
+    .ai-tutor-chat-panel
+    > div:last-child {
+    background: #111827 !important;
+    border-top-color: #263247 !important;
+}
+
+
+html.dark
+    .ai-tutor-chat-panel
+    textarea {
+    background: transparent !important;
+    color: #f1f5f9 !important;
+}
+
+
+html.dark
+    .ai-tutor-chat-panel
+    textarea::placeholder {
+    color: #64748b !important;
+}
+
+
+html.dark
+    .ai-tutor-chat-panel
+    textarea:focus {
+    background: transparent !important;
+}
+
+
+/* =========================================
+   SIDEBAR INFO CARDS
+   ========================================= */
+
+html.dark .ai-tutor-info-card {
+    background:
+        linear-gradient(
+            145deg,
+            #111827,
+            #0f172a
+        ) !important;
+
+    border-color: #263247 !important;
+}
+
+
+html.dark .ai-tutor-info-card h3 {
+    color: #f1f5f9 !important;
+}
+
+
+html.dark .ai-tutor-info-card p {
+    color: #94a3b8 !important;
+}
+
+
+/* =========================================
+   CURRENT FOCUS
+   ========================================= */
+
+html.dark
+    .ai-tutor-info-card.bg-blue-50\/60 {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(30, 64, 175, 0.16),
+            rgba(17, 24, 39, 0.92)
+        ) !important;
+
+    border-color: rgba(59, 130, 246, 0.26) !important;
+}
+
+
+/* =========================================
+   FOCUS AREAS
+   ========================================= */
+
+html.dark
+    .ai-tutor-info-card.bg-amber-50\/60 {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(120, 53, 15, 0.18),
+            rgba(17, 24, 39, 0.92)
+        ) !important;
+
+    border-color: rgba(245, 158, 11, 0.24) !important;
+}
+
+
+html.dark
+    .ai-tutor-info-card .border-amber-100 {
+    border-color: rgba(245, 158, 11, 0.18) !important;
+}
+
+
+html.dark
+    .ai-tutor-info-card .border-amber-100.bg-white {
+    background: #172033 !important;
+}
+
+
+/* =========================================
+   REINFORCED TOPICS
+   ========================================= */
+
+html.dark
+    .ai-tutor-info-card.bg-emerald-50\/60 {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(6, 78, 59, 0.18),
+            rgba(17, 24, 39, 0.92)
+        ) !important;
+
+    border-color: rgba(16, 185, 129, 0.23) !important;
+}
+
+
+html.dark
+    .ai-tutor-info-card .border-emerald-100 {
+    border-color: rgba(52, 211, 153, 0.18) !important;
+}
+
+
+html.dark
+    .ai-tutor-info-card .border-emerald-100.bg-white {
+    background: #172033 !important;
+}
+
+
+/* =========================================
+   EMPTY STATE
+   ========================================= */
+
+html.dark
+    .ai-tutor-note-panel
+    .border-dashed {
+    background:
+        linear-gradient(
+            145deg,
+            #172033,
+            #111827
+        ) !important;
+
+    border-color: #334155 !important;
+}
+
+
+html.dark
+    .ai-tutor-note-panel
+    .border-dashed h4 {
+    color: #e5e7eb !important;
+}
+
+
+/* =========================================
+   ERROR
+   ========================================= */
+
+html.dark
+    .ai-tutor-page
+    .bg-red-50 {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(127, 29, 29, 0.20),
+            rgba(69, 10, 10, 0.16)
+        ) !important;
+
+    border-color: rgba(248, 113, 113, 0.22) !important;
+
+    color: #fca5a5 !important;
+}
+
+
+/* =========================================
+   PREMIUM DARK SCROLLBAR
+   ========================================= */
+
+html.dark
+    .ai-tutor-messages::-webkit-scrollbar {
+    width: 7px;
+}
+
+
+html.dark
+    .ai-tutor-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+html.dark
+    .ai-tutor-messages::-webkit-scrollbar-thumb {
+    background:
+        linear-gradient(
+            180deg,
+            #334155,
+            #1e40af
+        );
+
+    border-radius: 999px;
+}
+
+
+html.dark
+    .ai-tutor-messages::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(
+            180deg,
+            #475569,
+            #2563eb
+        );
+}

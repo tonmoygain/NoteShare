@@ -367,3 +367,44 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.recipient.username} - {self.title}"
+
+
+
+# =========================================================
+# GOOGLE CALENDAR CONNECTION
+# =========================================================
+
+class GoogleCalendarConnection(models.Model):
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="google_calendar_connection"
+    )
+
+    access_token = models.TextField()
+
+    refresh_token = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    token_expiry = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    scopes = models.TextField(
+        blank=True
+    )
+
+    connected_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return f"{self.user.username} Google Calendar"

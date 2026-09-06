@@ -178,5 +178,34 @@ path(
     name="social-login-token",
 ),
 
-]
 
+
+# ==========================
+# Google Calendar API
+# ==========================
+
+path(
+    "api/google-calendar/connect/",
+    views.google_calendar_connect,
+    name="google-calendar-connect"
+),
+
+path(
+    "api/google-calendar/callback/",
+    views.google_calendar_callback,
+    name="google-calendar-callback"
+),
+
+path(
+    "api/google-calendar/status/",
+    views.google_calendar_status,
+    name="google-calendar-status"
+),
+
+path(
+    "api/google-calendar/events/",
+    views.google_calendar_events,
+    name="google-calendar-events"
+),
+
+]
