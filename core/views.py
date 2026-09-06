@@ -2,6 +2,7 @@ import requests
 import re
 import os
 import mimetypes
+from datetime import timedelta
 
 from django.http import HttpResponseRedirect
 from difflib import SequenceMatcher
@@ -58,6 +59,13 @@ from .google_calendar import (
     save_google_credentials,
     is_google_calendar_connected,
     get_upcoming_events,
+    build_schedule_intelligence_response,
+    build_best_free_time_response,
+    build_schedule_list_response,
+    get_next_class_event,
+    parse_calendar_datetime,
+    extract_time_token,
+    LOCAL_TIMEZONE,
 )
 
 
@@ -2386,6 +2394,419 @@ def find_relevant_notes(query, max_notes=3):
     return relevant_notes[:max_notes]
 
 
+# =========================================================
+# CALENDAR → NOTESHARE INTELLIGENCE
+# =========================================================
+
+def find_calendar_related_notes(
+    event,
+    max_notes=3,
+):
+    """
+    Find NoteShare notes that are strongly related to a
+    calendar event.
+
+    Metadata is used first.
+    Document extraction is only used for the strongest
+    candidates, preventing unrelated notes from leaking
+    into calendar preparation context.
+    """
+
+    if not event:
+        return []
+
+    event_text = " ".join([
+        event.get("summary", ""),
+        event.get("description", ""),
+        event.get("location", ""),
+    ]).strip().lower()
+
+    query_words = set(
+        re.findall(
+            r"\b[a-zA-Z0-9]+\b",
+            event_text
+        )
+    )
+
+    stop_words = {
+        "the",
+        "and",
+        "for",
+        "with",
+        "class",
+        "lecture",
+        "lab",
+        "lesson",
+        "tutorial",
+        "course",
+        "meeting",
+        "session",
+        "at",
+        "on",
+        "in",
+        "today",
+        "tomorrow",
+    }
+
+    query_words = {
+        word
+        for word in query_words
+        if word not in stop_words
+        and len(word) >= 2
+    }
+
+    if not query_words:
+        return []
+
+    candidates = []
+
+    notes = Note.objects.all()
+
+    for note in notes:
+
+        metadata_fields = [
+            note.title or "",
+            note.department or "",
+            note.class_level or "",
+            note.subject or "",
+            note.chapter or "",
+            note.board or "",
+            note.semester or "",
+            note.course or "",
+            note.description or "",
+        ]
+
+        metadata_text = " ".join(
+            metadata_fields
+        ).lower()
+
+        metadata_words = set(
+            re.findall(
+                r"\b[a-zA-Z0-9]+\b",
+                metadata_text
+            )
+        )
+
+        title_words = set(
+            re.findall(
+                r"\b[a-zA-Z0-9]+\b",
+                (note.title or "").lower()
+            )
+        )
+
+        subject_words = set(
+            re.findall(
+                r"\b[a-zA-Z0-9]+\b",
+                (note.subject or "").lower()
+            )
+        )
+
+        department_words = set(
+            re.findall(
+                r"\b[a-zA-Z0-9]+\b",
+                (note.department or "").lower()
+            )
+        )
+
+        chapter_words = set(
+            re.findall(
+                r"\b[a-zA-Z0-9]+\b",
+                (note.chapter or "").lower()
+            )
+        )
+
+        score = 0
+
+        score += (
+            len(
+                query_words.intersection(
+                    title_words
+                )
+            ) * 12
+        )
+
+        score += (
+            len(
+                query_words.intersection(
+                    subject_words
+                )
+            ) * 10
+        )
+
+        score += (
+            len(
+                query_words.intersection(
+                    department_words
+                )
+            ) * 8
+        )
+
+        score += (
+            len(
+                query_words.intersection(
+                    chapter_words
+                )
+            ) * 7
+        )
+
+        score += (
+            len(
+                query_words.intersection(
+                    metadata_words
+                )
+            ) * 2
+        )
+
+        if score > 0:
+
+            candidates.append(
+                (
+                    score,
+                    note
+                )
+            )
+
+    candidates.sort(
+        key=lambda item: item[0],
+        reverse=True,
+    )
+
+    # Only top metadata candidates get content verification.
+    verified = []
+
+    for score, note in candidates[:8]:
+
+        note_text = get_note_text(
+            note
+        ).lower()
+
+        if not note_text:
+
+            verified.append(
+                (
+                    score,
+                    note
+                )
+            )
+
+            continue
+
+        content_words = set(
+            re.findall(
+                r"\b[a-zA-Z0-9]+\b",
+                note_text
+            )
+        )
+
+        content_overlap = len(
+            query_words.intersection(
+                content_words
+            )
+        )
+
+        verified_score = (
+            score
+            + content_overlap
+        )
+
+        verified.append(
+            (
+                verified_score,
+                note
+            )
+        )
+
+    verified.sort(
+        key=lambda item: item[0],
+        reverse=True,
+    )
+
+    # Conservative threshold.
+    # This prevents weak, generic matches from becoming
+    # calendar preparation sources.
+    best_score = (
+        verified[0][0]
+        if verified
+        else 0
+    )
+
+    if best_score < 7:
+        return []
+
+    return [
+        note
+        for score, note in verified
+        if score >= max(
+            7,
+            best_score * 0.55
+        )
+    ][:max_notes]
+
+
+# =========================================================
+# CALENDAR ACADEMIC PREPARATION
+# =========================================================
+
+def is_calendar_preparation_query(
+    message_lower
+):
+    preparation_phrases = [
+        "what should i revise",
+        "what should i review",
+        "what should i study",
+        "what do i need to revise",
+        "what do i need to review",
+        "prepare for class",
+        "prepare for the class",
+        "prepare before class",
+        "before class",
+        "before the class",
+        "before my class",
+        "before lecture",
+        "before the lecture",
+        "what should i prepare",
+    ]
+
+    return any(
+        phrase in message_lower
+        for phrase in preparation_phrases
+    )
+
+
+def find_relevant_calendar_event(
+    query,
+    events,
+):
+    """
+    Find the calendar event most relevant to the query.
+
+    Time match is strongest when the user explicitly
+    mentions a clock time.
+    """
+
+    if not events:
+        return None
+
+    query_lower = (
+        query or ""
+    ).lower()
+
+    target_time = None
+
+    try:
+        target_time = extract_time_token(
+            query_lower
+        )
+    except Exception:
+        target_time = None
+
+    query_words = set(
+        re.findall(
+            r"\b[a-zA-Z0-9]+\b",
+            query_lower
+        )
+    )
+
+    generic_words = {
+        "i",
+        "have",
+        "my",
+        "what",
+        "should",
+        "do",
+        "before",
+        "class",
+        "the",
+        "at",
+        "pm",
+        "am",
+        "prepare",
+        "revise",
+        "review",
+        "study",
+        "need",
+        "to",
+        "for",
+    }
+
+    query_words = {
+        word
+        for word in query_words
+        if word not in generic_words
+        and len(word) >= 2
+    }
+
+    best_event = None
+    best_score = 0
+
+    for event in events:
+
+        score = 0
+
+        event_text = " ".join([
+            event.get("summary", ""),
+            event.get("description", ""),
+        ]).lower()
+
+        event_words = set(
+            re.findall(
+                r"\b[a-zA-Z0-9]+\b",
+                event_text
+            )
+        )
+
+        score += (
+            len(
+                query_words.intersection(
+                    event_words
+                )
+            ) * 10
+        )
+
+        if target_time:
+
+            event_start = parse_calendar_datetime(
+                event.get("start")
+            )
+
+            if event_start:
+
+                event_start = (
+                    event_start
+                    .astimezone(
+                        LOCAL_TIMEZONE
+                    )
+                )
+
+                if (
+                    event_start.hour
+                    == target_time.hour
+                    and event_start.minute
+                    == target_time.minute
+                ):
+                    score += 30
+
+        if (
+            "class" in event_text
+            or "lecture" in event_text
+            or "lab" in event_text
+            or "tutorial" in event_text
+        ):
+            score += 5
+
+        if score > best_score:
+
+            best_score = score
+            best_event = event
+
+    if best_event:
+        return best_event
+
+    return get_next_class_event(
+        events
+    )
+
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def ai_chat(request):
@@ -2511,12 +2932,53 @@ def ai_chat(request):
         "what do i have",
         "what's on",
         "whats on",
+        "best time",
+        "when should i",
+        "free slot",
+        "free time",
+        "available slot",
+        "find me a slot",
+        "find a slot",
+        "best slot",
     ]
 
     is_calendar_query = any(
         
         keyword in message_lower
         for keyword in calendar_keywords 
+    )
+
+
+    # =====================================================
+    # ADVANCED PERSONAL ASSISTANT INTENTS
+    # =====================================================
+
+    schedule_overview_query = any(
+        phrase in message_lower
+        for phrase in [
+            "what do i have today",
+            "what do i have tomorrow",
+            "what's on today",
+            "whats on today",
+            "what's on tomorrow",
+            "whats on tomorrow",
+            "do i have anything tomorrow",
+            "do i have anything tomorrow morning",
+            "do i have anything tomorrow afternoon",
+            "do i have anything tomorrow evening",
+            "when is my next class",
+            "what is my next class",
+            "do i have any deadlines",
+            "deadlines this week",
+            "what do i have after",
+            "what do i have before",
+        ]
+    )
+
+    calendar_preparation_query = (
+        is_calendar_preparation_query(
+            message_lower
+        )
     )
 
     calendar_events = []
@@ -2827,7 +3289,18 @@ def ai_chat(request):
         client = genai.Client(
             api_key=os.getenv(
                 "GEMINI_API_KEY"
-            )
+            ),
+            http_options=types.HttpOptions(
+                timeout=60000,
+                retry_options=types.HttpRetryOptions(
+                    attempts=3,
+                    initial_delay=1,
+                    max_delay=5,
+                    exp_base=2,
+                    jitter=1,
+                    http_status_codes=[429, 500, 502, 503, 504],
+                ),
+            ),
         )
 
     except Exception as error:
@@ -2872,6 +3345,404 @@ def ai_chat(request):
         )
 
     print("ACADEMIC CONTEXT:", academic_context)
+
+
+    # =====================================================
+    # CALENDAR → NOTESHARE PREPARATION INTELLIGENCE
+    # =====================================================
+
+    if (
+        is_calendar_query
+        and calendar_preparation_query
+    ):
+
+        relevant_event = (
+            find_relevant_calendar_event(
+                message,
+                calendar_events,
+            )
+        )
+
+        if not relevant_event:
+
+            return Response({
+                "reply": (
+                    "I couldn't identify the calendar event "
+                    "you're referring to."
+                ),
+                "sources": [],
+                "academic_context": academic_context,
+                "calendar_intelligence": True,
+            })
+
+        calendar_related_notes = (
+            find_calendar_related_notes(
+                relevant_event,
+                max_notes=3,
+            )
+        )
+
+        event_title = (
+            relevant_event.get(
+                "summary",
+                "Untitled event",
+            )
+            or "Untitled event"
+        )
+
+        event_start = (
+            relevant_event.get(
+                "start",
+                "",
+            )
+            or ""
+        )
+
+        event_end = (
+            relevant_event.get(
+                "end",
+                "",
+            )
+            or ""
+        )
+
+        event_description = (
+            relevant_event.get(
+                "description",
+                "",
+            )
+            or ""
+        )
+
+        if not calendar_related_notes:
+
+            return Response({
+                "reply": (
+                    f"You have '{event_title}' on your calendar"
+                    f"{f' at {event_start}' if event_start else ''}."
+                    "\n\n"
+                    "I couldn't find a sufficiently relevant "
+                    "NoteShare note to recommend specific "
+                    "revision material for it."
+                ),
+                "sources": [],
+                "academic_context": academic_context,
+                "calendar_intelligence": True,
+            })
+
+        preparation_contents = []
+
+        preparation_contents.append(
+            """
+You are NoteShare's Calendar + Study Intelligence.
+
+The user is asking what they should study or revise
+for a specific calendar event.
+
+Use ONLY:
+1. The supplied calendar event.
+2. The supplied relevant NoteShare notes.
+
+Do not invent topics, chapters, deadlines, or study
+materials.
+
+Give practical preparation advice based on the actual
+NoteShare materials available.
+
+Prefer:
+- the most relevant topics to revise
+- important concepts
+- likely prerequisite knowledge
+- a short priority order
+- a concise study plan when useful
+
+Do not mention internal matching, scoring, or system logic.
+"""
+        )
+
+        preparation_contents.append(
+            f"""
+--- CALENDAR EVENT ---
+
+Title: {event_title}
+Start: {event_start or "Unknown"}
+End: {event_end or "Unknown"}
+Description: {event_description or "None"}
+"""
+        )
+
+        preparation_sources = []
+
+        for note in calendar_related_notes:
+
+            preparation_sources.append({
+                "id": note.id,
+                "title": note.title,
+            })
+
+            preparation_contents.append(
+                f"""
+--- RELEVANT NOTESHARE NOTE: {note.title} ---
+
+{build_academic_context_block(note)}
+"""
+            )
+
+            note_text = get_note_text(
+                note
+            )
+
+            if note_text:
+
+                preparation_contents.append(
+                    f"""
+--- NOTE CONTENT: {note.title} ---
+
+{note_text[:12000]}
+"""
+                )
+
+        preparation_contents.append(
+            f"""
+--- USER QUESTION ---
+
+{message}
+"""
+        )
+
+        try:
+
+            preparation_response = (
+                client.models.generate_content(
+                    model="gemini-3.1-flash-lite",
+                    contents=preparation_contents,
+                    config=types.GenerateContentConfig(
+                        system_instruction=(
+                            "Answer as a helpful academic "
+                            "personal assistant. "
+                            "Use only the supplied calendar "
+                            "event and NoteShare notes."
+                        )
+                    ),
+                )
+            )
+
+            preparation_reply = (
+                preparation_response.text
+                or "I couldn't generate a preparation plan."
+            )
+
+            return Response({
+                "reply": preparation_reply,
+                "sources": preparation_sources,
+                "academic_context": academic_context,
+                "calendar_intelligence": True,
+            })
+
+        except Exception as error:
+
+            print(
+                "CALENDAR PREPARATION AI ERROR:",
+                repr(error)
+            )
+
+            return Response({
+                "reply": (
+                    "I found the relevant calendar event "
+                    "and NoteShare material, but I couldn't "
+                    "generate the preparation guidance right now."
+                ),
+                "sources": preparation_sources,
+                "academic_context": academic_context,
+                "calendar_intelligence": True,
+            })
+
+
+    # =====================================================
+    # SMART SCHEDULE INTELLIGENCE
+    # =====================================================
+
+    schedule_query = any(
+        phrase in message_lower
+        for phrase in [
+            "am i free",
+            "am i available",
+            "free at",
+            "available at",
+            "do i have time",
+            "do i have a free",
+            "can i study",
+            "can i work",
+            "can i schedule",
+        ]
+    )
+
+
+        # =====================================================
+    # ADVANCED SCHEDULE OVERVIEW
+    # =====================================================
+
+    if (
+        is_calendar_query
+        and schedule_overview_query
+    ):
+
+        try:
+
+            schedule_overview_reply = (
+                build_schedule_list_response(
+                    message,
+                    calendar_events,
+                )
+            )
+
+            if schedule_overview_reply:
+
+                return Response({
+                    "reply": schedule_overview_reply,
+                    "sources": [],
+                    "academic_context": academic_context,
+                    "schedule_intelligence": True,
+                })
+
+        except Exception as error:
+
+            print(
+                "SCHEDULE OVERVIEW ERROR:",
+                repr(error)
+            )
+
+            return Response({
+                "reply": (
+                    "I couldn't reliably read "
+                    "your calendar schedule right now."
+                ),
+                "sources": [],
+                "academic_context": academic_context,
+                "schedule_intelligence": True,
+            })
+
+
+    # =====================================================
+    # BEST FREE TIME QUERY
+    # =====================================================
+
+    best_time_query = (
+        any(
+            phrase in message_lower
+            for phrase in [
+                "best time",
+                "when should i",
+                "free slot",
+                "free time",
+                "available slot",
+                "find me a slot",
+                "find a slot",
+                "best slot",
+            ]
+        )
+        and any(
+            phrase in message_lower
+            for phrase in [
+                "study",
+                "work",
+                "read",
+                "practice",
+                "focus",
+                "task",
+                "slot",
+            ]
+        )
+        and any(
+            digit in message_lower
+            for digit in "0123456789"
+        )
+    )
+
+    if (
+        is_calendar_query
+        and best_time_query
+    ):
+
+        try:
+
+            best_time_reply = (
+                build_best_free_time_response(
+                    message,
+                    calendar_events,
+                )
+            )
+
+            if best_time_reply:
+
+                return Response({
+                    "reply": best_time_reply,
+                    "sources": [],
+                    "academic_context": academic_context,
+                    "schedule_intelligence": True,
+                })
+
+        except Exception as error:
+
+            print(
+                "BEST FREE TIME ERROR:",
+                repr(error)
+            )
+
+            return Response({
+                "reply": (
+                    "I couldn't reliably calculate "
+                    "a free time slot from your calendar."
+                ),
+                "sources": [],
+                "academic_context": academic_context,
+                "schedule_intelligence": True,
+            })
+
+    # =====================================================
+    # POINT / PERIOD AVAILABILITY QUERY
+    # =====================================================
+
+    if (
+        is_calendar_query
+        and schedule_query
+    ):
+        try:
+
+            smart_schedule_reply = (
+                build_schedule_intelligence_response(
+                    message,
+                    calendar_events,
+                )
+            )
+
+            if smart_schedule_reply:
+
+                return Response({
+                    "reply": smart_schedule_reply,
+                    "sources": [],
+                    "academic_context": academic_context,
+                    "schedule_intelligence": True,
+                })
+
+        except Exception as error:
+
+            print(
+                "SMART SCHEDULE ERROR:",
+                repr(error)
+            )
+
+            # Do not send the request to Gemini.
+            # Availability questions must never be guessed.
+            return Response({
+                "reply": (
+                    "I couldn't reliably check "
+                    "your schedule for that time."
+                ),
+                "sources": [],
+                "academic_context": academic_context,
+                "schedule_intelligence": True,
+            })
 
 
     if tutor_mode:
@@ -3413,6 +4284,149 @@ def google_calendar_status(request):
     })
 
 
+# =========================================================
+# CALENDAR REMINDER SYNC
+# =========================================================
+
+def sync_calendar_reminders(
+    user,
+    events,
+):
+    """
+    Create NoteShare notifications for calendar events
+    that are coming up soon.
+
+    Uses the existing Notification model with
+    notification_type="system".
+
+    This is request-driven and non-blocking:
+    reminder failures never break calendar loading.
+    """
+
+    if not events:
+        return
+
+    now = timezone.now().astimezone(
+        LOCAL_TIMEZONE
+    )
+
+    # -----------------------------------------------------
+    # Only inspect events coming up within 24 hours.
+    # -----------------------------------------------------
+
+    for event in events:
+
+        if event.get("is_all_day"):
+            continue
+
+        event_start = parse_calendar_datetime(
+            event.get("start")
+        )
+
+        if not event_start:
+            continue
+
+        event_start = event_start.astimezone(
+            LOCAL_TIMEZONE
+        )
+
+        seconds_until_event = (
+            event_start - now
+        ).total_seconds()
+
+        # Ignore past events.
+        if seconds_until_event <= 0:
+            continue
+
+        # Ignore events more than 24 hours away.
+        if seconds_until_event > 24 * 60 * 60:
+            continue
+
+        title = (
+            event.get(
+                "summary",
+                "Untitled event",
+            )
+            or "Untitled event"
+        )
+
+        # -------------------------------------------------
+        # 1. Within 60 minutes
+        # -------------------------------------------------
+
+        if seconds_until_event <= 60 * 60:
+
+            notification_title = (
+                "Calendar reminder"
+            )
+
+            notification_message = (
+                f"Starting soon: {title}"
+            )
+
+        # -------------------------------------------------
+        # 2. Within 24 hours
+        # -------------------------------------------------
+
+        else:
+
+            notification_title = (
+                "Upcoming event"
+            )
+
+            notification_message = (
+                f"Coming up: {title}"
+            )
+
+        # -------------------------------------------------
+        # Prevent duplicate reminders.
+        # -------------------------------------------------
+
+        recent_cutoff = (
+            timezone.now()
+            - timedelta(days=2)
+        )
+
+        existing_notification = (
+            Notification.objects
+            .filter(
+                recipient=user,
+                notification_type="system",
+                title=notification_title,
+                message=notification_message,
+                created_at__gte=recent_cutoff,
+            )
+            .exists()
+        )
+
+        if existing_notification:
+            continue
+
+        try:
+
+            Notification.objects.create(
+                recipient=user,
+                notification_type="system",
+                title=notification_title,
+                message=notification_message,
+                link=event.get(
+                    "html_link",
+                    ""
+                ) or "",
+            )
+
+        except Exception as error:
+
+            print(
+                "Calendar Reminder Error:",
+                repr(error)
+            )
+
+            # Reminder failure must never
+            # break the calendar request.
+            continue
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def google_calendar_events(request):
@@ -3453,6 +4467,11 @@ def google_calendar_events(request):
             request.user,
             days=days,
             max_results=20,
+        )
+
+        sync_calendar_reminders(
+            request.user,
+            events,
         )
 
         return Response({

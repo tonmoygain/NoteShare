@@ -419,7 +419,9 @@ function AIAssistant() {
 
     const calendarQuestions = [
         "What do I have today?",
-        "What's coming up this week?",
+        "Do I have anything tomorrow morning?",
+        "When is my next class?",
+        "Do I have any deadlines this week?",
     ];
 
     return (
