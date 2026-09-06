@@ -296,7 +296,6 @@ function AIAssistant() {
         try {
             const response = await API.post("ai/chat/", {
                 message: trimmedMessage,
-                use_calendar: calendarConnected,
             });
 
             setMessages((previous) => [

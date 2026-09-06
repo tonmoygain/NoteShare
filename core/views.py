@@ -2483,14 +2483,6 @@ def ai_chat(request):
     # CALENDAR / PERSONAL ASSISTANT CONTEXT
     # =====================================================
 
-    use_calendar = (
-        request.data.get(
-            "use_calendar",
-            False
-        )
-        is True
-    )
-
     calendar_keywords = [
         "today",
         "tomorrow",
@@ -2517,7 +2509,7 @@ def ai_chat(request):
         "whats on",
     ]
 
-    is_calendar_query = (
+    is_calendar_query = any(
         
         keyword in message_lower
         for keyword in calendar_keywords 
