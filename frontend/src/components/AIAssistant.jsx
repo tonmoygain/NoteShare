@@ -272,6 +272,65 @@ function AIAssistant() {
     );
 
     // =====================================================
+    // DAILY BRIEFING
+    // =====================================================
+
+    const getTimeOfDayGreeting = () => {
+        const hour = new Date().getHours();
+
+        if (hour < 12) {
+            return "Good morning";
+        }
+
+        if (hour < 18) {
+            return "Good afternoon";
+        }
+
+        return "Good evening";
+    };
+
+    const getNextTodayEvent = () => {
+        const timedEvents = todayEvents
+            .filter(
+                (event) =>
+                    event?.start &&
+                    !event.is_all_day
+            )
+            .map((event) => ({
+                ...event,
+                parsedStart: new Date(
+                    event.start
+                ),
+            }))
+            .filter(
+                (event) =>
+                    !Number.isNaN(
+                        event.parsedStart.getTime()
+                    )
+            )
+            .sort(
+                (a, b) =>
+                    a.parsedStart.getTime() -
+                    b.parsedStart.getTime()
+            );
+
+        const now = new Date();
+
+        return (
+            timedEvents.find(
+                (event) =>
+                    event.parsedStart >= now
+            ) || timedEvents[0] || null
+        );
+    };
+
+    const nextTodayEvent =
+        getNextTodayEvent();
+
+    const dailyGreeting =
+        getTimeOfDayGreeting();
+
+    // =====================================================
     // SEND MESSAGE
     // =====================================================
 
@@ -658,6 +717,153 @@ function AIAssistant() {
                                 py-5
                             "
                         >
+
+                            {/* =================================================
+                                DAILY BRIEFING
+                            ================================================= */}
+
+                            {calendarConnected && !calendarLoading && (
+                                <motion.div
+                                    initial={{
+                                        opacity: 0,
+                                        y: 8,
+                                    }}
+                                    animate={{
+                                        opacity: 1,
+                                        y: 0,
+                                    }}
+                                    className="
+                                        ai-assistant-daily-briefing
+                                        mb-4
+                                        overflow-hidden
+                                        rounded-[22px]
+                                        border
+                                        border-blue-100
+                                        bg-gradient-to-br
+                                        from-slate-950
+                                        via-blue-950
+                                        to-cyan-900
+                                        text-white
+                                        shadow-lg
+                                        shadow-blue-900/10
+                                    "
+                                >
+                                    <div className="relative overflow-hidden px-4 py-4">
+                                        <div className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-cyan-400/20 blur-3xl" />
+
+                                        <div className="relative">
+                                            <div className="mb-3 flex items-center justify-between gap-3">
+                                                <div className="flex items-center gap-2">
+                                                    <div
+                                                        className="
+                                                            flex
+                                                            h-8
+                                                            w-8
+                                                            items-center
+                                                            justify-center
+                                                            rounded-xl
+                                                            bg-white/10
+                                                            ring-1
+                                                            ring-white/10
+                                                        "
+                                                    >
+                                                        <Sparkles size={14} />
+                                                    </div>
+
+                                                    <p className="text-[9px] font-black uppercase tracking-[0.16em] text-cyan-200">
+                                                        Daily Briefing
+                                                    </p>
+                                                </div>
+
+                                                <span className="rounded-full bg-emerald-400/10 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-emerald-200">
+                                                    Live
+                                                </span>
+                                            </div>
+
+                                            <h4 className="text-[18px] font-black tracking-tight">
+                                                {dailyGreeting} 👋
+                                            </h4>
+
+                                            {todayEvents.length > 0 ? (
+                                                <>
+                                                    <p className="mt-1 text-[11px] font-medium leading-5 text-blue-100">
+                                                        You have{" "}
+                                                        <span className="font-black text-white">
+                                                            {todayEvents.length}{" "}
+                                                            {todayEvents.length === 1
+                                                                ? "event"
+                                                                : "events"}
+                                                        </span>{" "}
+                                                        scheduled for today.
+                                                    </p>
+
+                                                    {nextTodayEvent && (
+                                                        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
+                                                            <p className="text-[8px] font-black uppercase tracking-[0.14em] text-cyan-200">
+                                                                Next up
+                                                            </p>
+
+                                                            <div className="mt-2 flex items-start gap-3">
+                                                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10">
+                                                                    <Clock3 size={15} />
+                                                                </div>
+
+                                                                <div className="min-w-0">
+                                                                    <p className="truncate text-[11px] font-black text-white">
+                                                                        {nextTodayEvent.summary ||
+                                                                            "Untitled event"}
+                                                                    </p>
+
+                                                                    <p className="mt-1 text-[9px] font-semibold text-blue-100">
+                                                                        {formatEventTime(
+                                                                            nextTodayEvent
+                                                                        )}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {todayEvents.length === 1 ? (
+                                                        <p className="mt-3 text-[9px] font-semibold text-cyan-100/80">
+                                                            Your schedule looks light today.
+                                                        </p>
+                                                    ) : (
+                                                        <p className="mt-3 text-[9px] font-semibold text-cyan-100/80">
+                                                            Your agenda is ready above. I’ll keep it
+                                                            in context when you ask about your day.
+                                                        </p>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <p className="mt-1 text-[11px] font-medium leading-5 text-blue-100">
+                                                        Your calendar is clear today.
+                                                    </p>
+
+                                                    <div className="mt-4 rounded-2xl border border-emerald-300/10 bg-emerald-400/5 px-3 py-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <CheckCircle2
+                                                                size={15}
+                                                                className="text-emerald-300"
+                                                            />
+
+                                                            <p className="text-[10px] font-black text-emerald-100">
+                                                                No events scheduled
+                                                            </p>
+                                                        </div>
+
+                                                        <p className="mt-1 pl-5 text-[9px] font-semibold text-blue-100/70">
+                                                            You have a clear day ahead.
+                                                        </p>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+
                             {/* =================================================
                                 PERSONAL ASSISTANT / CALENDAR
                             ================================================== */}
