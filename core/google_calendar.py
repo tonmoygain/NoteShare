@@ -69,6 +69,7 @@ def create_google_flow(state=None):
             GOOGLE_CALENDAR_SCOPE
         ],
         state=state,
+        autogenerate_code_verifier=True,
     )
 
     flow.redirect_uri = GOOGLE_REDIRECT_URI
@@ -94,7 +95,10 @@ def get_google_authorization_url(user_id):
 
     cache.set(
         f"google_calendar_oauth:{state}",
-        user_id,
+        {
+            "user_id": user_id,
+            "code_verifier": flow.code_verifier,
+        },
         timeout=600,
     )
 
@@ -121,11 +125,11 @@ def complete_google_authorization(request):
         f"google_calendar_oauth:{state}"
     )
 
-    user_id = cache.get(
+    oauth_data = cache.get(
         cache_key
     )
 
-    if not user_id:
+    if not oauth_data:
 
         raise ValueError(
             "Invalid or expired OAuth state."
@@ -136,9 +140,25 @@ def complete_google_authorization(request):
         cache_key
     )
 
+    user_id = oauth_data.get(
+        "user_id"
+    )
+
+    code_verifier = oauth_data.get(
+        "code_verifier"
+    )
+
+    if not user_id:
+
+        raise ValueError(
+            "Invalid OAuth user state."
+        )
+
     flow = create_google_flow(
         state=state
     )
+
+    flow.code_verifier = code_verifier
 
     flow.fetch_token(
         authorization_response=request.build_absolute_uri()
