@@ -76,6 +76,9 @@ function AITutor() {
     const [learningSessionId, setLearningSessionId] =
         useState(null);
 
+    const [academicContext, setAcademicContext] =
+        useState(null);
+
     /* =========================================================
        LOAD NOTES
     ========================================================= */
@@ -136,12 +139,12 @@ function AITutor() {
             tag: "Practice",
         },
         {
-            id: "challenge",
-            title: "Challenge Me",
+            id: "explore",
+            title: "Explore Any Topic",
             description:
-                "Solve conceptual and application-based problems that test your reasoning.",
-            icon: Target,
-            tag: "Think",
+                "Ask about any academic topic and learn beyond your uploaded notes.",
+            icon: Sparkles,
+            tag: "Beyond Notes",
         },
     ];
 
@@ -150,11 +153,15 @@ function AITutor() {
     ========================================================= */
 
     const getModeInstruction = (mode) => {
-        if (!selectedNote) {
+        if (
+            !selectedNote && 
+            mode !== "explore"
+        ) {
             return "";
         }
 
-        const noteName = selectedNote.title;
+        const noteName = 
+            selectedNote?.title || "Open Academic Topic";
 
         if (mode === "teach") {
             return `
@@ -211,31 +218,31 @@ Do not claim mastery from a single correct answer.
 `;
         }
 
+        if (mode === "explore") {
         return `
-You are NoteShare AI Tutor in ADAPTIVE CHALLENGE MODE.
+You are NoteShare AI Tutor in OPEN ACADEMIC LEARNING MODE.
 
-Selected academic note:
-"${noteName}"
+The student wants to learn beyond the selected NoteShare material.
 
-Current difficulty:
-${currentDifficulty}
+Your role:
+1. Teach the requested academic topic clearly.
+2. Do not restrict the answer to the uploaded note.
+3. Use reliable general academic knowledge when the answer
+   is not present in the selected note.
+4. Explain concepts step by step.
+5. Adapt depth to the student's academic level.
+6. Use examples, analogies, and reasoning when useful.
+7. Ask short understanding-check questions when appropriate.
+8. Never fabricate facts, formulas, references, or statistics.
+9. If the student's question is ambiguous, explain the most
+   likely academic interpretation and briefly clarify it.
 
-Your job is to test reasoning, application, and conceptual understanding.
-
-Rules:
-1. Ask ONE conceptual or application-based problem at a time.
-2. Prefer reasoning over memorized definitions.
-3. Ask the student to explain why they reached their conclusion.
-4. Evaluate both reasoning and final answer.
-5. Identify the concept involved in an incorrect response.
-6. If the student succeeds, increase conceptual difficulty.
-7. If the student struggles, temporarily move to a simpler supporting problem.
-8. Keep every question grounded in the retrieved NoteShare material.
-
-Do not create unsupported facts.
-Do not claim mastery from one successful response.
+Important:
+The selected NoteShare note remains useful context when relevant,
+but it is NOT the only allowed source in this mode.
 `;
-    };
+    }
+};
 
     /* =========================================================
        STRUCTURED AI MARKERS
@@ -255,11 +262,13 @@ Rules:
 - Use PARTIAL when the response has some correct reasoning but is incomplete.
 - Use INCORRECT when the response is materially wrong.
 - TUTOR_TOPIC should identify the main concept being taught or evaluated.
-- TUTOR_NEXT_DIFFICULTY should recommend the next level.
+
+- TUTOR_NEXT_DIFFICULTY may be omitted when no difficulty recommendation is relevant.
 
 The student-selected difficulty is fixed for this session.
-Do not change the difficulty level automatically.
-Do not recommend a different difficulty level.
+Do not automatically change the student's selected difficulty.
+
+For learning progression, adapt the complexity of the next task only within the selected difficulty unless the student explicitly starts a new session with another difficulty.
 
 Do not put any explanation outside those three marker lines inside the marker block.
 `;
@@ -413,8 +422,9 @@ Begin teaching the selected note and finish with one short understanding-check q
 For QUIZ MODE:
 Ask the first question.
 
-For CHALLENGE MODE:
-Ask the first conceptual/application challenge.
+For EXPLORE ANY TOPIC MODE:
+Introduce the open academic learning experience and invite the student to ask any academic question, whether or not it is covered by the selected NoteShare material.
+
 
 Do not reveal answers before the student responds.
 `;
@@ -443,8 +453,8 @@ Then:
 1. Give useful feedback.
 2. Explain the reasoning briefly.
 3. Identify the main concept involved.
-4. Decide whether the next task should become easier, remain similar, or become harder.
-5. Continue the learning session with the NEXT appropriate task.
+4. Continue with the next appropriate learning task while respecting the student's selected difficulty.
+5. For Explore Any Topic mode, answer the student's academic question directly and continue the learning conversation naturally.
 
 Do not restart the entire lesson.
 `;
@@ -460,7 +470,7 @@ Do not restart the entire lesson.
         previousTutorMessage = "",
         firstMessage = false,
     }) => {
-        if (!selectedNote) {
+        if (!selectedNote && mode !== "explore") {
             return;
         }
 
@@ -479,8 +489,27 @@ Do not restart the entire lesson.
                 "ai/chat/",
                 {
                     message: prompt,
+                    tutor_mode: mode,
+                    note_id: selectedNote?.id ?? null,
+                    difficulty: currentDifficulty,
+
+                    // Send the student's actual question separately
+                    // so the backend can detect academic context reliably.
+                    academic_query:
+                        userMessage?.trim() || "",
                 }
             );
+
+            console.log("========== AI TUTOR DEBUG ==========");
+            console.log("Mode:", mode);
+            console.log("User Question:", userMessage);
+            console.log("Academic Query Sent:", userMessage?.trim() || "");
+            console.log("Backend Response:", response.data);
+            console.log(
+                "Academic Context From Backend:",
+                response.data?.academic_context
+            );
+            console.log("====================================");
 
             const rawReply =
                 response.data?.reply ||
@@ -488,6 +517,14 @@ Do not restart the entire lesson.
 
             const sources =
                 response.data?.sources || [];
+
+            const responseAcademicContext =
+                response.data?.academic_context || null;
+
+            console.log(
+                "responseAcademicContext:",
+                responseAcademicContext
+            );
 
             const parsed =
                 parseTutorMarkers(
@@ -593,6 +630,12 @@ Do not restart the entire lesson.
                 parsed.topic
             );
 
+            if (responseAcademicContext) {
+                setAcademicContext(
+                    responseAcademicContext
+                );
+            }
+
             setMessages(
                 (previous) => [
                     ...previous,
@@ -639,7 +682,7 @@ Do not restart the entire lesson.
     const startLearning =
         async () => {
             if (
-                !selectedNote ||
+                (!selectedNote && selectedMode !== "explore") ||
                 sessionLoading
             ) {
                 return;
@@ -655,6 +698,8 @@ Do not restart the entire lesson.
             setLastEvaluation(null);
             setLastTopic(null);
             setSessionError("");
+            setAcademicContext(null);
+
             const newSessionId = createSessionId();
             setLearningSessionId(newSessionId);
             recordLearningEvent({
@@ -687,7 +732,7 @@ Do not restart the entire lesson.
 
             if (
                 !trimmed ||
-                !selectedNote ||
+                (!selectedNote && selectedMode !== "explore") ||
                 sessionLoading
             ) {
                 return;
@@ -762,6 +807,8 @@ Do not restart the entire lesson.
 
         setLastEvaluation(null);
         setLastTopic(null);
+
+        setAcademicContext(null);
     };
 
     /* =========================================================
@@ -783,7 +830,7 @@ Do not restart the entire lesson.
             return "Quiz Me";
         }
 
-        return "Challenge Me";
+        return "Explore Any Topic";
     };
 
     /* =========================================================
@@ -926,7 +973,7 @@ Do not restart the entire lesson.
                             Learn from your own NoteShare
                             materials through guided teaching,
                             adaptive practice, and reasoning-based
-                            challenges.
+                            exploration beyond your notes.
                         </p>
 
                         <div className="
@@ -1194,6 +1241,99 @@ Do not restart the entire lesson.
                             </div>
 
                             <div className="mt-5">
+
+                                {/* =================================================
+                                    OPEN ACADEMIC EXPLORATION
+                                ================================================== */}
+
+                                <motion.button
+                                    type="button"
+                                    whileHover={{ y: -3 }}
+                                    whileTap={{ scale: 0.985 }}
+                                    onClick={() => {
+                                        setSelectedNote(null);
+                                        setSelectedMode("explore");
+                                    }}
+                                    className={`
+                                        group
+                                        mb-4
+                                        w-full
+                                        rounded-[24px]
+                                        border
+                                        p-4
+                                        text-left
+                                        transition-all
+                                        ${
+                                            selectedMode === "explore" && !selectedNote
+                                                ? "border-cyan-300 bg-gradient-to-r from-cyan-50 to-blue-50 shadow-[0_16px_40px_rgba(6,182,212,0.10)]"
+                                                : "border-slate-200 bg-white hover:border-cyan-200 hover:bg-cyan-50/40"
+                                        }
+                                    `}
+                                >
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div className="flex min-w-0 items-center gap-3">
+
+                                            <span className="
+                                                flex
+                                                h-12
+                                                w-12
+                                                shrink-0
+                                                items-center
+                                                justify-center
+                                                rounded-2xl
+                                                bg-gradient-to-br
+                                                from-cyan-500
+                                                to-blue-600
+                                                text-white
+                                                shadow-lg
+                                                shadow-cyan-500/15
+                                            ">
+                                                <Sparkles size={20} />
+                                            </span>
+
+                                            <span className="min-w-0">
+                                                <span className="
+                                                    block
+                                                    text-sm
+                                                    font-black
+                                                    text-slate-800
+                                                ">
+                                                    Explore Without a Note
+                                                </span>
+
+                                                <span className="
+                                                    mt-1
+                                                    block
+                                                    text-[11px]
+                                                    font-semibold
+                                                    leading-5
+                                                    text-slate-400
+                                                ">
+                                                    Ask the Tutor about any academic topic beyond your uploaded notes.
+                                                </span>
+                                            </span>
+
+                                        </div>
+
+                                        {selectedMode === "explore" && !selectedNote ? (
+                                            <CheckCircle2
+                                                size={21}
+                                                className="shrink-0 text-cyan-600"
+                                            />
+                                        ) : (
+                                            <ChevronRight
+                                                size={18}
+                                                className="
+                                                    shrink-0
+                                                    text-slate-300
+                                                    transition
+                                                    group-hover:translate-x-0.5
+                                                    group-hover:text-cyan-500
+                                                "
+                                            />
+                                        )}
+                                    </div>
+                                </motion.button>
 
                                 {loadingNotes ? (
                                     <div className="
@@ -1843,6 +1983,8 @@ Do not restart the entire lesson.
                                 ">
                                     {selectedNote
                                         ? `${selectedNote.title} · ${getModeTitle()}`
+                                        : selectedMode === "explore"
+                                        ? "Open Academic Learning · Explore Any Topic"
                                         : "Select a note and learning strategy first."}
                                 </p>
                             </div>
@@ -1853,7 +1995,7 @@ Do not restart the entire lesson.
                                     startLearning
                                 }
                                 disabled={
-                                    !selectedNote ||
+                                    (!selectedNote && selectedMode !== "explore") ||
                                     sessionLoading
                                 }
                                 className="
@@ -2032,6 +2174,97 @@ Do not restart the entire lesson.
                                             " />
                                             Adaptive session active
                                         </span>
+
+                                        {academicContext && (
+                                            <motion.span
+                                                initial={{
+                                                    opacity: 0,
+                                                    scale: 0.96,
+                                                }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    scale: 1,
+                                                }}
+                                                transition={{
+                                                    duration: 0.2,
+                                                }}
+                                                className="
+                                                    inline-flex
+                                                    items-center
+                                                    gap-1.5
+                                                    rounded-full
+                                                    border
+                                                    border-cyan-100
+                                                    bg-cyan-50
+                                                    px-2.5
+                                                    py-1
+                                                    text-[9px]
+                                                    font-black
+                                                    uppercase
+                                                    tracking-wider
+                                                    text-cyan-700
+                                                "
+                                            >
+                                                <GraduationCap size={11} />
+
+                                                <span>
+                                                    {academicContext.level}
+                                                </span>
+
+                                                {academicContext.class_level && (
+                                                    <>
+                                                        <span className="text-cyan-300">
+                                                            ·
+                                                        </span>
+
+                                                        <span>
+                                                            {academicContext.class_level}
+                                                        </span>
+                                                    </>
+                                                )}
+
+                                                {academicContext.department && (
+                                                    <>
+                                                        <span className="text-cyan-300">
+                                                            ·
+                                                        </span>
+
+                                                        <span>
+                                                            {academicContext.department}
+                                                        </span>
+                                                    </>
+                                                )}
+
+                                                {academicContext.semester && (
+                                                    <>
+                                                        <span className="text-cyan-300">
+                                                            ·
+                                                        </span>
+
+                                                        <span>
+                                                            {academicContext.semester}
+                                                        </span>
+                                                    </>
+                                                )}
+
+                                                <span className="
+                                                    ml-0.5
+                                                    rounded-full
+                                                    bg-white/80
+                                                    px-1.5
+                                                    py-0.5
+                                                    text-[8px]
+                                                    font-bold
+                                                    normal-case
+                                                    tracking-normal
+                                                    text-cyan-600
+                                                ">
+                                                    {academicContext.source}
+                                                </span>
+                                            </motion.span>
+                                        )}
+
+
                                     </div>
 
                                     <h2 className="
@@ -2041,7 +2274,7 @@ Do not restart the entire lesson.
                                         font-black
                                         text-slate-800
                                     ">
-                                        {selectedNote?.title}
+                                        {selectedNote?.title || "Open Academic Learning"}
                                     </h2>
 
                                 </div>
@@ -2689,8 +2922,8 @@ Do not restart the entire lesson.
                                             "quiz"
                                                 ? "Type your answer..."
                                                 : selectedMode ===
-                                                  "challenge"
-                                                ? "Explain your reasoning..."
+                                                  "explore"
+                                                ? "Ask any academic question..."
                                                 : "Respond to your Tutor..."
                                         }
                                         rows={1}
@@ -2839,8 +3072,8 @@ Do not restart the entire lesson.
                                         "Practice one question at a time while the session adjusts difficulty."}
 
                                     {selectedMode ===
-                                        "challenge" &&
-                                        "Test reasoning and application rather than simple recall."}
+                                        "explore" &&
+                                        "Explore any academic topic, even when it is outside your uploaded notes."}
                                 </p>
 
                             </div>
@@ -3104,11 +3337,11 @@ Do not restart the entire lesson.
                                     leading-6
                                     text-blue-50
                                 ">
-                                    The Tutor works around
-                                    the selected NoteShare
-                                    academic material and can
-                                    bring you back to the source
-                                    notes used in the session.
+                                    The Tutor uses your selected
+                                    NoteShare material as learning
+                                    context when available, while
+                                    Explore Any Topic can take your
+                                    learning beyond the uploaded notes.
                                 </p>
                             </div>
 

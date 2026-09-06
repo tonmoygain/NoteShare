@@ -1518,6 +1518,596 @@ def get_note_text(note):
         )
 
         return ""
+
+
+# =========================================================
+# AI ACADEMIC CONTEXT
+# =========================================================
+
+def get_note_academic_context(note):
+    """
+    Build a structured academic profile for AI Tutor / Assistant.
+
+    Supports:
+    - School
+    - College
+    - University
+
+    Uses the metadata already stored on Note.
+    """
+
+    level = (
+        note.education_level or "university"
+    ).strip().lower()
+
+    if level in {"school", "schooling"}:
+        education_label = "School"
+
+    elif level in {"college", "higher_secondary", "hsc"}:
+        education_label = "College"
+
+    else:
+        education_label = "University"
+
+    return {
+        "education_level": education_label,
+        "department": (
+            note.department or ""
+        ).strip(),
+        "class_level": (
+            note.class_level or ""
+        ).strip(),
+        "subject": (
+            note.subject or ""
+        ).strip(),
+        "chapter": (
+            note.chapter or ""
+        ).strip(),
+        "board": (
+            note.board or ""
+        ).strip(),
+        "semester": (
+            note.semester or ""
+        ).strip(),
+        "course": (
+            note.course or ""
+        ).strip(),
+        "description": (
+            note.description or ""
+        ).strip(),
+    }
+
+
+def build_academic_context_block(note):
+    """
+    Convert Note academic metadata into a clean AI context block.
+    """
+
+    context = get_note_academic_context(note)
+
+    return f"""
+--- NOTE ACADEMIC PROFILE ---
+
+Education Level: {context["education_level"]}
+
+Department: {context["department"] or "Not specified"}
+
+Class / Year: {context["class_level"] or "Not specified"}
+
+Subject: {context["subject"] or "Not specified"}
+
+Chapter / Topic: {context["chapter"] or "Not specified"}
+
+Board / Curriculum: {context["board"] or "Not specified"}
+
+Semester: {context["semester"] or "Not specified"}
+
+Course: {context["course"] or "Not specified"}
+
+Description: {context["description"] or "Not specified"}
+"""
+
+# =========================================================
+# QUERY ACADEMIC LEVEL DETECTION
+# =========================================================
+
+def infer_query_academic_context(query):
+    """
+    Infer academic level signals directly from the student's question.
+
+    This is intentionally lightweight.
+    It does not replace Note metadata.
+    It only gives the AI additional context when the question
+    itself contains academic-level signals.
+    """
+
+    text = (
+        query or ""
+    ).strip().lower()
+
+    signals = []
+
+    # -----------------------------------------------------
+    # SCHOOL SIGNALS
+    # -----------------------------------------------------
+
+    school_patterns = [
+        r"\bclass\s*[1-9]\b",
+        r"\bclass\s*1[0-2]\b",
+        r"\bgrade\s*[1-9]\b",
+        r"\bgrade\s*1[0-2]\b",
+        r"\bssc\b",
+        r"\bjunior\s*school\b",
+        r"\bsecondary\s*school\b",
+        r"\bprimary\s*school\b",
+        r"\bnctb\b",
+        r"\bschool\s*level\b",
+    ]
+
+    if any(
+        re.search(pattern, text)
+        for pattern in school_patterns
+    ):
+        signals.append("School")
+
+    # -----------------------------------------------------
+    # COLLEGE SIGNALS
+    # -----------------------------------------------------
+
+    college_patterns = [
+        r"\bhsc\b",
+        r"\bcollege\s*level\b",
+        r"\bcollege\s*student\b",
+        r"\bclass\s*xi\b",
+        r"\bclass\s*xii\b",
+        r"\byear\s*11\b",
+        r"\byear\s*12\b",
+        r"\bhigher\s*secondary\b",
+        r"\bintermediate\b",
+    ]
+
+    if any(
+        re.search(pattern, text)
+        for pattern in college_patterns
+    ):
+        signals.append("College")
+
+    # -----------------------------------------------------
+    # UNIVERSITY SIGNALS
+    # -----------------------------------------------------
+
+    university_patterns = [
+        r"\buniversity\b",
+        r"\bundergraduate\b",
+        r"\bgraduate\b",
+        r"\bbachelor\b",
+        r"\bbsc\b",
+        r"\bbba\b",
+        r"\bbeng\b",
+        r"\bcse\b",
+        r"\bit\b",
+        r"\bengineering\b",
+        r"\bsemester\b",
+        r"\bcredit\b",
+        r"\bthesis\b",
+        r"\bresearch\b",
+        r"\balgorithm\b",
+        r"\bdata\s*structure\b",
+        r"\boperating\s*system\b",
+        r"\bdatabase\b",
+    ]
+
+    if any(
+        re.search(pattern, text)
+        for pattern in university_patterns
+    ):
+        signals.append("University")
+
+    # -----------------------------------------------------
+    # REMOVE DUPLICATES
+    # -----------------------------------------------------
+
+    signals = list(
+        dict.fromkeys(signals)
+    )
+
+    if len(signals) == 1:
+
+        return (
+            f"Question-level academic signal: "
+            f"{signals[0]}"
+        )
+
+    if len(signals) > 1:
+
+        return (
+            "Question-level academic signals: "
+            + ", ".join(signals)
+            + ". Do not assume a level when the signals conflict; "
+              "use the clearest explicit context."
+        )
+
+    return (
+        "No explicit academic level was detected "
+        "from the student's question."
+    )
+
+
+def build_ai_academic_context(note=None, query=""):
+    """
+    Build the academic context that should be visible to the frontend.
+
+    Priority:
+    1. Selected Note metadata
+    2. Explicit level detected in the query
+    3. General Academic
+    """
+
+    # -----------------------------------------------------
+    # NOTE-BASED CONTEXT
+    # -----------------------------------------------------
+
+    if note:
+
+        context = get_note_academic_context(
+            note
+        )
+
+        return {
+            "level": context["education_level"],
+            "class_level": context["class_level"],
+            "subject": context["subject"],
+            "department": context["department"],
+            "semester": context["semester"],
+            "course": context["course"],
+            "board": context["board"],
+            "chapter": context["chapter"],
+            "source": "NoteShare Note",
+        }
+
+
+    # =====================================================
+    # QUERY-BASED CONTEXT
+    # =====================================================
+
+    query = (
+        query or ""
+    ).strip().lower()
+
+    # -----------------------------------------------------
+    # SCHOOL
+    # -----------------------------------------------------
+
+    school_patterns = [
+        r"\bclass\s*[1-9]\b",
+        r"\bclass\s*1[0-2]\b",
+        r"\bgrade\s*[1-9]\b",
+        r"\bgrade\s*1[0-2]\b",
+        r"\bssc\b",
+        r"\bnctb\b",
+        r"\bschool\b",
+        r"\bsecondary\b",
+        r"\bprimary\b",
+    ]
+
+    if any(
+        re.search(
+            pattern,
+            query
+        )
+        for pattern in school_patterns
+    ):
+
+        class_match = re.search(
+            r"\bclass\s*(1[0-2]|[1-9])\b",
+            query
+        )
+
+        grade_match = re.search(
+            r"\bgrade\s*(1[0-2]|[1-9])\b",
+            query
+        )
+
+        detected_class = ""
+
+        if class_match:
+            detected_class = (
+                f"Class {class_match.group(1)}"
+            )
+
+        elif grade_match:
+            detected_class = (
+                f"Grade {grade_match.group(1)}"
+            )
+
+        return {
+            "level": "School",
+            "class_level": detected_class,
+            "subject": "",
+            "department": "",
+            "semester": "",
+            "course": "",
+            "board": "",
+            "chapter": "",
+            "source": "Question Context",
+        }
+
+    # -----------------------------------------------------
+    # COLLEGE
+    # -----------------------------------------------------
+
+    college_patterns = [
+        r"\bhsc\b",
+        r"\bcollege\b",
+        r"\bhigher\s*secondary\b",
+        r"\bclass\s*xi\b",
+        r"\bclass\s*xii\b",
+        r"\bintermediate\b",
+    ]
+
+    if any(
+        re.search(
+            pattern,
+            query
+        )
+        for pattern in college_patterns
+    ):
+
+        return {
+            "level": "College",
+            "class_level": "",
+            "subject": "",
+            "department": "",
+            "semester": "",
+            "course": "",
+            "board": "",
+            "chapter": "",
+            "source": "Question Context",
+        }
+
+    # -----------------------------------------------------
+    # UNIVERSITY
+    # -----------------------------------------------------
+
+    university_patterns = [
+        r"\buniversity\b",
+        r"\bundergraduate\b",
+        r"\bgraduate\b",
+        r"\bbachelor\b",
+        r"\bbsc\b",
+        r"\bbba\b",
+        r"\bbeng\b",
+        r"\bcse\b",
+        r"\bsemester\b",
+        r"\bthesis\b",
+        r"\bresearch\b",
+        r"\bengineering\b",
+    ]
+
+    if any(
+        re.search(
+            pattern,
+            query
+        )
+        for pattern in university_patterns
+    ):
+
+        return {
+            "level": "University",
+            "class_level": "",
+            "subject": "",
+            "department": "",
+            "semester": "",
+            "course": "",
+            "board": "",
+            "chapter": "",
+            "source": "Question Context",
+        }
+
+    # =====================================================
+    # DEFAULT
+    # =====================================================
+
+    return {
+        "level": "General Academic",
+        "class_level": "",
+        "subject": "",
+        "department": "",
+        "semester": "",
+        "course": "",
+        "board": "",
+        "chapter": "",
+        "source": "Adaptive Context",
+    }
+
+
+def get_tutor_academic_instruction(
+    tutor_mode,
+    difficulty="medium",
+    note=None,
+    query="",
+):
+    """
+    Build adaptive academic behavior for the AI Tutor.
+    Existing learning modes remain separate.
+    """
+
+    tutor_mode = (
+        tutor_mode or "teach"
+    ).strip().lower()
+
+    difficulty = (
+        difficulty or "medium"
+    ).strip().lower()
+
+    academic_profile = ""
+
+    if note:
+        academic_profile = (
+            build_academic_context_block(note)
+        )
+
+    query_academic_context = (
+        infer_query_academic_context(
+            query
+        )
+    )
+
+    if tutor_mode == "explore":
+
+        return f"""
+You are NoteShare AI Tutor in OPEN ACADEMIC LEARNING MODE.
+
+Your purpose is to help the student learn academic subjects
+beyond the boundaries of the uploaded NoteShare materials.
+
+{academic_profile}
+
+{query_academic_context}
+
+CURRENT DIFFICULTY:
+{difficulty}
+
+ACADEMIC CONTEXT PRIORITY:
+
+1. Explicit academic metadata from a selected NoteShare note
+   is the strongest available academic-level signal.
+
+2. Explicit academic-level signals in the student's question
+   are the next strongest signal.
+
+3. If neither provides a reliable level, use clear,
+   academically accurate language with moderate depth.
+   Do not falsely claim to know the student's academic level.
+
+4. Never make the response more advanced merely because a
+   university-level keyword appears in an unrelated context.
+
+ACADEMIC ADAPTATION RULES:
+
+1. Identify the student's likely academic level from the
+   available NoteShare metadata.
+
+2. For SCHOOL students:
+   - Use clear, age-appropriate language.
+   - Introduce the core idea before details.
+   - Prefer familiar examples and visual/intuitive analogies.
+   - Avoid unnecessary technical jargon.
+   - Keep formulas and terminology appropriate to the class.
+   - For exam questions, emphasize understanding before memorization.
+
+3. For COLLEGE students:
+   - Use structured academic language.
+   - Explain concepts with moderate technical depth.
+   - Include definitions, mechanisms, examples, and exam-relevant reasoning.
+   - Connect related ideas when useful.
+   - Do not oversimplify concepts that require deeper explanation.
+
+4. For UNIVERSITY students:
+   - Use precise technical terminology.
+   - Explain mechanisms, assumptions, relationships, and edge cases when relevant.
+   - For technical subjects, include algorithms, equations, derivations,
+     complexity, implementation details, or analytical reasoning when appropriate.
+   - Encourage critical thinking rather than memorized responses.
+   - Do not oversimplify university-level material unnecessarily.
+
+OPEN TOPIC BEHAVIOR:
+
+1. The student may ask about ANY academic topic.
+2. The selected NoteShare note is useful context when relevant,
+   but it is NOT a mandatory knowledge boundary.
+3. If the requested topic is not present in the selected note,
+   answer using reliable general academic knowledge.
+4. Clearly distinguish between information grounded in the
+   selected NoteShare material and general academic explanation
+   when that distinction matters.
+5. Never invent facts, formulas, citations, statistics, or claims.
+6. Break difficult concepts into logical steps.
+7. Use examples, analogies, equations, or pseudo-code when
+   they genuinely improve understanding.
+8. Encourage understanding instead of simply dumping an answer.
+9. Handle follow-up questions naturally and preserve the
+   learning context of the conversation.
+10. When appropriate, finish with a concise understanding-check
+    question.
+
+DIFFICULTY GUIDANCE:
+
+EASY:
+- Fundamentals
+- Simple language
+- Guided examples
+
+MEDIUM:
+- Conceptual depth
+- Moderate reasoning
+- Applied examples
+
+HARD:
+- Deeper reasoning
+- Multi-step analysis
+- Challenging applications
+
+Important:
+The student-selected difficulty is fixed for the session.
+Do not silently change it.
+"""
+
+    if tutor_mode == "quiz":
+
+        return f"""
+You are NoteShare AI Tutor in ADAPTIVE QUIZ MODE.
+
+{academic_profile}
+
+Current difficulty:
+{difficulty}
+
+Your role is to assess genuine understanding.
+
+Rules:
+1. Ask exactly ONE question at a time.
+2. Do not reveal the answer before the student responds.
+3. Prefer conceptual understanding over memorization.
+4. Evaluate the student's latest response accurately.
+5. Explain why an answer is correct, partially correct,
+   or incorrect.
+6. Identify the main concept involved.
+7. Use the selected academic level to determine appropriate
+   vocabulary and complexity.
+8. Keep note-grounded questions based primarily on the
+   supplied NoteShare material.
+9. If the student asks a follow-up academic clarification,
+   answer it clearly before continuing the quiz.
+10. Do not fabricate statistics or claim mastery from limited evidence.
+
+The selected difficulty is fixed for this session.
+"""
+
+    return f"""
+You are NoteShare AI Tutor in TEACH MODE.
+
+{academic_profile}
+
+Current difficulty:
+{difficulty}
+
+Your job is to teach the student clearly and progressively.
+
+Rules:
+1. Start from the student's likely knowledge level.
+2. Explain step by step.
+3. Use examples, analogies, and practical applications when useful.
+4. Adapt vocabulary and depth to School, College, or University level.
+5. Encourage active understanding.
+6. Ask concise understanding-check questions when appropriate.
+7. If the student is confused, simplify without becoming inaccurate.
+8. Use the selected NoteShare material as the primary source when relevant.
+9. Do not invent information.
+10. Preserve continuity across follow-up questions.
+
+The selected difficulty is fixed for this session.
+"""
     
 
 
@@ -1792,7 +2382,19 @@ def find_relevant_notes(query, max_notes=3):
 @permission_classes([IsAuthenticated])
 def ai_chat(request):
 
-    message = request.data.get("message", "").strip()
+    print("NEW AI CHAT CODE IS RUNNING")
+
+    message = request.data.get(
+        "message",
+        ""
+    ).strip()
+
+    academic_query = (
+        request.data.get(
+            "academic_query",
+            ""
+        ) or ""
+    ).strip()
 
     if not message:
         return Response(
@@ -1802,9 +2404,60 @@ def ai_chat(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # ==========================================
+    # =====================================================
+    # TUTOR CONTEXT
+    # =====================================================
+
+    tutor_mode = (
+        request.data.get(
+            "tutor_mode",
+            ""
+        ) or ""
+    ).strip().lower()
+
+    note_id = request.data.get(
+        "note_id"
+    )
+
+    difficulty = (
+        request.data.get(
+            "difficulty",
+            "medium"
+        ) or "medium"
+    ).strip().lower()
+
+    valid_modes = {
+        "teach",
+        "quiz",
+        "explore",
+    }
+
+    if tutor_mode not in valid_modes:
+        tutor_mode = ""
+
+    # =====================================================
+    # SELECTED NOTE
+    # =====================================================
+
+    selected_note = None
+
+    if note_id:
+
+        try:
+            selected_note = Note.objects.get(
+                id=int(note_id)
+            )
+
+        except (
+            ValueError,
+            TypeError,
+            Note.DoesNotExist
+        ):
+            selected_note = None
+
+    # =====================================================
     # NOTE AVAILABILITY QUESTIONS
-    # ==========================================
+    # =====================================================
 
     availability_keywords = [
         "what notes",
@@ -1818,12 +2471,19 @@ def ai_chat(request):
 
     message_lower = message.lower()
 
-    if any(
-        keyword in message_lower
-        for keyword in availability_keywords
+    if (
+        any(
+            keyword in message_lower
+            for keyword in availability_keywords
+        )
+        and tutor_mode != "explore"
     ):
 
-        all_notes = Note.objects.all().order_by("-uploaded_at")
+        all_notes = (
+            Note.objects
+            .all()
+            .order_by("-uploaded_at")
+        )
 
         note_names = [
             f"{index}. {note.title}"
@@ -1840,7 +2500,9 @@ def ai_chat(request):
         )
 
         return Response({
+
             "reply": reply,
+
             "sources": [
                 {
                     "id": note.id,
@@ -1848,205 +2510,265 @@ def ai_chat(request):
                 }
                 for note in all_notes
             ],
+
         })
 
-
-    # ==========================================
-    # SELECT RELEVANT NOTES
-    # ==========================================
-
-    message_lower = message.lower().strip()
+    # =====================================================
+    # FIND RELEVANT NOTES
+    # =====================================================
 
     all_notes = list(
-        Note.objects.all().order_by("-uploaded_at")
+        Note.objects
+        .all()
+        .order_by("-uploaded_at")
     )
 
-    # -------------------------------------------------
-    # 1. Exact title match gets absolute priority
-    # -------------------------------------------------
+    relevant_notes = []
+
+    # -----------------------------------------------------
+    # Selected note gets priority for Tutor
+    # -----------------------------------------------------
+
+    if selected_note:
+
+        relevant_notes.append(
+            selected_note
+        )
+
+    # -----------------------------------------------------
+    # Exact title matching
+    # -----------------------------------------------------
 
     exact_matches = []
 
     for note in all_notes:
 
-        title = (note.title or "").strip().lower()
+        title = (
+            note.title or ""
+        ).strip().lower()
 
         if not title:
             continue
 
         if title == message_lower:
-            exact_matches.append(note)
+
+            exact_matches.append(
+                note
+            )
+
             continue
 
-        # Example:
-        # "What is the COC note about?"
-        # should match note title "COC"
-
-        title_pattern = rf"\b{re.escape(title)}\b"
+        title_pattern = (
+            rf"\b{re.escape(title)}\b"
+        )
 
         if re.search(
             title_pattern,
             message_lower
         ):
-            exact_matches.append(note)
 
-    if exact_matches:
+            exact_matches.append(
+                note
+            )
 
-        relevant_notes = exact_matches[:3]
+    # -----------------------------------------------------
+    # Metadata matching
+    # -----------------------------------------------------
 
-    else:
+    query_words = set(
+        re.findall(
+            r"\b[a-zA-Z0-9]+\b",
+            message_lower
+        )
+    )
 
-        # -------------------------------------------------
-        # 2. Metadata-based matching
-        # -------------------------------------------------
+    scored_notes = []
 
-        query_words = set(
+    for note in all_notes:
+
+        title = (
+            note.title or ""
+        ).lower()
+
+        education_level = (
+            note.education_level or ""
+        ).lower()
+
+        department = (
+            note.department or ""
+        ).lower()
+
+        class_level = (
+            note.class_level or ""
+        ).lower()
+
+        subject = (
+            note.subject or ""
+        ).lower()
+
+        chapter = (
+            note.chapter or ""
+        ).lower()
+
+        board = (
+            note.board or ""
+        ).lower()
+
+        semester = (
+            note.semester or ""
+        ).lower()
+
+        course = (
+            note.course or ""
+        ).lower()
+
+        description = (
+            note.description or ""
+        ).lower()
+
+        metadata_text = (
+            f"{title} "
+            f"{education_level} "
+            f"{department} "
+            f"{class_level} "
+            f"{subject} "
+            f"{chapter} "
+            f"{board} "
+            f"{semester} "
+            f"{course} "
+            f"{description}"
+        )
+
+        metadata_words = set(
             re.findall(
                 r"\b[a-zA-Z0-9]+\b",
-                message_lower
+                metadata_text
             )
         )
 
-        scored_notes = []
+        matches = query_words.intersection(
+            metadata_words
+        )
 
-        for note in all_notes:
+        score = len(matches)
 
-            title = (
-                note.title or ""
-            ).lower()
-
-            education_level = (
-                note.education_level or ""
-            ).lower()
-
-            department = (
-                note.department or ""
-            ).lower()
-
-            class_level = (
-                note.class_level or ""
-            ).lower()
-
-            subject = (
-                note.subject or ""
-            ).lower()
-
-            chapter = (
-                note.chapter or ""
-            ).lower()
-
-            board = (
-                note.board or ""
-            ).lower()
-
-            semester = (
-                note.semester or ""
-            ).lower()
-
-            course = (
-                note.course or ""
-            ).lower()
-
-            description = (
-                note.description or ""
-            ).lower()
-
-            metadata_text = (
-                f"{title} "
-                f"{education_level} "
-                f"{department} "
-                f"{class_level} "
-                f"{subject} "
-                f"{chapter} "
-                f"{board} "
-                f"{semester} "
-                f"{course} "
-                f"{description}"
+        title_words = set(
+            re.findall(
+                r"\b[a-zA-Z0-9]+\b",
+                title
             )
+        )
 
-            metadata_words = set(
-                re.findall(
-                    r"\b[a-zA-Z0-9]+\b",
-                    metadata_text
-                )
-            )
-
-            matches = query_words.intersection(
-                metadata_words
-            )
-
-            score = len(matches)
-
-            title_words = set(
-                re.findall(
-                    r"\b[a-zA-Z0-9]+\b",
-                    title
-                )
-            )
-
-            title_matches = query_words.intersection(
+        title_matches = (
+            query_words.intersection(
                 title_words
             )
+        )
 
-            score += len(title_matches) * 20
+        score += (
+            len(title_matches) * 20
+        )
 
-            description_words = set(
-                re.findall(
-                    r"\b[a-zA-Z0-9]+\b",
-                    description
-                )
+        description_words = set(
+            re.findall(
+                r"\b[a-zA-Z0-9]+\b",
+                description
             )
+        )
 
-            score += len(
+        score += (
+            len(
                 query_words.intersection(
                     description_words
                 )
             ) * 5
-
-            if score > 0:
-
-                scored_notes.append(
-                    (
-                        score,
-                        note
-                    )
-                )
-
-        scored_notes.sort(
-            key=lambda item: item[0],
-            reverse=True
         )
 
-        relevant_notes = [
+        if score > 0:
+
+            scored_notes.append(
+                (
+                    score,
+                    note
+                )
+            )
+
+    scored_notes.sort(
+        key=lambda item: item[0],
+        reverse=True
+    )
+
+    metadata_matches = [
+        note
+        for score, note in scored_notes[:3]
+    ]
+
+    # -----------------------------------------------------
+    # Existing advanced relevance system
+    # -----------------------------------------------------
+
+    fallback_notes = find_relevant_notes(
+        message,
+        max_notes=3
+    )
+
+    # -----------------------------------------------------
+    # Combine without duplicates
+    # -----------------------------------------------------
+
+    combined_candidates = []
+
+    for note in (
+        exact_matches
+        + relevant_notes
+        + metadata_matches
+        + fallback_notes
+    ):
+
+        if not any(
+            existing.id == note.id
+            for existing in combined_candidates
+        ):
+            combined_candidates.append(
+                note
+            )
+
+    # -----------------------------------------------------
+    # Tutor selected note remains primary
+    # -----------------------------------------------------
+
+    if selected_note:
+
+        combined_candidates = [
+            selected_note
+        ] + [
             note
-            for score, note in scored_notes[:3]
+            for note in combined_candidates
+            if note.id != selected_note.id
         ]
 
-        # -------------------------------------------------
-        # 3. Existing relevance system as final fallback
-        # -------------------------------------------------
+    relevant_notes = (
+        combined_candidates[:3]
+    )
 
-        if not relevant_notes:
-
-            relevant_notes = find_relevant_notes(
-                message,
-                max_notes=3
-            )
-    
-
-    # ==========================================
+    # =====================================================
     # GEMINI CLIENT
-    # ==========================================
+    # =====================================================
 
     try:
 
         client = genai.Client(
-            api_key=os.getenv("GEMINI_API_KEY")
+            api_key=os.getenv(
+                "GEMINI_API_KEY"
+            )
         )
 
     except Exception as error:
 
-        print("Gemini Client Error:", error)
+        print(
+            "Gemini Client Error:",
+            error
+        )
 
         return Response(
             {
@@ -2056,57 +2778,87 @@ def ai_chat(request):
             status=status.HTTP_503_SERVICE_UNAVAILABLE
         )
 
-    # ==========================================
-    # BUILD GEMINI CONTENT
-    # ==========================================
+    # =====================================================
+    # SYSTEM INSTRUCTION
+    # =====================================================
 
-    contents = []
+    academic_reference_note = (
+        selected_note
+        or (
+            relevant_notes[0]
+            if relevant_notes
+            else None
+        )
+    )
 
-    system_prompt = """
+    # Explore mode should follow the student's explicit
+    # academic question before falling back to a NoteShare note.
+    if tutor_mode == "explore" and academic_query:
+        academic_context = build_ai_academic_context(
+            note=None,
+            query=academic_query,
+        )
+    else:
+        academic_context = build_ai_academic_context(
+            note=academic_reference_note,
+            query=academic_query or message,
+        )
+
+    print("ACADEMIC CONTEXT:", academic_context)
+
+
+    if tutor_mode:
+
+        system_prompt = get_tutor_academic_instruction(
+            tutor_mode=tutor_mode,
+            difficulty=difficulty,
+            note=academic_reference_note,
+            query=academic_query or message,
+        )
+
+    else:
+
+        system_prompt = """
 You are NoteShare AI Assistant.
 
-Your job is to answer questions using the
-uploaded notes selected by the NoteShare system.
+Your job is to answer questions using relevant
+NoteShare academic materials.
 
 Rules:
 
-1. Answer primarily from the provided note files
-   and extracted note text.
-
-2. If a note file is provided as an image or PDF,
-   inspect the file directly.
-
-3. Do not invent information.
-
-4. If the requested information is not present
-   in the provided notes, clearly say so.
-
-5. Do not use unrelated notes to answer a question
-   about a specific note.
-
-6. If the user mentions a specific note title,
-   prioritize that exact note.
-
-7. Keep answers clear and student-friendly.
+1. Use relevant uploaded notes when available.
+2. Do not invent information.
+3. If the user's question refers to a specific note,
+   prioritize that note.
+4. Keep answers clear, useful, and student-friendly.
+5. Do not mix unrelated notes unnecessarily.
+6. When academic metadata is provided, respect the
+   student's education level and subject context.
 """
 
-    contents.append(system_prompt)
+    # =====================================================
+    # CONTENTS
+    # =====================================================
+
+    contents = []
+
+    contents.append(
+        system_prompt
+    )
 
     contents.append(
         f"""
-User Question:
+USER QUESTION:
 
 {message}
-
-Use the following NoteShare materials to answer.
 """
     )
 
-    sources = []
+    # =====================================================
+    # ADD ACADEMIC CONTEXT
+    # =====================================================
 
-    # ==========================================
-    # ADD SELECTED NOTES
-    # ==========================================
+    sources = []
 
     for note in relevant_notes[:3]:
 
@@ -2115,51 +2867,52 @@ Use the following NoteShare materials to answer.
             "title": note.title,
         })
 
-        education_label = (
-            "School / College"
-            if (note.education_level or "").lower() == "school"
-            else "University"
+        academic_metadata = (
+            build_academic_context_block(
+                note
+            )
         )
-
-        academic_metadata = f"""
---- NOTE ACADEMIC CONTEXT: {note.title} ---
-
-Education Level: {education_label}
-Department: {note.department or "Not specified"}
-Class: {note.class_level or "Not specified"}
-Subject: {note.subject or "Not specified"}
-Chapter / Topic: {note.chapter or "Not specified"}
-Board / Curriculum: {note.board or "Not specified"}
-Semester: {note.semester or "Not specified"}
-Course / Subject: {note.course or "Not specified"}
-Description: {note.description or "Not specified"}
-"""
 
         contents.append(
-            academic_metadata
+            f"""
+--- NOTE: {note.title} ---
+
+{academic_metadata}
+"""
         )
 
-        extracted_text = get_note_text(note)
+        # =================================================
+        # NOTE TEXT
+        # =================================================
+
+        extracted_text = get_note_text(
+            note
+        )
 
         if extracted_text:
 
-            extracted_text = extracted_text[:12000]
+            extracted_text = (
+                extracted_text[:12000]
+            )
 
             contents.append(
                 f"""
-        --- NOTE TEXT: {note.title} ---
+--- NOTE TEXT: {note.title} ---
 
-        {extracted_text}
-        """
+{extracted_text}
+"""
             )
 
             continue
 
-        # ==========================================
-        # FALLBACK: DIRECT FILE INPUT
-        # ==========================================
+        # =================================================
+        # DIRECT FILE INPUT
+        # =================================================
 
         try:
+
+            if not note.file:
+                continue
 
             file_url = note.file.url
 
@@ -2170,45 +2923,63 @@ Description: {note.description or "Not specified"}
 
             file_response.raise_for_status()
 
-            file_bytes = file_response.content
+            file_bytes = (
+                file_response.content
+            )
 
-            # Cloudinary provides the real MIME type in the response header.
             mime_type = (
-                file_response.headers.get("Content-Type", "")
+                file_response.headers
+                .get(
+                    "Content-Type",
+                    ""
+                )
                 .split(";")[0]
                 .strip()
             )
 
-            # Fallback for any unusual case.
             if not mime_type:
 
-                mime_type, _ = mimetypes.guess_type(
-                    note.file.name
+                mime_type, _ = (
+                    mimetypes.guess_type(
+                        note.file.name
+                    )
                 )
 
             if not mime_type:
 
-                if note.file.name.lower().endswith(".pdf"):
-                    mime_type = "application/pdf"
+                if (
+                    note.file.name
+                    .lower()
+                    .endswith(".pdf")
+                ):
+
+                    mime_type = (
+                        "application/pdf"
+                    )
+
                 else:
-                    mime_type = "image/jpeg"
+
+                    mime_type = (
+                        "image/jpeg"
+                    )
 
             contents.append(
                 f"""
-            --- NOTE FILE: {note.title} ---
+--- NOTE FILE: {note.title} ---
 
-            This file is the actual uploaded NoteShare file.
-            If it is an image, inspect the visual content directly.
-            If it is a PDF, read the document content directly.
-            """
+This is the actual uploaded NoteShare
+academic file.
+
+Inspect the file directly when necessary.
+"""
             )
 
             contents.append(
-            types.Part.from_bytes(
-                data=file_bytes,
-                mime_type=mime_type
-            ) 
-        )
+                types.Part.from_bytes(
+                    data=file_bytes,
+                    mime_type=mime_type
+                )
+            )
 
         except Exception as error:
 
@@ -2218,23 +2989,30 @@ Description: {note.description or "Not specified"}
                 error
             )
 
-    # ==========================================
-    # NO MATERIAL FOUND
-    # ==========================================
+    # =====================================================
+    # NO NOTES + NON-EXPLORE REQUEST
+    # =====================================================
 
-    if not relevant_notes:
+    if (
+        not relevant_notes
+        and tutor_mode != "explore"
+        and not selected_note
+    ):
 
         return Response({
+
             "reply": (
-                "I could not identify a relevant uploaded "
-                "note for this question."
+                "I could not identify a relevant "
+                "NoteShare note for this learning request."
             ),
+
             "sources": [],
+
         })
 
-    # ==========================================
+    # =====================================================
     # GEMINI REQUEST
-    # ==========================================
+    # =====================================================
 
     try:
 
@@ -2247,6 +3025,7 @@ Description: {note.description or "Not specified"}
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt
             ),
+
         )
 
         reply = (
@@ -2254,11 +3033,15 @@ Description: {note.description or "Not specified"}
             or "No response received from AI."
         )
 
+        print("RETURNING ACADEMIC CONTEXT:", academic_context)
+
         return Response({
 
             "reply": reply,
 
             "sources": sources,
+
+            "academic_context": academic_context,
 
         })
 
@@ -2270,13 +3053,16 @@ Description: {note.description or "Not specified"}
         )
 
         return Response(
+
             {
                 "error":
                     "Gemini AI is currently unavailable.",
                 "details":
                     str(error),
             },
+
             status=status.HTTP_503_SERVICE_UNAVAILABLE
+
         )
 
 
