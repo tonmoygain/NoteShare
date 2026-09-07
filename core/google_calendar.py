@@ -540,15 +540,50 @@ def parse_time_value(
 
 def extract_time_token(text):
 
-    pattern = re.compile(
+    text = (
+        text or ""
+    ).strip()
+
+    # -----------------------------------------------------
+    # 12-hour format WITH AM / PM
+    #
+    # Examples:
+    # 6 PM
+    # 6:30 PM
+    # 10 AM
+    # 10:45 AM
+    # -----------------------------------------------------
+
+    twelve_hour_with_meridiem = re.compile(
         r"\b"
         r"(1[0-2]|0?[1-9])"
         r"(?:[:.]([0-5][0-9]))?"
         r"\s*"
-        r"(am|pm)?"
+        r"(am|pm)"
         r"\b",
         re.IGNORECASE,
     )
+
+    match = twelve_hour_with_meridiem.search(
+        text
+    )
+
+    if match:
+
+        return parse_time_value(
+            hour=match.group(1),
+            minute=match.group(2) or "0",
+            meridiem=match.group(3),
+        )
+
+    # -----------------------------------------------------
+    # 24-hour format
+    #
+    # Examples:
+    # 18:00
+    # 09:30
+    # 23:15
+    # -----------------------------------------------------
 
     twenty_four_pattern = re.compile(
         r"\b"
@@ -558,46 +593,47 @@ def extract_time_token(text):
         r"\b"
     )
 
-    match = pattern.search(
-        text
-    )
-
-    if match:
-
-        hour = match.group(1)
-
-        minute = (
-            match.group(2)
-            or "0"
-        )
-
-        meridiem = (
-            match.group(3)
-        )
-
-        return parse_time_value(
-            hour,
-            minute,
-            meridiem,
-        )
-
     match_24 = twenty_four_pattern.search(
         text
     )
 
     if match_24:
 
-        token = match_24.group(
-            0
-        )
+        token = match_24.group(0)
 
-        hour, minute = token.split(
-            ":"
-        )
+        hour, minute = token.split(":")
 
         return parse_time_value(
-            hour,
-            minute,
+            hour=hour,
+            minute=minute,
+        )
+
+    # -----------------------------------------------------
+    # 12-hour format WITHOUT AM / PM
+    #
+    # Examples:
+    # 6
+    # 6:30
+    #
+    # Kept for existing schedule queries.
+    # -----------------------------------------------------
+
+    twelve_hour_plain = re.compile(
+        r"\b"
+        r"(1[0-2]|0?[1-9])"
+        r"(?:[:.]([0-5][0-9]))?"
+        r"\b"
+    )
+
+    match_plain = twelve_hour_plain.search(
+        text
+    )
+
+    if match_plain:
+
+        return parse_time_value(
+            hour=match_plain.group(1),
+            minute=match_plain.group(2) or "0",
         )
 
     return None
