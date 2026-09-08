@@ -4171,17 +4171,80 @@ Inspect the file directly when necessary.
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def notification_list(request):
+
+    # ---------------------------------------------------------
+    # Sync Google Calendar reminders before returning
+    # notifications.
+    #
+    # This keeps the existing notification panel unchanged.
+    # The frontend already polls this endpoint every 15 seconds.
+    # ---------------------------------------------------------
+
     try:
-        limit = min(max(int(request.GET.get("limit", 20)), 1), 50)
-    except (TypeError, ValueError):
+
+        if is_google_calendar_connected(
+            request.user
+        ):
+
+            calendar_events = get_upcoming_events(
+                request.user,
+                days=7,
+                max_results=20,
+            )
+
+            sync_calendar_reminders(
+                request.user,
+                calendar_events,
+            )
+
+    except Exception as error:
+
+        # Calendar sync must never break
+        # the existing notification system.
+        print(
+            "Notification Calendar Sync Error:",
+            repr(error)
+        )
+
+    # ---------------------------------------------------------
+    # EXISTING NOTIFICATION RESPONSE
+    # ---------------------------------------------------------
+
+    try:
+
+        limit = min(
+            max(
+                int(
+                    request.GET.get(
+                        "limit",
+                        20
+                    )
+                ),
+                1
+            ),
+            50
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
         limit = 20
 
-    notifications = Notification.objects.filter(
-        recipient=request.user
-    ).select_related("actor").order_by("-created_at")[:limit]
+    notifications = (
+        Notification.objects
+        .filter(
+            recipient=request.user
+        )
+        .select_related("actor")
+        .order_by("-created_at")[:limit]
+    )
 
     return Response({
+
         "notifications": [
+
             {
                 "id": item.id,
                 "type": item.notification_type,
@@ -4191,15 +4254,31 @@ def notification_list(request):
                 "is_read": item.is_read,
                 "created_at": item.created_at,
                 "read_at": item.read_at,
-                "actor": item.actor.username if item.actor else None,
-                "actor_id": item.actor.id if item.actor else None,
+                "actor": (
+                    item.actor.username
+                    if item.actor
+                    else None
+                ),
+                "actor_id": (
+                    item.actor.id
+                    if item.actor
+                    else None
+                ),
             }
+
             for item in notifications
+
         ],
-        "unread_count": Notification.objects.filter(
-            recipient=request.user,
-            is_read=False
-        ).count(),
+
+        "unread_count": (
+            Notification.objects
+            .filter(
+                recipient=request.user,
+                is_read=False
+            )
+            .count()
+        ),
+
     })
 
 
