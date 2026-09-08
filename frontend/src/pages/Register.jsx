@@ -273,7 +273,7 @@ function Register() {
                                     className="flex items-center gap-3 text-sm font-medium text-slate-200"
                                 >
                                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300">
-                                        âœ“
+                                        #
                                     </span>
 
                                     {item}

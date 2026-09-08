@@ -934,7 +934,7 @@ Do not restart the entire lesson.
                             backdrop-blur-md
                         ">
                             <Sparkles size={14} />
-                            KnoVara AI Learning Â· Powered by your learning data
+                            KnoVara AI Learning · Powered by your learning data
                         </div>
 
                         <h1 className="
@@ -1151,7 +1151,7 @@ Do not restart the entire lesson.
                                 tracking-[0.18em]
                                 text-blue-600
                             ">
-                                Step 01 Â· Choose your source
+                                Step 01 · Choose your source
                             </p>
 
                             <h2 className="
@@ -1571,7 +1571,7 @@ Do not restart the entire lesson.
                                 tracking-[0.18em]
                                 text-blue-600
                             ">
-                                Step 02 Â· AI Learning Lab
+                                Step 02 · AI Learning Lab
                             </p>
 
                             <h2 className="
@@ -1776,7 +1776,7 @@ Do not restart the entire lesson.
                                     tracking-[0.18em]
                                     text-blue-600
                                 ">
-                                    Step 03 Â· Choose difficulty
+                                    Step 03 · Choose difficulty
                                 </p>
 
                                 <h3 className="
@@ -1961,7 +1961,7 @@ Do not restart the entire lesson.
                                         uppercase
                                         tracking-[0.16em]
                                     ">
-                                        Step 04 Â· Start Session
+                                        Step 04 · Start Session
                                     </span>
                                 </div>
 
@@ -1982,9 +1982,9 @@ Do not restart the entire lesson.
                                     text-slate-500
                                 ">
                                     {selectedNote
-                                        ? `${selectedNote.title} Â· ${getModeTitle()}`
+                                        ? `${selectedNote.title} · ${getModeTitle()}`
                                         : selectedMode === "explore"
-                                        ? "Open Academic Learning Â· Explore Any Topic"
+                                        ? "Open Academic Learning · Explore Any Topic"
                                         : "Select a note and learning strategy first."}
                                 </p>
                             </div>
@@ -2214,7 +2214,7 @@ Do not restart the entire lesson.
                                                 {academicContext.class_level && (
                                                     <>
                                                         <span className="text-cyan-300">
-                                                            Â·
+                                                            ·
                                                         </span>
 
                                                         <span>
@@ -2226,7 +2226,7 @@ Do not restart the entire lesson.
                                                 {academicContext.department && (
                                                     <>
                                                         <span className="text-cyan-300">
-                                                            Â·
+                                                            ·
                                                         </span>
 
                                                         <span>
@@ -2238,7 +2238,7 @@ Do not restart the entire lesson.
                                                 {academicContext.semester && (
                                                     <>
                                                         <span className="text-cyan-300">
-                                                            Â·
+                                                            ·
                                                         </span>
 
                                                         <span>
@@ -3002,7 +3002,7 @@ Do not restart the entire lesson.
                                     font-semibold
                                     text-slate-400
                                 ">
-                                    Enter to send Â· Shift + Enter
+                                    Enter to send · Shift + Enter
                                     for a new line
                                 </p>
 

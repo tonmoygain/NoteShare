@@ -272,7 +272,7 @@ function Sidebar() {
                                     tracking-[0.18em]
                                     text-slate-400
                                 ">
-                                    Learn Â· Share Â· Grow
+                                    Learn · Share · Grow
                                 </p>
                             </div>
                         </Link>

@@ -305,7 +305,7 @@ function Footer() {
                                     </p>
 
                                     <p className="mt-1 break-all text-sm font-medium text-slate-300">
-                                        support@noteshare.com
+                                        support@knovara.com
                                     </p>
                                 </div>
                             </div>
@@ -374,7 +374,7 @@ function Footer() {
                 <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-5 py-6 sm:px-8 md:flex-row">
 
                     <p className="text-center text-xs text-slate-500 sm:text-sm md:text-left">
-                        Â© {new Date().getFullYear()} KnoVara. All rights reserved.
+                        © {new Date().getFullYear()} KnoVara. All rights reserved.
                     </p>
 
                     <div className="flex items-center gap-5 text-xs font-semibold text-slate-500 sm:gap-6 sm:text-sm">

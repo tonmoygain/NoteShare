@@ -664,7 +664,7 @@ function Hero() {
                                             "
                                         >
                                             {loading
-                                                ? "â€”"
+                                                ? ""
                                                 : item.value.toLocaleString()}
                                         </p>
 

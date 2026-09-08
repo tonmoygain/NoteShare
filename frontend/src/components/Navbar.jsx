@@ -102,7 +102,7 @@ function Navbar() {
 
                                     <span className="text-sm">
 
-                                        {menuOpen ? "â–²" : "â–¼"}
+                                        {menuOpen ? "–²" : "–¼"}
 
                                     </span>
 

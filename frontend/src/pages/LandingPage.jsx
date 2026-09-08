@@ -195,7 +195,7 @@ export default function LandingPage() {
                                     KnoVara
                                 </p>
                                 <p className="hidden text-[9px] font-black uppercase tracking-[.18em] text-slate-400 sm:block">
-                                    Learn Â· Share Â· Grow
+                                    Learn · Share · Grow
                                 </p>
                             </div>
                         </Link>
@@ -960,7 +960,7 @@ export default function LandingPage() {
                                 </p>
 
                                 <p className="text-[9px] font-semibold text-slate-500">
-                                    Learn Â· Share Â· Grow
+                                    Learn · Share · Grow
                                 </p>
                             </div>
                         </div>
@@ -1085,7 +1085,7 @@ export default function LandingPage() {
                     <div className="flex flex-col gap-4 border-t border-white/10 py-6 text-[10px] font-semibold text-slate-600 sm:flex-row sm:items-center sm:justify-between">
 
                         <p>
-                            Â© {new Date().getFullYear()} KnoVara. All rights reserved.
+                            © {new Date().getFullYear()} KnoVara. All rights reserved.
                         </p>
 
                         <div className="flex items-center gap-5">
