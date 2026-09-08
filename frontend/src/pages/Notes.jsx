@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 
 import {
@@ -592,7 +592,7 @@ function Notes() {
                                 size={14}
                             />
 
-                            NoteShare Knowledge Hub
+                            KnoVara Knowledge Hub
                         </motion.div>
 
                         <h1 className="
@@ -617,7 +617,7 @@ function Notes() {
                         ">
                             Explore, share and discover
                             useful academic notes from
-                            the NoteShare community.
+                            the KnoVara community.
                         </p>
 
                         <div className="
@@ -1948,3 +1948,5 @@ function Notes() {
 }
 
 export default Notes;
+
+

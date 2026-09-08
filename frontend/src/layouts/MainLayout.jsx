@@ -1,4 +1,4 @@
-import Sidebar from "../components/Sidebar";
+﻿import Sidebar from "../components/Sidebar";
 import { Outlet } from "react-router-dom";
 import { motion } from "motion/react";
 
@@ -145,3 +145,5 @@ function MainLayout() {
 }
 
 export default MainLayout;
+
+

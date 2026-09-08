@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -2024,7 +2024,7 @@ function NoteDetails() {
                                     `}
                                 >
                                     You are about to permanently remove
-                                    this study resource from NoteShare.
+                                    this study resource from KnoVara.
                                 </p>
 
                                 <div
@@ -2168,3 +2168,5 @@ function NoteDetails() {
 }
 
 export default NoteDetails;
+
+

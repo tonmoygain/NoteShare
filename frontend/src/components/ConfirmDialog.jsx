@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "motion/react";
+﻿import { AnimatePresence, motion } from "motion/react";
 import {
     AlertTriangle,
     X,
@@ -72,7 +72,7 @@ function ConfirmDialog({
                                     </h3>
 
                                     <p className="mt-1 text-xs font-semibold uppercase tracking-[.12em] text-slate-400">
-                                        NoteShare security
+                                        KnoVara security
                                     </p>
                                 </div>
                             </div>
@@ -129,3 +129,5 @@ function ConfirmDialog({
 }
 
 export default ConfirmDialog;
+
+

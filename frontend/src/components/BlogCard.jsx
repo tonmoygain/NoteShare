@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+﻿import { useNavigate } from "react-router-dom";
 import {
     BookOpen,
     ArrowRight,
@@ -194,3 +194,5 @@ function BlogCard({ blog }) {
 }
 
 export default BlogCard;
+
+

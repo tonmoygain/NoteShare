@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+﻿import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 function Navbar() {
@@ -38,7 +38,7 @@ function Navbar() {
                     to="/"
                     className="text-3xl font-bold text-blue-600"
                 >
-                    NoteShare
+                    KnoVara
                 </Link>
 
 
@@ -102,7 +102,7 @@ function Navbar() {
 
                                     <span className="text-sm">
 
-                                        {menuOpen ? "▲" : "▼"}
+                                        {menuOpen ? "â–²" : "â–¼"}
 
                                     </span>
 
@@ -201,3 +201,5 @@ function Navbar() {
 }
 
 export default Navbar;
+
+

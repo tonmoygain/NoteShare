@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+﻿import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -168,7 +168,7 @@ function QuickActions() {
                     text-slate-400
                     sm:text-right
                 ">
-                    Everything you need to explore and contribute to NoteShare.
+                    Everything you need to explore and contribute to KnoVara.
                 </p>
             </motion.div>
 
@@ -413,3 +413,5 @@ function QuickActions() {
 }
 
 export default QuickActions;
+
+

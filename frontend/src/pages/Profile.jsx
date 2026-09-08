@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import API from "../services/api";
@@ -1682,7 +1682,7 @@ function Profile() {
                                 </h2>
 
                                 <p className="mt-1 text-sm text-slate-400">
-                                    Keep your NoteShare account secure.
+                                    Keep your KnoVara account secure.
                                 </p>
                             </div>
 
@@ -1838,7 +1838,7 @@ function Profile() {
                         </h2>
 
                         <p className="mt-2 max-w-2xl text-sm leading-6 text-red-600/80">
-                            Permanently delete your NoteShare account and associated content. This action cannot be undone.
+                            Permanently delete your KnoVara account and associated content. This action cannot be undone.
                         </p>
                     </div>
 
@@ -1859,3 +1859,5 @@ function Profile() {
 }
 
 export default Profile;
+
+

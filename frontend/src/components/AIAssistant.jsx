@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
 
@@ -31,7 +31,7 @@ function AIAssistant() {
         {
             role: "assistant",
             content:
-                "Hi! I'm NoteShare AI. Ask me anything about the uploaded notes.",
+                "Hi! I'm KnoVara AI. Ask me anything about the uploaded notes.",
         },
     ]);
 
@@ -56,7 +56,7 @@ function AIAssistant() {
             {
                 role: "assistant",
                 content:
-                    "Hi! I'm NoteShare AI. Ask me anything about the uploaded notes.",
+                    "Hi! I'm KnoVara AI. Ask me anything about the uploaded notes.",
             },
         ]);
     };
@@ -476,7 +476,7 @@ function AIAssistant() {
                             ring-1
                             ring-white/40
                         "
-                        title="NoteShare AI Assistant"
+                        title="KnoVara AI Assistant"
                     >
                         <div className="absolute inset-0 rounded-2xl bg-white/10" />
 
@@ -613,7 +613,7 @@ function AIAssistant() {
                                     <div className="min-w-0">
                                         <div className="flex items-center gap-2">
                                             <h3 className="truncate font-black">
-                                                NoteShare AI
+                                                KnoVara AI
                                             </h3>
 
                                             <span
@@ -698,7 +698,7 @@ function AIAssistant() {
                                     className="text-cyan-300"
                                 />
 
-                                Answers are based on uploaded NoteShare content.
+                                Answers are based on uploaded KnoVara content.
                             </div>
                         </div>
 
@@ -783,7 +783,7 @@ function AIAssistant() {
                                             </div>
 
                                             <h4 className="text-[18px] font-black tracking-tight">
-                                                {dailyGreeting} 👋
+                                                {dailyGreeting} ðŸ‘‹
                                             </h4>
 
                                             {todayEvents.length > 0 ? (
@@ -832,7 +832,7 @@ function AIAssistant() {
                                                         </p>
                                                     ) : (
                                                         <p className="mt-3 text-[9px] font-semibold text-cyan-100/80">
-                                                            Your agenda is ready above. I’ll keep it
+                                                            Your agenda is ready above. Iâ€™ll keep it
                                                             in context when you ask about your day.
                                                         </p>
                                                     )}
@@ -917,7 +917,7 @@ function AIAssistant() {
                                             </p>
 
                                             <p className="ai-assistant-calendar-subtitle mt-0.5 text-[10px] font-semibold text-slate-500">
-                                                Your schedule, right inside NoteShare
+                                                Your schedule, right inside KnoVara
                                             </p>
                                         </div>
                                     </div>
@@ -970,7 +970,7 @@ function AIAssistant() {
                                 {!calendarConnected ? (
                                     <div className="px-4 pb-4">
                                         <p className="ai-assistant-calendar-description mb-3 text-[11px] leading-5 text-slate-600">
-                                            Connect your Google Calendar so NoteShare AI can
+                                            Connect your Google Calendar so KnoVara AI can
                                             show today's agenda and upcoming events and answer
                                             schedule questions.
                                         </p>
@@ -1783,7 +1783,7 @@ function AIAssistant() {
                                 "
                             >
                                 <MessageCircle size={11} />
-                                Enter to send · Shift + Enter for a new line
+                                Enter to send Â· Shift + Enter for a new line
                             </div>
                         </div>
                     </motion.div>
@@ -1794,3 +1794,5 @@ function AIAssistant() {
 }
 
 export default AIAssistant;
+
+

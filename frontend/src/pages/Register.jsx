@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import Toast from "../components/Toast";
@@ -244,7 +244,7 @@ function Register() {
 
                         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-bold text-cyan-200 backdrop-blur-sm">
                             <Sparkles size={14} />
-                            Join NoteShare
+                            Join KnoVara
                         </div>
 
                         <div className="mt-8 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/10 shadow-xl backdrop-blur-sm">
@@ -259,7 +259,7 @@ function Register() {
                         </h2>
 
                         <p className="mt-5 max-w-md text-sm leading-7 text-slate-300 xl:text-base">
-                            Create your NoteShare account and start sharing notes, writing blogs and connecting with other students.
+                            Create your KnoVara account and start sharing notes, writing blogs and connecting with other students.
                         </p>
 
                         <div className="mt-8 space-y-3">
@@ -273,7 +273,7 @@ function Register() {
                                     className="flex items-center gap-3 text-sm font-medium text-slate-200"
                                 >
                                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300">
-                                        ✓
+                                        âœ“
                                     </span>
 
                                     {item}
@@ -311,7 +311,7 @@ function Register() {
 
                             <div>
                                 <p className="text-lg font-black tracking-tight text-slate-900">
-                                    NoteShare
+                                    KnoVara
                                 </p>
 
                                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
@@ -334,7 +334,7 @@ function Register() {
                             </h1>
 
                             <p className="mt-2 leading-6 text-slate-500">
-                                Join NoteShare and start sharing academic resources.
+                                Join KnoVara and start sharing academic resources.
                             </p>
                         </div>
 
@@ -846,3 +846,5 @@ function Register() {
 }
 
 export default Register;
+
+

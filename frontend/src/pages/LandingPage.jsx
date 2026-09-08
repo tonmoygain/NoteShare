@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -192,10 +192,10 @@ export default function LandingPage() {
 
                             <div>
                                 <p className="text-[15px] font-black tracking-tight text-slate-950">
-                                    NoteShare
+                                    KnoVara
                                 </p>
                                 <p className="hidden text-[9px] font-black uppercase tracking-[.18em] text-slate-400 sm:block">
-                                    Learn · Share · Grow
+                                    Learn Â· Share Â· Grow
                                 </p>
                             </div>
                         </Link>
@@ -219,7 +219,7 @@ export default function LandingPage() {
                                 href="#why"
                                 className="text-sm font-bold text-slate-500 transition hover:text-blue-600"
                             >
-                                Why NoteShare
+                                Why KnoVara
                             </a>
 
                             <a
@@ -315,7 +315,7 @@ export default function LandingPage() {
 
                                                         <p className="truncate text-[10px] font-semibold text-slate-400">
                                                             {profile?.email ||
-                                                                "NoteShare member"}
+                                                                "KnoVara member"}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -415,7 +415,7 @@ export default function LandingPage() {
                                                     </p>
 
                                                     <p className="text-[9px] font-semibold text-slate-400">
-                                                        Sign out of NoteShare
+                                                        Sign out of KnoVara
                                                     </p>
                                                 </div>
                                             </button>
@@ -483,7 +483,7 @@ export default function LandingPage() {
 
                     <Reveal delay={0.1}>
                         <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
-                            NoteShare brings academic resources, AI-powered
+                            KnoVara brings academic resources, AI-powered
                             learning, progress intelligence and student
                             collaboration into one focused platform.
                         </p>
@@ -495,7 +495,7 @@ export default function LandingPage() {
                                 onClick={() => navigate("/dashboard")}
                                 className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-4 text-sm font-black text-white shadow-[0_20px_55px_rgba(37,99,235,.25)] transition hover:-translate-y-1"
                             >
-                                Enter NoteShare
+                                Enter KnoVara
                                 <ArrowRight
                                     size={17}
                                     className="transition-transform group-hover:translate-x-1"
@@ -535,7 +535,7 @@ export default function LandingPage() {
                         <Reveal>
                             <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-blue-600">
                                 <Sparkles size={12} />
-                                NoteShare Intelligence
+                                KnoVara Intelligence
                             </span>
 
                             <h2 className="mt-6 max-w-2xl text-4xl font-black leading-[1.03] tracking-[-.04em] text-slate-950 sm:text-5xl">
@@ -546,7 +546,7 @@ export default function LandingPage() {
                             </h2>
 
                             <p className="mt-6 max-w-xl text-base leading-8 text-slate-500 sm:text-lg">
-                                NoteShare uses AI where it can genuinely help:
+                                KnoVara uses AI where it can genuinely help:
                                 understanding resources, practising concepts
                                 and turning learning activity into useful
                                 insight.
@@ -596,7 +596,7 @@ export default function LandingPage() {
 
                     <Reveal className="max-w-3xl">
                         <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-blue-600 shadow-sm ring-1 ring-slate-200">
-                            Why NoteShare
+                            Why KnoVara
                         </span>
 
                         <h2 className="mt-6 text-4xl font-black leading-[1.04] tracking-[-.04em] text-slate-950 sm:text-5xl">
@@ -787,7 +787,7 @@ export default function LandingPage() {
                         </h2>
 
                         <p className="mt-5 max-w-2xl text-base leading-8 text-slate-500 sm:text-lg">
-                            NoteShare brings the essential parts of studying into one
+                            KnoVara brings the essential parts of studying into one
                             connected flow, so you can find resources, learn from them,
                             practise what you know and keep moving forward.
                         </p>
@@ -839,7 +839,7 @@ export default function LandingPage() {
                                 </h3>
 
                                 <p className="mt-3 text-sm leading-7 text-slate-500">
-                                    Use NoteShare's intelligent learning tools to understand
+                                    Use KnoVara's intelligent learning tools to understand
                                     concepts and get contextual academic support.
                                 </p>
                             </div>
@@ -913,7 +913,7 @@ export default function LandingPage() {
                         </div>
 
                         <p className="mt-6 text-[10px] font-black uppercase tracking-[.18em] text-cyan-300">
-                            Welcome to NoteShare
+                            Welcome to KnoVara
                         </p>
 
                         <h2 className="mt-4 text-4xl font-black tracking-[-.04em] text-white sm:text-6xl">
@@ -932,7 +932,7 @@ export default function LandingPage() {
                             onClick={() => navigate("/dashboard")}
                             className="mt-9 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-4 text-sm font-black text-white shadow-xl shadow-blue-500/20 transition hover:-translate-y-1"
                         >
-                            Enter NoteShare
+                            Enter KnoVara
                             <ArrowRight size={17} />
                         </button>
 
@@ -956,11 +956,11 @@ export default function LandingPage() {
 
                             <div>
                                 <p className="text-sm font-black text-white">
-                                    NoteShare
+                                    KnoVara
                                 </p>
 
                                 <p className="text-[9px] font-semibold text-slate-500">
-                                    Learn · Share · Grow
+                                    Learn Â· Share Â· Grow
                                 </p>
                             </div>
                         </div>
@@ -1038,7 +1038,7 @@ export default function LandingPage() {
                                 href="#ai"
                                 className="text-xs font-bold text-slate-400 transition hover:text-white"
                             >
-                                NoteShare AI
+                                KnoVara AI
                             </a>
 
                             <a
@@ -1075,7 +1075,7 @@ export default function LandingPage() {
                                 to="/dashboard"
                                 className="text-xs font-bold text-slate-400 transition hover:text-white"
                             >
-                                Enter NoteShare
+                                Enter KnoVara
                             </Link>
                         </div>
                     </div>
@@ -1085,7 +1085,7 @@ export default function LandingPage() {
                     <div className="flex flex-col gap-4 border-t border-white/10 py-6 text-[10px] font-semibold text-slate-600 sm:flex-row sm:items-center sm:justify-between">
 
                         <p>
-                            © {new Date().getFullYear()} NoteShare. All rights reserved.
+                            Â© {new Date().getFullYear()} KnoVara. All rights reserved.
                         </p>
 
                         <div className="flex items-center gap-5">
@@ -1112,3 +1112,5 @@ export default function LandingPage() {
         </div>
     );
 }
+
+

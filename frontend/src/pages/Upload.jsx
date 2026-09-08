@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 
@@ -1504,7 +1504,7 @@ function Upload() {
                                 className="text-emerald-500"
                             />
 
-                            Your uploaded resource will be shared with the NoteShare community.
+                            Your uploaded resource will be shared with the KnoVara community.
 
                         </div>
 
@@ -1586,3 +1586,5 @@ function Upload() {
 }
 
 export default Upload;
+
+

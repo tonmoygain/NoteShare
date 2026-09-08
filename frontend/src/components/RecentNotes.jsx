@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+﻿import { useNavigate } from "react-router-dom";
 import {
     BookOpen,
     Eye,
@@ -173,7 +173,7 @@ function RecentNotes({ notes = [] }) {
                     }
                     className="w-full mt-6 py-3.5 rounded-xl bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 font-semibold text-sm transition"
                 >
-                    View All Notes →
+                    View All Notes →’
                 </button>
 
             )}
@@ -183,3 +183,5 @@ function RecentNotes({ notes = [] }) {
 }
 
 export default RecentNotes;
+
+

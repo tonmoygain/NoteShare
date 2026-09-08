@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import {
     Sparkles,
@@ -145,7 +145,7 @@ function Home() {
 
 
             {/* =====================================================
-                WHY CHOOSE NOTESHARE
+                WHY CHOOSE KNOVERA
             ====================================================== */}
 
             <section
@@ -281,7 +281,7 @@ function Home() {
                     {[
                         {
                             number: "01",
-                            icon: "📚",
+                            icon: "",
                             title: "Smart Notes",
                             description:
                                 "Find organized lecture notes, study materials, and resources without digging through scattered chats and files.",
@@ -289,7 +289,7 @@ function Home() {
 
                         {
                             number: "02",
-                            icon: "✍️",
+                            icon: "",
                             title: "Academic Blogs",
                             description:
                                 "Share tutorials, study tips, project experiences, and useful academic ideas with the student community.",
@@ -297,7 +297,7 @@ function Home() {
 
                         {
                             number: "03",
-                            icon: "🤝",
+                            icon: "",
                             title: "Easy Collaboration",
                             description:
                                 "Upload, download, discuss, and exchange useful resources with classmates from one central place.",
@@ -489,3 +489,5 @@ function Home() {
 
 
 export default Home;
+
+

@@ -1,4 +1,4 @@
-const STORAGE_KEY = "noteshare_learning_events_v1";
+﻿const STORAGE_KEY = "noteshare_learning_events_v1";
 const MAX_EVENTS = 500;
 
 export function createSessionId() {
@@ -57,3 +57,5 @@ export function clearLearningEvents() {
         console.error("Failed to clear learning analytics:", error);
     }
 }
+
+

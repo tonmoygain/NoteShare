@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../services/api";
@@ -143,8 +143,8 @@ function BlogDetails() {
 
     const handleShare = async () => {
         const shareData = {
-            title: blog?.title || "NoteShare Blog",
-            text: `Check out this blog on NoteShare: ${
+            title: blog?.title || "KnoVara Blog",
+            text: `Check out this blog on KnoVara: ${
                 blog?.title || ""
             }`,
             url: window.location.href,
@@ -1007,7 +1007,7 @@ function BlogDetails() {
                                     "
                                 >
                                     You are about to permanently remove
-                                    this article from the NoteShare community.
+                                    this article from the KnoVara community.
                                 </p>
 
                                 <div
@@ -1147,3 +1147,5 @@ function BlogDetails() {
 }
 
 export default BlogDetails;
+
+

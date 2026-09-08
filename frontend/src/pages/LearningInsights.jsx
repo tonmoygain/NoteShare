@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -74,14 +74,14 @@ function LearningInsights() {
                 <div className="relative grid gap-8 lg:grid-cols-[1fr_330px] lg:items-center">
                     <div>
                         <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[.18em] text-cyan-200 backdrop-blur-sm">
-                            <BarChart3 size={14} /> NoteShare Learning Intelligence · Flagship Learning Layer
+                            <BarChart3 size={14} /> KnoVara Learning Intelligence Â· Flagship Learning Layer
                         </span>
                         <h1 className="mt-6 max-w-4xl text-4xl font-black leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
                             See how you learn.
                             <span className="block bg-gradient-to-r from-cyan-300 via-blue-200 to-white bg-clip-text text-transparent">Know what to study next.</span>
                         </h1>
                         <p className="mt-5 max-w-2xl text-sm leading-7 text-blue-100/80 sm:text-base">
-                            NoteShare turns your AI Tutor practice into simple learning insights: accuracy, strong areas, weak areas, and a clear next step.
+                            KnoVara turns your AI Tutor practice into simple learning insights: accuracy, strong areas, weak areas, and a clear next step.
                         </p>
                         <div className="mt-7 flex flex-wrap items-center gap-3">
                             <button type="button" onClick={() => navigate("/ai-tutor")} className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-xs font-black text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-900">
@@ -178,7 +178,7 @@ function LearningInsights() {
                     <div className="mt-5 space-y-4">
                         {stats.topics.length ? stats.topics.slice(0, 8).map((item) => (
                             <div key={item.topic}>
-                                <div className="flex items-center justify-between gap-3"><p className="text-xs font-black text-slate-700">{item.topic}</p><p className="text-[10px] font-black text-slate-400">{item.accuracy}% accuracy · {item.total} attempts</p></div>
+                                <div className="flex items-center justify-between gap-3"><p className="text-xs font-black text-slate-700">{item.topic}</p><p className="text-[10px] font-black text-slate-400">{item.accuracy}% accuracy Â· {item.total} attempts</p></div>
                                 <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-gradient-to-r from-blue-600 to-cyan-500" style={{ width: `${item.accuracy}%` }} /></div>
                             </div>
                         )) : <p className="rounded-2xl bg-slate-50 p-4 text-xs font-semibold text-slate-500">No topic data yet. Start an AI Tutor session.</p>}
@@ -193,7 +193,7 @@ function LearningInsights() {
                         {weakTopics.length
                             ? `Spend your next study block on ${weakTopics[0].topic}. Use AI Tutor Quiz Me or Challenge Me, then check this dashboard again.`
                             : stats.attempts.length
-                            ? "Keep practicing. Once NoteShare has more evaluated responses, it can make stronger topic-level recommendations."
+                            ? "Keep practicing. Once KnoVara has more evaluated responses, it can make stronger topic-level recommendations."
                             : "Start with one AI Tutor session. The dashboard needs a little learning activity before it can identify patterns."}
                     </p>
                     <button type="button" onClick={() => navigate("/ai-tutor")} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-xs font-black text-slate-900">Go to AI Tutor <ArrowRight size={14} /></button>
@@ -205,7 +205,7 @@ function LearningInsights() {
                 <div className="mt-5 space-y-2">
                     {stats.recent.length ? stats.recent.map((item) => (
                         <div key={item.id} className="flex flex-col gap-2 rounded-2xl border border-slate-100 bg-slate-50/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p className="text-xs font-black text-slate-700">{item.topic || "General topic"}</p><p className="mt-0.5 text-[10px] font-semibold text-slate-400">{item.noteTitle} · {item.mode}</p></div>
+                            <div><p className="text-xs font-black text-slate-700">{item.topic || "General topic"}</p><p className="mt-0.5 text-[10px] font-semibold text-slate-400">{item.noteTitle} Â· {item.mode}</p></div>
                             <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase ${item.evaluation === "correct" ? "bg-emerald-100 text-emerald-700" : item.evaluation === "incorrect" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
                                 {item.evaluation === "correct" ? <CheckCircle2 size={11} /> : item.evaluation === "incorrect" ? <XCircle size={11} /> : <Target size={11} />} {item.evaluation}
                             </span>
@@ -220,3 +220,5 @@ function LearningInsights() {
 }
 
 export default LearningInsights;
+
+

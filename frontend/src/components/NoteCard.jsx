@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+﻿import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -721,7 +721,7 @@ function NoteCard({ note }) {
                         transition-colors
                         group-hover:text-slate-600
                     ">
-                        Open note →
+                        Open note →’
                     </span>
 
                 </div>
@@ -742,3 +742,5 @@ function BookIcon() {
 }
 
 export default NoteCard;
+
+

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import API from "../services/api";
@@ -115,7 +115,7 @@ function SocialCallback() {
 
                     <p className="text-sm text-slate-400 mt-2">
 
-                        Please wait while we sign you into NoteShare.
+                        Please wait while we sign you into KnoVara.
 
                     </p>
 
@@ -130,3 +130,5 @@ function SocialCallback() {
 }
 
 export default SocialCallback;
+
+

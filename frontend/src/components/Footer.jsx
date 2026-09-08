@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+﻿import { motion } from "motion/react";
 
 import {
     GraduationCap,
@@ -90,7 +90,7 @@ function Footer() {
 
                             <div>
                                 <h2 className="text-2xl font-black tracking-tight">
-                                    NoteShare
+                                    KnoVara
                                 </h2>
 
                                 <div className="mt-1 flex items-center gap-1.5">
@@ -374,7 +374,7 @@ function Footer() {
                 <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-5 py-6 sm:px-8 md:flex-row">
 
                     <p className="text-center text-xs text-slate-500 sm:text-sm md:text-left">
-                        © {new Date().getFullYear()} NoteShare. All rights reserved.
+                        Â© {new Date().getFullYear()} KnoVara. All rights reserved.
                     </p>
 
                     <div className="flex items-center gap-5 text-xs font-semibold text-slate-500 sm:gap-6 sm:text-sm">
@@ -405,3 +405,5 @@ function Footer() {
 }
 
 export default Footer;
+
+

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router-dom";
 
@@ -165,7 +165,7 @@ function AITutor() {
 
         if (mode === "teach") {
             return `
-You are NoteShare AI Tutor in TEACH MODE.
+You are KnoVara AI Tutor in TEACH MODE.
 
 Selected academic note:
 "${noteName}"
@@ -180,7 +180,7 @@ Learning approach:
 5. Adapt the explanation according to the student's response.
 6. If the student is confused, simplify the explanation.
 7. Connect related concepts when the retrieved source supports that connection.
-8. Do not invent information outside the retrieved NoteShare material.
+8. Do not invent information outside the retrieved KnoVara material.
 
 Important:
 This is a learning session. Do not simply dump the answer.
@@ -190,7 +190,7 @@ Guide the student toward understanding.
 
         if (mode === "quiz") {
             return `
-You are NoteShare AI Tutor in ADAPTIVE QUIZ MODE.
+You are KnoVara AI Tutor in ADAPTIVE QUIZ MODE.
 
 Selected academic note:
 "${noteName}"
@@ -211,7 +211,7 @@ Rules:
 8. If incorrect, reduce difficulty and provide a short repair explanation.
 9. Identify the concept involved in the student's mistake.
 10. If the same concept causes repeated mistakes, recommend targeted review.
-11. Keep all academic claims grounded in the retrieved NoteShare content.
+11. Keep all academic claims grounded in the retrieved KnoVara content.
 
 Do not create fake statistics.
 Do not claim mastery from a single correct answer.
@@ -220,9 +220,9 @@ Do not claim mastery from a single correct answer.
 
         if (mode === "explore") {
         return `
-You are NoteShare AI Tutor in OPEN ACADEMIC LEARNING MODE.
+You are KnoVara AI Tutor in OPEN ACADEMIC LEARNING MODE.
 
-The student wants to learn beyond the selected NoteShare material.
+The student wants to learn beyond the selected KnoVara material.
 
 Your role:
 1. Teach the requested academic topic clearly.
@@ -238,7 +238,7 @@ Your role:
    likely academic interpretation and briefly clarify it.
 
 Important:
-The selected NoteShare note remains useful context when relevant,
+The selected KnoVara note remains useful context when relevant,
 but it is NOT the only allowed source in this mode.
 `;
     }
@@ -423,7 +423,7 @@ For QUIZ MODE:
 Ask the first question.
 
 For EXPLORE ANY TOPIC MODE:
-Introduce the open academic learning experience and invite the student to ask any academic question, whether or not it is covered by the selected NoteShare material.
+Introduce the open academic learning experience and invite the student to ask any academic question, whether or not it is covered by the selected KnoVara material.
 
 
 Do not reveal answers before the student responds.
@@ -934,7 +934,7 @@ Do not restart the entire lesson.
                             backdrop-blur-md
                         ">
                             <Sparkles size={14} />
-                            NoteShare AI Learning · Powered by your learning data
+                            KnoVara AI Learning Â· Powered by your learning data
                         </div>
 
                         <h1 className="
@@ -970,7 +970,7 @@ Do not restart the entire lesson.
                             text-blue-100
                             sm:text-base
                         ">
-                            Learn from your own NoteShare
+                            Learn from your own KnoVara
                             materials through guided teaching,
                             adaptive practice, and reasoning-based
                             exploration beyond your notes.
@@ -1151,7 +1151,7 @@ Do not restart the entire lesson.
                                 tracking-[0.18em]
                                 text-blue-600
                             ">
-                                Step 01 · Choose your source
+                                Step 01 Â· Choose your source
                             </p>
 
                             <h2 className="
@@ -1174,7 +1174,7 @@ Do not restart the entire lesson.
                             ">
                                 Select one of your uploaded notes.
                                 The Tutor will use the relevant
-                                NoteShare content as the learning source.
+                                KnoVara content as the learning source.
                             </p>
                         </div>
 
@@ -1571,7 +1571,7 @@ Do not restart the entire lesson.
                                 tracking-[0.18em]
                                 text-blue-600
                             ">
-                                Step 02 · AI Learning Lab
+                                Step 02 Â· AI Learning Lab
                             </p>
 
                             <h2 className="
@@ -1776,7 +1776,7 @@ Do not restart the entire lesson.
                                     tracking-[0.18em]
                                     text-blue-600
                                 ">
-                                    Step 03 · Choose difficulty
+                                    Step 03 Â· Choose difficulty
                                 </p>
 
                                 <h3 className="
@@ -1961,7 +1961,7 @@ Do not restart the entire lesson.
                                         uppercase
                                         tracking-[0.16em]
                                     ">
-                                        Step 04 · Start Session
+                                        Step 04 Â· Start Session
                                     </span>
                                 </div>
 
@@ -1982,9 +1982,9 @@ Do not restart the entire lesson.
                                     text-slate-500
                                 ">
                                     {selectedNote
-                                        ? `${selectedNote.title} · ${getModeTitle()}`
+                                        ? `${selectedNote.title} Â· ${getModeTitle()}`
                                         : selectedMode === "explore"
-                                        ? "Open Academic Learning · Explore Any Topic"
+                                        ? "Open Academic Learning Â· Explore Any Topic"
                                         : "Select a note and learning strategy first."}
                                 </p>
                             </div>
@@ -2214,7 +2214,7 @@ Do not restart the entire lesson.
                                                 {academicContext.class_level && (
                                                     <>
                                                         <span className="text-cyan-300">
-                                                            ·
+                                                            Â·
                                                         </span>
 
                                                         <span>
@@ -2226,7 +2226,7 @@ Do not restart the entire lesson.
                                                 {academicContext.department && (
                                                     <>
                                                         <span className="text-cyan-300">
-                                                            ·
+                                                            Â·
                                                         </span>
 
                                                         <span>
@@ -2238,7 +2238,7 @@ Do not restart the entire lesson.
                                                 {academicContext.semester && (
                                                     <>
                                                         <span className="text-cyan-300">
-                                                            ·
+                                                            Â·
                                                         </span>
 
                                                         <span>
@@ -3002,7 +3002,7 @@ Do not restart the entire lesson.
                                     font-semibold
                                     text-slate-400
                                 ">
-                                    Enter to send · Shift + Enter
+                                    Enter to send Â· Shift + Enter
                                     for a new line
                                 </p>
 
@@ -3338,7 +3338,7 @@ Do not restart the entire lesson.
                                     text-blue-50
                                 ">
                                     The Tutor uses your selected
-                                    NoteShare material as learning
+                                    KnoVara material as learning
                                     context when available, while
                                     Explore Any Topic can take your
                                     learning beyond the uploaded notes.
@@ -3355,3 +3355,5 @@ Do not restart the entire lesson.
 }
 
 export default AITutor;
+
+

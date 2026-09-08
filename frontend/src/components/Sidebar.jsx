@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
     Link,
@@ -261,7 +261,7 @@ function Sidebar() {
                                     tracking-tight
                                     text-slate-900
                                 ">
-                                    NoteShare
+                                    KnoVara
                                 </p>
 
                                 <p className="
@@ -272,7 +272,7 @@ function Sidebar() {
                                     tracking-[0.18em]
                                     text-slate-400
                                 ">
-                                    Learn · Share · Grow
+                                    Learn Â· Share Â· Grow
                                 </p>
                             </div>
                         </Link>
@@ -651,7 +651,7 @@ function Sidebar() {
                                         text-slate-400
                                     "
                                 >
-                                    NoteShare member
+                                    KnoVara member
                                 </p>
                             </div>
                         </div>
@@ -663,3 +663,5 @@ function Sidebar() {
 }
 
 export default Sidebar;
+
+

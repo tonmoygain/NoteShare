@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
 
@@ -814,7 +814,7 @@ function Rooms() {
                                 <Hash size={22} />
 
                                 <h2 className="text-2xl font-black">
-                                    Build the NoteShare Community
+                                    Build the KnoVara Community
                                 </h2>
                             </div>
 
@@ -838,3 +838,5 @@ function Rooms() {
 }
 
 export default Rooms;
+
+

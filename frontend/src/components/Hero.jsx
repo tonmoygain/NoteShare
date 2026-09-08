@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 
@@ -664,7 +664,7 @@ function Hero() {
                                             "
                                         >
                                             {loading
-                                                ? "—"
+                                                ? "â€”"
                                                 : item.value.toLocaleString()}
                                         </p>
 
@@ -701,3 +701,5 @@ function Hero() {
 
 
 export default Hero;
+
+

@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+﻿import { Navigate } from "react-router-dom";
 
 function ProtectedRoute({ children }) {
 
@@ -15,3 +15,5 @@ function ProtectedRoute({ children }) {
 }
 
 export default ProtectedRoute;
+
+
