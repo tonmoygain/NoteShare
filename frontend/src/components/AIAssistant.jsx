@@ -783,7 +783,7 @@ function AIAssistant() {
                                             </div>
 
                                             <h4 className="text-[18px] font-black tracking-tight">
-                                                {dailyGreeting} ðŸ‘‹
+                                                {dailyGreeting} 
                                             </h4>
 
                                             {todayEvents.length > 0 ? (
@@ -832,7 +832,7 @@ function AIAssistant() {
                                                         </p>
                                                     ) : (
                                                         <p className="mt-3 text-[9px] font-semibold text-cyan-100/80">
-                                                            Your agenda is ready above. Iâ€™ll keep it
+                                                            Your agenda is ready above. I'll keep it
                                                             in context when you ask about your day.
                                                         </p>
                                                     )}
@@ -1783,7 +1783,7 @@ function AIAssistant() {
                                 "
                             >
                                 <MessageCircle size={11} />
-                                Enter to send Â· Shift + Enter for a new line
+                                Enter to send · Shift + Enter for a new line
                             </div>
                         </div>
                     </motion.div>
