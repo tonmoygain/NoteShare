@@ -1504,7 +1504,7 @@ function Upload() {
                                 className="text-emerald-500"
                             />
 
-                            Your uploaded resource will be shared with the KnoVara community.
+                            Your uploaded resource will be shared with the Nuvexa community.
 
                         </div>
 

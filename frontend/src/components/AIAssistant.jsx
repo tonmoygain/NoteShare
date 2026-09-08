@@ -31,7 +31,7 @@ function AIAssistant() {
         {
             role: "assistant",
             content:
-                "Hi! I'm KnoVara AI. Ask me anything about the uploaded notes.",
+                "Hi! I'm Nuvexa AI. Ask me anything about the uploaded notes.",
         },
     ]);
 
@@ -56,7 +56,7 @@ function AIAssistant() {
             {
                 role: "assistant",
                 content:
-                    "Hi! I'm KnoVara AI. Ask me anything about the uploaded notes.",
+                    "Hi! I'm Nuvexa AI. Ask me anything about the uploaded notes.",
             },
         ]);
     };
@@ -476,7 +476,7 @@ function AIAssistant() {
                             ring-1
                             ring-white/40
                         "
-                        title="KnoVara AI Assistant"
+                        title="Nuvexa AI Assistant"
                     >
                         <div className="absolute inset-0 rounded-2xl bg-white/10" />
 
@@ -613,7 +613,7 @@ function AIAssistant() {
                                     <div className="min-w-0">
                                         <div className="flex items-center gap-2">
                                             <h3 className="truncate font-black">
-                                                KnoVara AI
+                                                Nuvexa AI
                                             </h3>
 
                                             <span
@@ -698,7 +698,7 @@ function AIAssistant() {
                                     className="text-cyan-300"
                                 />
 
-                                Answers are based on uploaded KnoVara content.
+                                Answers are based on uploaded Nuvexa content.
                             </div>
                         </div>
 
@@ -917,7 +917,7 @@ function AIAssistant() {
                                             </p>
 
                                             <p className="ai-assistant-calendar-subtitle mt-0.5 text-[10px] font-semibold text-slate-500">
-                                                Your schedule, right inside KnoVara
+                                                Your schedule, right inside Nuvexa
                                             </p>
                                         </div>
                                     </div>
@@ -970,7 +970,7 @@ function AIAssistant() {
                                 {!calendarConnected ? (
                                     <div className="px-4 pb-4">
                                         <p className="ai-assistant-calendar-description mb-3 text-[11px] leading-5 text-slate-600">
-                                            Connect your Google Calendar so KnoVara AI can
+                                            Connect your Google Calendar so Nuvexa AI can
                                             show today's agenda and upcoming events and answer
                                             schedule questions.
                                         </p>

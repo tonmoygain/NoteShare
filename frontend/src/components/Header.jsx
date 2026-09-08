@@ -510,7 +510,7 @@ function Header({ search, setSearch }) {
                             strokeWidth={2.4}
                         />
 
-                        KnoVara
+                        Nuvexa
                     </div>
 
                     <h1
@@ -1002,7 +1002,7 @@ function Header({ search, setSearch }) {
                                                         Notifications
                                                     </p>
                                                     <p className="mt-0.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                                                        Important activity from KnoVara
+                                                        Important activity from Nuvexa
                                                     </p>
                                                 </div>
                                             </div>
@@ -1047,7 +1047,7 @@ function Header({ search, setSearch }) {
                                                     You're all caught up
                                                 </p>
                                                 <p className="mx-auto mt-1 max-w-[230px] text-xs leading-5 text-slate-400">
-                                                    Important KnoVara activity will appear here automatically.
+                                                    Important Nuvexa activity will appear here automatically.
                                                 </p>
                                             </div>
                                         ) : (
@@ -1113,7 +1113,7 @@ function Header({ search, setSearch }) {
                                     <div className="border-t border-slate-100 px-5 py-3 dark:border-slate-800">
                                         <div className="flex items-center justify-between gap-3">
                                             <p className="text-[10px] font-bold text-slate-400">
-                                                Stored securely in your KnoVara account
+                                                Stored securely in your Nuvexa account
                                             </p>
                                             <button
                                                 type="button"
@@ -1774,7 +1774,7 @@ function Header({ search, setSearch }) {
                                             dark:text-white
                                         "
                                     >
-                                        Leaving KnoVara?
+                                        Leaving Nuvexa?
                                     </h3>
 
                                     <p

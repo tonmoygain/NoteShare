@@ -162,7 +162,7 @@ function Blogs() {
                             "
                         >
                             <Sparkles size={14} />
-                            KnoVara Knowledge Hub
+                            Nuvexa Knowledge Hub
                         </motion.div>
 
                         <h1 className="mt-6 text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
@@ -170,7 +170,7 @@ function Blogs() {
                         </h1>
 
                         <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
-                            Explore tutorials, experiences, study tips and academic ideas shared by the KnoVara community.
+                            Explore tutorials, experiences, study tips and academic ideas shared by the Nuvexa community.
                         </p>
 
                         <div className="mt-7 flex flex-wrap gap-3">
@@ -364,7 +364,7 @@ function Blogs() {
                     <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-slate-500 sm:text-base">
                         {search
                             ? "Try another keyword or search for a different author."
-                            : "Be the first student to share an article with the KnoVara community."}
+                            : "Be the first student to share an article with the Nuvexa community."}
                     </p>
 
                     {!search && (
@@ -512,7 +512,7 @@ function Blogs() {
 
                                 <p className="mt-4 line-clamp-4 text-sm leading-7 text-slate-500">
                                     {blog.content ||
-                                        "Explore this educational article shared by the KnoVara community."}
+                                        "Explore this educational article shared by the Nuvexa community."}
                                 </p>
 
                                 {/* Author */}

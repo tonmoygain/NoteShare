@@ -165,7 +165,7 @@ function AITutor() {
 
         if (mode === "teach") {
             return `
-You are KnoVara AI Tutor in TEACH MODE.
+You are Nuvexa AI Tutor in TEACH MODE.
 
 Selected academic note:
 "${noteName}"
@@ -180,7 +180,7 @@ Learning approach:
 5. Adapt the explanation according to the student's response.
 6. If the student is confused, simplify the explanation.
 7. Connect related concepts when the retrieved source supports that connection.
-8. Do not invent information outside the retrieved KnoVara material.
+8. Do not invent information outside the retrieved Nuvexa material.
 
 Important:
 This is a learning session. Do not simply dump the answer.
@@ -190,7 +190,7 @@ Guide the student toward understanding.
 
         if (mode === "quiz") {
             return `
-You are KnoVara AI Tutor in ADAPTIVE QUIZ MODE.
+You are Nuvexa AI Tutor in ADAPTIVE QUIZ MODE.
 
 Selected academic note:
 "${noteName}"
@@ -211,7 +211,7 @@ Rules:
 8. If incorrect, reduce difficulty and provide a short repair explanation.
 9. Identify the concept involved in the student's mistake.
 10. If the same concept causes repeated mistakes, recommend targeted review.
-11. Keep all academic claims grounded in the retrieved KnoVara content.
+11. Keep all academic claims grounded in the retrieved Nuvexa content.
 
 Do not create fake statistics.
 Do not claim mastery from a single correct answer.
@@ -220,9 +220,9 @@ Do not claim mastery from a single correct answer.
 
         if (mode === "explore") {
         return `
-You are KnoVara AI Tutor in OPEN ACADEMIC LEARNING MODE.
+You are Nuvexa AI Tutor in OPEN ACADEMIC LEARNING MODE.
 
-The student wants to learn beyond the selected KnoVara material.
+The student wants to learn beyond the selected Nuvexa material.
 
 Your role:
 1. Teach the requested academic topic clearly.
@@ -238,7 +238,7 @@ Your role:
    likely academic interpretation and briefly clarify it.
 
 Important:
-The selected KnoVara note remains useful context when relevant,
+The selected Nuvexa note remains useful context when relevant,
 but it is NOT the only allowed source in this mode.
 `;
     }
@@ -423,7 +423,7 @@ For QUIZ MODE:
 Ask the first question.
 
 For EXPLORE ANY TOPIC MODE:
-Introduce the open academic learning experience and invite the student to ask any academic question, whether or not it is covered by the selected KnoVara material.
+Introduce the open academic learning experience and invite the student to ask any academic question, whether or not it is covered by the selected Nuvexa material.
 
 
 Do not reveal answers before the student responds.
@@ -934,7 +934,7 @@ Do not restart the entire lesson.
                             backdrop-blur-md
                         ">
                             <Sparkles size={14} />
-                            KnoVara AI Learning · Powered by your learning data
+                            Nuvexa AI Learning · Powered by your learning data
                         </div>
 
                         <h1 className="
@@ -970,7 +970,7 @@ Do not restart the entire lesson.
                             text-blue-100
                             sm:text-base
                         ">
-                            Learn from your own KnoVara
+                            Learn from your own Nuvexa
                             materials through guided teaching,
                             adaptive practice, and reasoning-based
                             exploration beyond your notes.
@@ -1174,7 +1174,7 @@ Do not restart the entire lesson.
                             ">
                                 Select one of your uploaded notes.
                                 The Tutor will use the relevant
-                                KnoVara content as the learning source.
+                                Nuvexa content as the learning source.
                             </p>
                         </div>
 
@@ -3338,7 +3338,7 @@ Do not restart the entire lesson.
                                     text-blue-50
                                 ">
                                     The Tutor uses your selected
-                                    KnoVara material as learning
+                                    Nuvexa material as learning
                                     context when available, while
                                     Explore Any Topic can take your
                                     learning beyond the uploaded notes.

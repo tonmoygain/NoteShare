@@ -1682,7 +1682,7 @@ function Profile() {
                                 </h2>
 
                                 <p className="mt-1 text-sm text-slate-400">
-                                    Keep your KnoVara account secure.
+                                    Keep your Nuvexa account secure.
                                 </p>
                             </div>
 
@@ -1838,7 +1838,7 @@ function Profile() {
                         </h2>
 
                         <p className="mt-2 max-w-2xl text-sm leading-6 text-red-600/80">
-                            Permanently delete your KnoVara account and associated content. This action cannot be undone.
+                            Permanently delete your Nuvexa account and associated content. This action cannot be undone.
                         </p>
                     </div>
 

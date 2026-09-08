@@ -143,8 +143,8 @@ function BlogDetails() {
 
     const handleShare = async () => {
         const shareData = {
-            title: blog?.title || "KnoVara Blog",
-            text: `Check out this blog on KnoVara: ${
+            title: blog?.title || "Nuvexa Blog",
+            text: `Check out this blog on Nuvexa: ${
                 blog?.title || ""
             }`,
             url: window.location.href,
@@ -1007,7 +1007,7 @@ function BlogDetails() {
                                     "
                                 >
                                     You are about to permanently remove
-                                    this article from the KnoVara community.
+                                    this article from the Nuvexa community.
                                 </p>
 
                                 <div

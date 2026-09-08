@@ -89,7 +89,7 @@ def create_notification(
         recipient=recipient,
         actor=actor,
         notification_type=notification_type,
-        title=(title or "KnoVara notification").strip(),
+        title=(title or "Nuvexa notification").strip(),
         message=(message or "").strip(),
         link=(link or "").strip(),
     )
@@ -1778,7 +1778,7 @@ def build_ai_academic_context(note=None, query=""):
             "course": context["course"],
             "board": context["board"],
             "chapter": context["chapter"],
-            "source": "KnoVara Note",
+            "source": "Nuvexa Note",
         }
 
 
@@ -1972,10 +1972,10 @@ def get_tutor_academic_instruction(
     if tutor_mode == "explore":
 
         return f"""
-You are KnoVara AI Tutor in OPEN ACADEMIC LEARNING MODE.
+You are Nuvexa AI Tutor in OPEN ACADEMIC LEARNING MODE.
 
 Your purpose is to help the student learn academic subjects
-beyond the boundaries of the uploaded KnoVara materials.
+beyond the boundaries of the uploaded Nuvexa materials.
 
 {academic_profile}
 
@@ -1986,7 +1986,7 @@ CURRENT DIFFICULTY:
 
 ACADEMIC CONTEXT PRIORITY:
 
-1. Explicit academic metadata from a selected KnoVara note
+1. Explicit academic metadata from a selected Nuvexa note
    is the strongest available academic-level signal.
 
 2. Explicit academic-level signals in the student's question
@@ -2002,7 +2002,7 @@ ACADEMIC CONTEXT PRIORITY:
 ACADEMIC ADAPTATION RULES:
 
 1. Identify the student's likely academic level from the
-   available KnoVara metadata.
+   available Nuvexa metadata.
 
 2. For SCHOOL students:
    - Use clear, age-appropriate language.
@@ -2030,12 +2030,12 @@ ACADEMIC ADAPTATION RULES:
 OPEN TOPIC BEHAVIOR:
 
 1. The student may ask about ANY academic topic.
-2. The selected KnoVara note is useful context when relevant,
+2. The selected Nuvexa note is useful context when relevant,
    but it is NOT a mandatory knowledge boundary.
 3. If the requested topic is not present in the selected note,
    answer using reliable general academic knowledge.
 4. Clearly distinguish between information grounded in the
-   selected KnoVara material and general academic explanation
+   selected Nuvexa material and general academic explanation
    when that distinction matters.
 5. Never invent facts, formulas, citations, statistics, or claims.
 6. Break difficult concepts into logical steps.
@@ -2072,7 +2072,7 @@ Do not silently change it.
     if tutor_mode == "quiz":
 
         return f"""
-You are KnoVara AI Tutor in ADAPTIVE QUIZ MODE.
+You are Nuvexa AI Tutor in ADAPTIVE QUIZ MODE.
 
 {academic_profile}
 
@@ -2092,7 +2092,7 @@ Rules:
 7. Use the selected academic level to determine appropriate
    vocabulary and complexity.
 8. Keep note-grounded questions based primarily on the
-   supplied KnoVara material.
+   supplied Nuvexa material.
 9. If the student asks a follow-up academic clarification,
    answer it clearly before continuing the quiz.
 10. Do not fabricate statistics or claim mastery from limited evidence.
@@ -2101,7 +2101,7 @@ The selected difficulty is fixed for this session.
 """
 
     return f"""
-You are KnoVara AI Tutor in TEACH MODE.
+You are Nuvexa AI Tutor in TEACH MODE.
 
 {academic_profile}
 
@@ -2118,7 +2118,7 @@ Rules:
 5. Encourage active understanding.
 6. Ask concise understanding-check questions when appropriate.
 7. If the student is confused, simplify without becoming inaccurate.
-8. Use the selected KnoVara material as the primary source when relevant.
+8. Use the selected Nuvexa material as the primary source when relevant.
 9. Do not invent information.
 10. Preserve continuity across follow-up questions.
 
@@ -2403,7 +2403,7 @@ def find_calendar_related_notes(
     max_notes=3,
 ):
     """
-    Find KnoVara notes that are strongly related to a
+    Find Nuvexa notes that are strongly related to a
     calendar event.
 
     Metadata is used first.
@@ -3024,7 +3024,7 @@ def ai_chat(request):
 
         reply = (
             "The following notes are currently available "
-            "in KnoVara:\n\n"
+            "in Nuvexa:\n\n"
             + "\n".join(note_names)
         )
 
@@ -3332,7 +3332,7 @@ def ai_chat(request):
     )
 
     # Explore mode should follow the student's explicit
-    # academic question before falling back to a KnoVara note.
+    # academic question before falling back to a Nuvexa note.
     if tutor_mode == "explore" and academic_query:
         academic_context = build_ai_academic_context(
             note=None,
@@ -3422,7 +3422,7 @@ def ai_chat(request):
                     f"{f' at {event_start}' if event_start else ''}."
                     "\n\n"
                     "I couldn't find a sufficiently relevant "
-                    "KnoVara note to recommend specific "
+                    "Nuvexa note to recommend specific "
                     "revision material for it."
                 ),
                 "sources": [],
@@ -3434,7 +3434,7 @@ def ai_chat(request):
 
         preparation_contents.append(
             """
-You are KnoVara's Calendar + Study Intelligence.
+You are Nuvexa's Calendar + Study Intelligence.
 
 The user wants help preparing for a specific calendar event.
 
@@ -3442,7 +3442,7 @@ STRICT EVIDENCE RULE:
 
 Use ONLY information supported by:
 1. The supplied Google Calendar event.
-2. The supplied KnoVara academic materials.
+2. The supplied Nuvexa academic materials.
 
 Never invent or assume:
 - the teacher's lecture plan
@@ -3453,7 +3453,7 @@ Never invent or assume:
 - assignments
 - deadlines
 - project requirements
-- facts not present in the supplied KnoVara materials
+- facts not present in the supplied Nuvexa materials
 
 Do NOT use phrases such as:
 - "likely involves"
@@ -3467,7 +3467,7 @@ STUDY GUIDANCE:
 
 1. Identify the exact topics, concepts, sections, diagrams,
    definitions, methods, or other material that actually
-   appears in the supplied KnoVara sources.
+   appears in the supplied Nuvexa sources.
 
 2. Rank preparation priorities using evidence from those sources.
 
@@ -3475,7 +3475,7 @@ STUDY GUIDANCE:
    on the supplied material.
 
 4. Clearly distinguish:
-   - what the KnoVara material explicitly contains
+   - what the Nuvexa material explicitly contains
    - what practical preparation advice you are deriving
      from that material
 
@@ -3487,9 +3487,9 @@ STUDY GUIDANCE:
 SOURCE DISCIPLINE:
 
 - Every academic recommendation must be traceable to one or
-  more supplied KnoVara sources.
+  more supplied Nuvexa sources.
 - Prefer the most directly relevant source.
-- Do not mix unrelated KnoVara materials.
+- Do not mix unrelated Nuvexa materials.
 - Do not claim that a topic is relevant merely because a
   keyword appears unless the material actually supports
   that connection.
@@ -3500,7 +3500,7 @@ Give the student a useful, concise, premium-quality answer.
 
 A strong response should normally contain:
 1. The calendar event being prepared for.
-2. Priority topics supported by the KnoVara material.
+2. Priority topics supported by the Nuvexa material.
 3. A concise review order or study plan.
 4. A brief note when the available material is insufficient.
 
@@ -3570,7 +3570,7 @@ Description: {event_description or "None"}
                             "Answer as a helpful academic "
                             "personal assistant. "
                             "Use only the supplied calendar "
-                            "event and KnoVara notes."
+                            "event and Nuvexa notes."
                         )
                     ),
                 )
@@ -3598,7 +3598,7 @@ Description: {event_description or "None"}
             return Response({
                 "reply": (
                     "I found the relevant calendar event "
-                    "and KnoVara material, but I couldn't "
+                    "and Nuvexa material, but I couldn't "
                     "generate the preparation guidance right now."
                 ),
                 "sources": preparation_sources,
@@ -3806,10 +3806,10 @@ Description: {event_description or "None"}
     else:
 
         system_prompt = """
-You are KnoVara AI Assistant.
+You are Nuvexa AI Assistant.
 
 Your job is to answer questions using relevant
-KnoVara academic materials.
+Nuvexa academic materials.
 
 Rules:
 
@@ -3835,7 +3835,7 @@ Rules:
 PERSONAL ASSISTANT / CALENDAR RULES:
 
 You may receive Google Calendar information for the
-authenticated KnoVara user.
+authenticated Nuvexa user.
 
 1. Use the supplied calendar events when answering
    schedule-related questions.
@@ -3930,7 +3930,7 @@ USER QUESTION:
 --- GOOGLE CALENDAR CONTEXT ---
 
 The following events belong to the authenticated
-KnoVara user's Google Calendar.
+Nuvexa user's Google Calendar.
 
 {chr(10).join(calendar_lines)}
 
@@ -4068,7 +4068,7 @@ for the authenticated user.
                 f"""
 --- NOTE FILE: {note.title} ---
 
-This is the actual uploaded KnoVara
+This is the actual uploaded Nuvexa
 academic file.
 
 Inspect the file directly when necessary.
@@ -4104,7 +4104,7 @@ Inspect the file directly when necessary.
 
             "reply": (
                 "I could not identify a relevant "
-                "KnoVara note for this learning request."
+                "Nuvexa note for this learning request."
             ),
 
             "sources": [],
@@ -4421,7 +4421,7 @@ def sync_calendar_reminders(
     events,
 ):
     """
-    Create KnoVara notifications for calendar events
+    Create Nuvexa notifications for calendar events
     that are coming up soon.
 
     Uses the existing Notification model with

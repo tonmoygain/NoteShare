@@ -224,7 +224,7 @@ function CreateBlog() {
                                 </h1>
 
                                 <p className="mt-2 max-w-2xl text-sm leading-6 text-blue-100 sm:text-base">
-                                    Share your knowledge, ideas and experiences with the KnoVara community.
+                                    Share your knowledge, ideas and experiences with the Nuvexa community.
                                 </p>
                             </div>
 
@@ -515,7 +515,7 @@ function CreateBlog() {
                             />
 
                             <p className="text-sm leading-6 text-blue-700">
-                                Your article will be published to the KnoVara community and can be discovered from the Blogs section.
+                                Your article will be published to the Nuvexa community and can be discovered from the Blogs section.
                             </p>
                         </div>
 

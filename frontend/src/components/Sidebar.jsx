@@ -261,7 +261,7 @@ function Sidebar() {
                                     tracking-tight
                                     text-slate-900
                                 ">
-                                    KnoVara
+                                    Nuvexa
                                 </p>
 
                                 <p className="
@@ -651,7 +651,7 @@ function Sidebar() {
                                         text-slate-400
                                     "
                                 >
-                                    KnoVara member
+                                    Nuvexa member
                                 </p>
                             </div>
                         </div>

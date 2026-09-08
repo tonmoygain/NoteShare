@@ -592,7 +592,7 @@ function Notes() {
                                 size={14}
                             />
 
-                            KnoVara Knowledge Hub
+                            Nuvexa Knowledge Hub
                         </motion.div>
 
                         <h1 className="
@@ -617,7 +617,7 @@ function Notes() {
                         ">
                             Explore, share and discover
                             useful academic notes from
-                            the KnoVara community.
+                            the Nuvexa community.
                         </p>
 
                         <div className="

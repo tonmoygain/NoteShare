@@ -74,14 +74,14 @@ function LearningInsights() {
                 <div className="relative grid gap-8 lg:grid-cols-[1fr_330px] lg:items-center">
                     <div>
                         <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[.18em] text-cyan-200 backdrop-blur-sm">
-                            <BarChart3 size={14} /> KnoVara Learning Intelligence · Flagship Learning Layer
+                            <BarChart3 size={14} /> Nuvexa Learning Intelligence · Flagship Learning Layer
                         </span>
                         <h1 className="mt-6 max-w-4xl text-4xl font-black leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
                             See how you learn.
                             <span className="block bg-gradient-to-r from-cyan-300 via-blue-200 to-white bg-clip-text text-transparent">Know what to study next.</span>
                         </h1>
                         <p className="mt-5 max-w-2xl text-sm leading-7 text-blue-100/80 sm:text-base">
-                            KnoVara turns your AI Tutor practice into simple learning insights: accuracy, strong areas, weak areas, and a clear next step.
+                            Nuvexa turns your AI Tutor practice into simple learning insights: accuracy, strong areas, weak areas, and a clear next step.
                         </p>
                         <div className="mt-7 flex flex-wrap items-center gap-3">
                             <button type="button" onClick={() => navigate("/ai-tutor")} className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-xs font-black text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-900">
@@ -193,7 +193,7 @@ function LearningInsights() {
                         {weakTopics.length
                             ? `Spend your next study block on ${weakTopics[0].topic}. Use AI Tutor Quiz Me or Challenge Me, then check this dashboard again.`
                             : stats.attempts.length
-                            ? "Keep practicing. Once KnoVara has more evaluated responses, it can make stronger topic-level recommendations."
+                            ? "Keep practicing. Once Nuvexa has more evaluated responses, it can make stronger topic-level recommendations."
                             : "Start with one AI Tutor session. The dashboard needs a little learning activity before it can identify patterns."}
                     </p>
                     <button type="button" onClick={() => navigate("/ai-tutor")} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-xs font-black text-slate-900">Go to AI Tutor <ArrowRight size={14} /></button>

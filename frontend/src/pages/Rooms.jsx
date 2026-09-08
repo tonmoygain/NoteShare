@@ -814,7 +814,7 @@ function Rooms() {
                                 <Hash size={22} />
 
                                 <h2 className="text-2xl font-black">
-                                    Build the KnoVara Community
+                                    Build the Nuvexa Community
                                 </h2>
                             </div>
 

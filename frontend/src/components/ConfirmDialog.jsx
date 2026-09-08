@@ -72,7 +72,7 @@ function ConfirmDialog({
                                     </h3>
 
                                     <p className="mt-1 text-xs font-semibold uppercase tracking-[.12em] text-slate-400">
-                                        KnoVara security
+                                        Nuvexa security
                                     </p>
                                 </div>
                             </div>

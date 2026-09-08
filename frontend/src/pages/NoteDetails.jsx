@@ -2024,7 +2024,7 @@ function NoteDetails() {
                                     `}
                                 >
                                     You are about to permanently remove
-                                    this study resource from KnoVara.
+                                    this study resource from Nuvexa.
                                 </p>
 
                                 <div

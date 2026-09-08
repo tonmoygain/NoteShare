@@ -38,7 +38,7 @@ function Navbar() {
                     to="/"
                     className="text-3xl font-bold text-blue-600"
                 >
-                    KnoVara
+                    Nuvexa
                 </Link>
 
 

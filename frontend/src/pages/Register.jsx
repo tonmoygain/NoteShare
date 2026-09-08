@@ -244,7 +244,7 @@ function Register() {
 
                         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-bold text-cyan-200 backdrop-blur-sm">
                             <Sparkles size={14} />
-                            Join KnoVara
+                            Join Nuvexa
                         </div>
 
                         <div className="mt-8 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/10 shadow-xl backdrop-blur-sm">
@@ -259,7 +259,7 @@ function Register() {
                         </h2>
 
                         <p className="mt-5 max-w-md text-sm leading-7 text-slate-300 xl:text-base">
-                            Create your KnoVara account and start sharing notes, writing blogs and connecting with other students.
+                            Create your Nuvexa account and start sharing notes, writing blogs and connecting with other students.
                         </p>
 
                         <div className="mt-8 space-y-3">
@@ -311,7 +311,7 @@ function Register() {
 
                             <div>
                                 <p className="text-lg font-black tracking-tight text-slate-900">
-                                    KnoVara
+                                    Nuvexa
                                 </p>
 
                                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
@@ -334,7 +334,7 @@ function Register() {
                             </h1>
 
                             <p className="mt-2 leading-6 text-slate-500">
-                                Join KnoVara and start sharing academic resources.
+                                Join Nuvexa and start sharing academic resources.
                             </p>
                         </div>
 

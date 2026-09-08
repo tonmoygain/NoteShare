@@ -168,7 +168,7 @@ function QuickActions() {
                     text-slate-400
                     sm:text-right
                 ">
-                    Everything you need to explore and contribute to KnoVara.
+                    Everything you need to explore and contribute to Nuvexa.
                 </p>
             </motion.div>
 

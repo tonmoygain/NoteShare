@@ -115,7 +115,7 @@ function SocialCallback() {
 
                     <p className="text-sm text-slate-400 mt-2">
 
-                        Please wait while we sign you into KnoVara.
+                        Please wait while we sign you into Nuvexa.
 
                     </p>
 
